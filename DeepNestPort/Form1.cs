@@ -21,7 +21,7 @@ namespace DeepNestPort
     {
         public Form1()
         {
-            InitializeComponent();            
+            InitializeComponent();
             listView4.DoubleBuffered(true);
             progressBar1 = new PictureBoxProgressBar();
             progressBar1.Dock = DockStyle.Fill;
@@ -156,86 +156,6 @@ namespace DeepNestPort
                 //var poly = SvgParser.polygonify(item);
                 //polygons.Add(poly);
             }
-
-
-
-        }
-
-
-        public static RawDetail LoadSvg(string path)
-        {
-            XDocument doc = XDocument.Load(path);
-            var fi = new FileInfo(path);
-            RawDetail s = new RawDetail();
-            s.Name = fi.Name;
-            List<GraphicsPath> paths = new List<GraphicsPath>();
-            var ns = doc.Descendants().First().Name.Namespace.NamespaceName;
-
-
-            foreach (var item in doc.Descendants("path"))
-            {
-                var dd = (item.Attribute("d").Value);
-
-                List<string> cmnds = new List<string>();
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < dd.Length; i++)
-                {
-                    if (char.IsLetter(dd[i]))
-                    {
-                        if (sb.Length > 0)
-                        {
-                            cmnds.Add(sb.ToString());
-                        }
-                        sb = new StringBuilder();
-                    }
-                    sb.Append(dd[i]);
-                }
-                if (sb.Length > 0)
-                {
-                    cmnds.Add(sb.ToString());
-                }
-                //GraphicsPath p = new GraphicsPath();
-
-
-                //polygons.Add(new SvgNestPort.Polygon() { orig = item,
-                //    /*Points = p.PathPoints.Select(z => new SvgPoint(z.X, z.Y)).ToArray()*/ });
-
-            }
-            foreach (var item in doc.Descendants("rect"))
-            {
-                float xx = 0;
-                float yy = 0;
-                if (item.Attribute("x") != null)
-                {
-                    xx = float.Parse(item.Attribute("x").Value);
-                }
-                if (item.Attribute("y") != null)
-                {
-                    yy = float.Parse(item.Attribute("y").Value);
-                }
-                var ww = float.Parse(item.Attribute("width").Value);
-                var hh = float.Parse(item.Attribute("height").Value);
-                GraphicsPath p = new GraphicsPath();
-                p.AddRectangle(new RectangleF(xx, yy, ww, hh));
-                s.Outers.Add(new LocalContour() { Points = p.PathPoints.ToList() });
-
-            }
-
-            foreach (var item in doc.Descendants(XName.Get("polygon", ns)))
-            {
-                var str = item.Attribute("points").Value.ToString();
-                var spl = str.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                List<PointF> points = new List<PointF>();
-                foreach (var sitem in spl)
-                {
-                    var spl2 = sitem.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-                    var ar = spl2.Select(z => float.Parse(z, CultureInfo.InvariantCulture)).ToArray();
-                    points.Add(new PointF(ar[0], ar[1]));
-                }
-                s.Outers.Add(new LocalContour() { Points = points.ToList() });
-            }
-
-            return s;
         }
 
         public double materailUtilization = 0;
@@ -279,7 +199,7 @@ namespace DeepNestPort
 
             ctx.gr.DrawString($"Call counter: {Background.callCounter};  last placeParts time: {Background.LastPlacePartTime}ms",
                     new Font("Arial", 15), Brushes.DarkBlue, 0, 110);
-            
+
 
             foreach (var item in polygons.Union(sheets))
             {
@@ -383,9 +303,10 @@ namespace DeepNestPort
         private void timer1_Tick(object sender, EventArgs e)
         {
             progressBar1.UpdateImg();
-            progressBar1.Value = (int)Math.Round(progressVal * 100f);            
+            progressBar1.Value = (int)Math.Round(progressVal * 100f);
             Redraw();
         }
+
         public static DrawingContext ctx = new DrawingContext();
         float sx { get { return ctx.sx; } set { ctx.sx = value; } }
         float sy { get { return ctx.sy; } set { ctx.sy = value; } }
@@ -443,16 +364,19 @@ namespace DeepNestPort
         {
             if (nest != null)
             {
-                listView4.BeginUpdate();
-                listView4.Items.Clear();
-                foreach (var item in nest.nests)
+                listView4.Invoke((Action)(() =>
                 {
-                    listView4.Items.Add(new ListViewItem(new string[] { item.fitness + ""}) { Tag = item });
-                }
-                listView4.EndUpdate();
+                    listView4.BeginUpdate();
+                    listView4.Items.Clear();
+                    foreach (var item in nest.nests)
+                    {
+                        listView4.Items.Add(new ListViewItem(new string[] { item.fitness + "" }) { Tag = item });
+                    }
+                    listView4.EndUpdate();
+                }));
             }
         }
-        
+
         bool recreate = true;
         public void DeepNestIterate()
         {
@@ -464,7 +388,7 @@ namespace DeepNestPort
                 nest = new SvgNest();
                 UpdateNestsList();
                 Background.cacheProcess2 = new Dictionary<string, NFP[]>();
-                
+
                 Background.window = new windowUnk();
                 Background.callCounter = 0;
             }
@@ -683,19 +607,6 @@ namespace DeepNestPort
 
         }
 
-        public void LoadDxf(string path)
-        {
-            /*var fi = new FileInfo(path);
-            var d = new udDetail(fi.FullName, DateTime.Now);
-
-            LoadDetailFromDXF(fi.FullName, d, DXFLoadMethodEnum.CADImport, false);
-                       
-
-            var raw = ImportGlPart(d);
-            int src = GetPolygonSource();
-
-            ImportFromRawDetail(raw, src);*/
-        }
 
         public int GetPolygonSource()
         {
@@ -752,19 +663,14 @@ namespace DeepNestPort
 
         }
 
-        public void AddSheet()
+        public void AddSheet(int w = 3000, int h = 1500)
         {
             var tt = new RectanglePolygonSheet();
             tt.Name = "sheet" + (sheets.Count + 1);
             sheets.Add(tt);
             var p = sheets.Last();
-            p.Points = new SvgPoint[] { };
-            p.AddPoint(new SvgPoint(0, 0));
-            p.AddPoint(new SvgPoint(1000, 0));
-            p.AddPoint(new SvgPoint(1000, 500));
-            p.AddPoint(new SvgPoint(0, 500));
-            tt.Height = 1500;
-            tt.Width = 3000;
+            tt.Height = h;
+            tt.Width = w;
             tt.Rebuild();
             UpdateList();
             ReorderSheets();
@@ -780,13 +686,13 @@ namespace DeepNestPort
         {
             if (listView1.SelectedItems.Count > 0)
             {
-                polygons.Remove(listView1.SelectedItems[0].Tag as NFP);
+                for (int i = 0; i < listView1.SelectedItems.Count; i++)
+                {
+                    polygons.Remove(listView1.SelectedItems[i].Tag as NFP);
+                }
                 UpdateList();
-
             }
         }
-
-
 
         private void circlToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -945,7 +851,7 @@ namespace DeepNestPort
                     {
                         for (int i = 0; i < q.Qnt; i++)
                         {
-                            LoadDxf(f.FullName);
+
                         }
                         UpdateList();
 
@@ -959,7 +865,7 @@ namespace DeepNestPort
 
         }
 
-        private void импортВыбранныхНесколькоToolStripMenuItem_Click(object sender, EventArgs e)
+        private void importSelectedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listView3.SelectedItems.Count > 0)
             {
@@ -970,7 +876,7 @@ namespace DeepNestPort
                     {
                         var t = (item as ListViewItem).Tag as FileInfo;
 
-                        var svg = LoadSvg(t.FullName);
+                        var svg = SvgParser.LoadSvg(t.FullName);
                         int src = 0;
                         if (polygons.Any())
                         {
@@ -1088,7 +994,7 @@ namespace DeepNestPort
             SvgNest.Config.simplify = checkBox2.Checked;
         }
 
-        
+
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
             Background.UseParallel = checkBox4.Checked;
@@ -1109,7 +1015,7 @@ namespace DeepNestPort
 
         }
 
-        
+
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1158,21 +1064,65 @@ namespace DeepNestPort
 
         }
 
+
+
         private void button1_Click(object sender, EventArgs e)
         {
             var cnt = (int)numericUpDown3.Value;
+            int? ww = null;
+            int? hh = null;
+
+            try
+            {
+                ww = int.Parse(textBox4.Text);
+                textBox4.BackColor = Color.White;
+                textBox4.ForeColor = Color.Black;
+            }
+            catch (Exception ex)
+            {
+                textBox4.BackColor = Color.Red;
+                textBox4.ForeColor = Color.White;
+            }
+
+            try
+            {
+                hh = int.Parse(textBox5.Text);
+                textBox5.BackColor = Color.White;
+                textBox5.ForeColor = Color.Black;
+            }
+            catch (Exception ex)
+            {
+                textBox5.BackColor = Color.Red;
+                textBox5.ForeColor = Color.White;
+            }
+
+            if (ww == null || hh == null)
+            {
+                MessageBox.Show("Wrong sizes", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             for (int i = 0; i < cnt; i++)
             {
-                AddSheet();
+                AddSheet(ww.Value, hh.Value);
             }
+        }
+
+        public int GetCountFromDialog()
+        {
+            QntDialog q = new DeepNestPort.QntDialog();
+            if (q.ShowDialog() == DialogResult.OK)
+            {
+                return q.Qnt;
+            }
+            return 0;
         }
 
         private void button13_Click(object sender, EventArgs e)
         {
-
+            var cnt = GetCountFromDialog();
             Random r = new Random();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < cnt; i++)
             {
                 var xx = r.Next(2000) + 100;
                 var yy = r.Next(2000);
@@ -1322,17 +1272,10 @@ namespace DeepNestPort
         private void toolStripButton2_Click_1(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Svgs files (*.svg)|*.svg";
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("	<svg version=\"1.1\" id=\"svg2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"   xml:space=\"preserve\">");
-
-                foreach (var item in polygons)
-                {
-                    sb.AppendLine($"<polygon fill=\"none\" stroke=\"#010101\" stroke-miterlimit=\"10\" points=\"{item.Points.Aggregate("", (x, y) => x + y.x + "," + y.y + " ")}\"/>");
-                }
-                sb.AppendLine("</svg>");
-                File.WriteAllText(sfd.FileName, sb.ToString());
+                SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
         }
 
@@ -1369,32 +1312,7 @@ namespace DeepNestPort
             return ret;
         }
     }
-    public class LocalContour
-    {
-        public float Len
-        {
-            get
-            {
-                float len = 0;
-                for (int i = 1; i < Points.Count; i++)
-                {
-                    var p1 = Points[i - 1];
-                    var p2 = Points[i];
-                    len += (float)Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
-                }
-                return len;
-            }
-        }
-        public List<PointF> Points = new List<PointF>();
-        public bool Enable = true;
-    }
-    public class RawDetail
-    {
-        public List<LocalContour> Outers = new List<LocalContour>();
-        public List<LocalContour> Holes = new List<LocalContour>();
 
-        public string Name { get; set; }
-    }
     public static class ControlExtensions
     {
         public static void DoubleBuffered(this Control control, bool enable)

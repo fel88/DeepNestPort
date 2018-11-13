@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -9,6 +12,109 @@ namespace DeepNestLib
 {
     public class SvgParser
     {
+        public static RawDetail LoadSvg(string path)
+        {
+            XDocument doc = XDocument.Load(path);
+            var fi = new FileInfo(path);
+            RawDetail s = new RawDetail();
+            s.Name = fi.Name;
+            List<GraphicsPath> paths = new List<GraphicsPath>();
+            var ns = doc.Descendants().First().Name.Namespace.NamespaceName;
+
+
+            foreach (var item in doc.Descendants("path"))
+            {
+                var dd = (item.Attribute("d").Value);
+
+                List<string> cmnds = new List<string>();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < dd.Length; i++)
+                {
+                    if (char.IsLetter(dd[i]))
+                    {
+                        if (sb.Length > 0)
+                        {
+                            cmnds.Add(sb.ToString());
+                        }
+                        sb = new StringBuilder();
+                    }
+                    sb.Append(dd[i]);
+                }
+                if (sb.Length > 0)
+                {
+                    cmnds.Add(sb.ToString());
+                }
+                //GraphicsPath p = new GraphicsPath();
+
+
+                //polygons.Add(new SvgNestPort.Polygon() { orig = item,
+                //    /*Points = p.PathPoints.Select(z => new SvgPoint(z.X, z.Y)).ToArray()*/ });
+
+            }
+            foreach (var item in doc.Descendants("rect"))
+            {
+                float xx = 0;
+                float yy = 0;
+                if (item.Attribute("x") != null)
+                {
+                    xx = float.Parse(item.Attribute("x").Value);
+                }
+                if (item.Attribute("y") != null)
+                {
+                    yy = float.Parse(item.Attribute("y").Value);
+                }
+                var ww = float.Parse(item.Attribute("width").Value);
+                var hh = float.Parse(item.Attribute("height").Value);
+                GraphicsPath p = new GraphicsPath();
+                p.AddRectangle(new RectangleF(xx, yy, ww, hh));
+                s.Outers.Add(new LocalContour() { Points = p.PathPoints.ToList() });
+
+            }
+
+            foreach (var item in doc.Descendants(XName.Get("polygon", ns)))
+            {
+                var str = item.Attribute("points").Value.ToString();
+                var spl = str.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                List<PointF> points = new List<PointF>();
+                foreach (var sitem in spl)
+                {
+                    var spl2 = sitem.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                    var ar = spl2.Select(z => float.Parse(z, CultureInfo.InvariantCulture)).ToArray();
+                    points.Add(new PointF(ar[0], ar[1]));
+                }
+                s.Outers.Add(new LocalContour() { Points = points.ToList() });
+            }
+
+            return s;
+        }
+        public static void Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("	<svg version=\"1.1\" id=\"svg2\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"   xml:space=\"preserve\">");
+
+            foreach (var item in polygons.Union(sheets))
+            {
+                var m = new Matrix();
+                m.Translate((float)item.x, (float)item.y);
+                m.Rotate(item.rotation);
+                List<SvgPoint> points = new List<SvgPoint>();
+                foreach (var pitem in item.Points)
+                {
+                    PointF[] pp = new[] { new PointF((float)pitem.x, (float)pitem.y) };
+                    m.TransformPoints(pp);
+                    points.Add(new SvgPoint(pp[0].X, pp[0].Y));
+                }
+                string fill = "lightblue";
+                if (sheets.Contains(item))
+                {
+                    fill = "none";
+                }
+                
+                sb.AppendLine($"<polygon fill=\"{fill}\"  stroke=\"black\" points=\"{points.Aggregate("", (x, y) => x + y.x.ToString().Replace(",", ".") + "," + y.y.ToString().Replace(",", ".") + " ")}\"/>");
+            }
+            sb.AppendLine("</svg>");
+            File.WriteAllText(path, sb.ToString());
+        }
 
         public static SvgConfig Conf = new SvgConfig();
         // return a polygon from the given SVG element in the form of an array of points
@@ -53,7 +159,7 @@ namespace DeepNestLib
                         poly.Add(new SvgPoint(x + w, y + h));
                         poly.Add(new SvgPoint(x, y + h));
                     }
-                  
+
 
                     break;
                 case "circle":
@@ -205,5 +311,31 @@ namespace DeepNestLib
         public float tolerance = 2f; // max bound for bezier->line segment conversion, in native SVG units
         public float toleranceSvg = 0.005f;// fudge factor for browser inaccuracy in SVG unit handling
 
+    }
+    public class LocalContour
+    {
+        public float Len
+        {
+            get
+            {
+                float len = 0;
+                for (int i = 1; i < Points.Count; i++)
+                {
+                    var p1 = Points[i - 1];
+                    var p2 = Points[i];
+                    len += (float)Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
+                }
+                return len;
+            }
+        }
+        public List<PointF> Points = new List<PointF>();
+        public bool Enable = true;
+    }
+    public class RawDetail
+    {
+        public List<LocalContour> Outers = new List<LocalContour>();
+        public List<LocalContour> Holes = new List<LocalContour>();
+
+        public string Name { get; set; }
     }
 }

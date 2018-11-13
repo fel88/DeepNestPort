@@ -995,22 +995,6 @@ namespace DeepNestLib
             //ipcRenderer.send('background-progress', { index: nestindex, progress: -1});
 
 
-            /*allplacements[0].sheetplacements[0].x = 0;
-            allplacements[0].sheetplacements[0].y = 300;
-            allplacements[0].sheetplacements[0].rotation = 270;
-            //id:0
-
-            allplacements[0].sheetplacements[1].x = 600;
-            allplacements[0].sheetplacements[1].y = 300;
-            allplacements[0].sheetplacements[1].rotation = 180;
-            //id:1
-
-            allplacements[0].sheetplacements[2].x = 900;
-            allplacements[0].sheetplacements[2].y = 0;
-            allplacements[0].sheetplacements[2].rotation = 90;
-            //id:2
-            */
-
             return new SheetPlacement()
             {
                 placements = new[] { allplacements.ToList() },
@@ -1464,42 +1448,11 @@ namespace DeepNestLib
                 return doc;
             }*/
 
-            /*
-            // not found in cache
-            if (inside || (A.children && A.children.length > 0))
-            {
-                //console.log('computing minkowski: ',A.length, B.length);
-                //console.time('addon');
-
-
-                ///////////tcp bridge/////////
-
-                nfp = tcpTest(A, B);
-                if (nfp && nfp.length > 0)
-                {
-                    var ch = nfp[0].splice(nfp[0].length - 1, 1);
-                    nfp[0].children = ch;
-
-
-                }*/
+            
+            // not found in cache           
             if (inside || (A.children != null && A.children.Count > 0))
             {
-
                 nfp = Process2(A, B);
-
-
-
-                /*
-
-                    ///////////
-                    //nfp = GeometryUtil.noFitPolygon(A,B,inside,false);
-                    //throw 'nfp error';
-                    //nfp = addon.calculateNFP({A: A, B: B});
-                    //console.timeEnd('addon');
-                }
-                else
-                {
-                */
             }
             else
             {

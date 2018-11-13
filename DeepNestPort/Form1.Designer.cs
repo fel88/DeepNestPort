@@ -38,7 +38,7 @@
             this.listView3 = new System.Windows.Forms.ListView();
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip3 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.импортВыбранныхНесколькоToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importSelectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.button17 = new System.Windows.Forms.Button();
             this.button16 = new System.Windows.Forms.Button();
@@ -46,6 +46,10 @@
             this.button14 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.textBox4 = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.button1 = new System.Windows.Forms.Button();
@@ -169,7 +173,7 @@
             this.groupBox3.Controls.Add(this.listView3);
             this.groupBox3.Location = new System.Drawing.Point(296, 6);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(219, 329);
+            this.groupBox3.Size = new System.Drawing.Size(219, 549);
             this.groupBox3.TabIndex = 12;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Files";
@@ -182,9 +186,10 @@
             this.listView3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView3.FullRowSelect = true;
             this.listView3.GridLines = true;
+            this.listView3.HideSelection = false;
             this.listView3.Location = new System.Drawing.Point(3, 22);
             this.listView3.Name = "listView3";
-            this.listView3.Size = new System.Drawing.Size(213, 304);
+            this.listView3.Size = new System.Drawing.Size(213, 524);
             this.listView3.TabIndex = 3;
             this.listView3.UseCompatibleStateImageBehavior = false;
             this.listView3.View = System.Windows.Forms.View.Details;
@@ -198,16 +203,16 @@
             // contextMenuStrip3
             // 
             this.contextMenuStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.импортВыбранныхНесколькоToolStripMenuItem});
+            this.importSelectedToolStripMenuItem});
             this.contextMenuStrip3.Name = "contextMenuStrip3";
             this.contextMenuStrip3.Size = new System.Drawing.Size(157, 26);
             // 
-            // импортВыбранныхНесколькоToolStripMenuItem
+            // importSelectedToolStripMenuItem
             // 
-            this.импортВыбранныхНесколькоToolStripMenuItem.Name = "импортВыбранныхНесколькоToolStripMenuItem";
-            this.импортВыбранныхНесколькоToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.импортВыбранныхНесколькоToolStripMenuItem.Text = "import selected";
-            this.импортВыбранныхНесколькоToolStripMenuItem.Click += new System.EventHandler(this.импортВыбранныхНесколькоToolStripMenuItem_Click);
+            this.importSelectedToolStripMenuItem.Name = "importSelectedToolStripMenuItem";
+            this.importSelectedToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.importSelectedToolStripMenuItem.Text = "import selected";
+            this.importSelectedToolStripMenuItem.Click += new System.EventHandler(this.importSelectedToolStripMenuItem_Click);
             // 
             // groupBox2
             // 
@@ -216,12 +221,12 @@
             this.groupBox2.Controls.Add(this.button15);
             this.groupBox2.Controls.Add(this.button14);
             this.groupBox2.Controls.Add(this.button13);
-            this.groupBox2.Location = new System.Drawing.Point(521, 114);
+            this.groupBox2.Location = new System.Drawing.Point(521, 178);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(306, 221);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Parts";
+            this.groupBox2.Text = "Template parts";
             // 
             // button17
             // 
@@ -275,15 +280,53 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label10);
+            this.groupBox1.Controls.Add(this.label9);
+            this.groupBox1.Controls.Add(this.textBox5);
+            this.groupBox1.Controls.Add(this.textBox4);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.numericUpDown3);
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Location = new System.Drawing.Point(521, 6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(306, 102);
+            this.groupBox1.Size = new System.Drawing.Size(306, 166);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Sheets";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(12, 83);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(56, 20);
+            this.label10.TabIndex = 6;
+            this.label10.Text = "Height";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(12, 56);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(50, 20);
+            this.label9.TabIndex = 5;
+            this.label9.Text = "Width";
+            // 
+            // textBox5
+            // 
+            this.textBox5.Location = new System.Drawing.Point(83, 83);
+            this.textBox5.Name = "textBox5";
+            this.textBox5.Size = new System.Drawing.Size(100, 26);
+            this.textBox5.TabIndex = 4;
+            this.textBox5.Text = "1500";
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(83, 53);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(100, 26);
+            this.textBox4.TabIndex = 3;
+            this.textBox4.Text = "3000";
             // 
             // label8
             // 
@@ -318,7 +361,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(104, 65);
+            this.button1.Location = new System.Drawing.Point(104, 129);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(102, 31);
             this.button1.TabIndex = 0;
@@ -348,7 +391,7 @@
             this.listView2.HideSelection = false;
             this.listView2.Location = new System.Drawing.Point(5, 287);
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(284, 80);
+            this.listView2.Size = new System.Drawing.Size(284, 268);
             this.listView2.TabIndex = 6;
             this.listView2.UseCompatibleStateImageBehavior = false;
             this.listView2.View = System.Windows.Forms.View.Details;
@@ -827,7 +870,7 @@
         private System.Windows.Forms.ListView listView3;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip3;
-        private System.Windows.Forms.ToolStripMenuItem импортВыбранныхНесколькоToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importSelectedToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ToolStripMenuItem cloneQntToolStripMenuItem;
@@ -860,6 +903,10 @@
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox textBox5;
+        private System.Windows.Forms.TextBox textBox4;
     }
 }
 
