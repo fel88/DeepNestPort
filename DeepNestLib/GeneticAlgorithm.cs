@@ -62,7 +62,7 @@ namespace DeepNestLib
                 population.Add(mutant);
             }
         }
-        public GeneticAlgorithm(NFP[] adam, Polygon binPolygon, SvgNestConfig config)
+        public GeneticAlgorithm(NFP[] adam, NFP binPolygon, SvgNestConfig config)
         {
             Config = config;
             config.populationSize = 10;
@@ -155,7 +155,7 @@ namespace DeepNestLib
             return array;
         }
 
-        public float randomAngle(Polygon part)
+        public float randomAngle(NFP part)
         {
             List<float> angList = new List<float>();
             for (int i = 0; i < Math.Max(Config.rotations, 1); i++)

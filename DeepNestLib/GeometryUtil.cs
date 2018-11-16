@@ -16,7 +16,7 @@ namespace DeepNestLib
         }
 
         // returns an interior NFP for the special case where A is a rectangle
-        public static NFP[] noFitPolygonRectangle(Polygon A, Polygon B)
+        public static NFP[] noFitPolygonRectangle(NFP A, NFP B)
         {
             var minAx = A[0].x;
             var minAy = A[0].y;
@@ -89,7 +89,7 @@ namespace DeepNestLib
 
   
         // returns the rectangular bounding box of the given polygon
-        public static PolygonBounds getPolygonBounds(Polygon _polygon)
+        public static PolygonBounds getPolygonBounds(NFP _polygon)
         {
             return getPolygonBounds(_polygon.Points);
         }
@@ -140,7 +140,7 @@ namespace DeepNestLib
 
         }
 
-        public static bool isRectangle(Polygon poly, double? tolerance = null)
+        public static bool isRectangle(NFP poly, double? tolerance = null)
         {
             var bb = getPolygonBounds(poly);
             if (tolerance == null)
@@ -164,7 +164,7 @@ namespace DeepNestLib
             return true;
         }
 
-        internal static PolygonWithBounds rotatePolygon(Polygon polygon, float angle)
+        public static PolygonWithBounds rotatePolygon(NFP polygon, float angle)
         {
 
             List<SvgPoint> rotated = new List<SvgPoint>();
@@ -194,7 +194,7 @@ namespace DeepNestLib
 
         }
 
-        public class PolygonWithBounds : Polygon
+        public class PolygonWithBounds : NFP
         {
             public double x;
             public double y;
@@ -354,7 +354,7 @@ namespace DeepNestLib
 
 
         // project each point of B onto A in the given direction, and return the 
-        public static double? polygonProjectionDistance(Polygon A, Polygon B, SvgPoint direction)
+        public static double? polygonProjectionDistance(NFP A, NFP B, SvgPoint direction)
         {
             var Boffsetx = B.offsetx ?? 0;
             var Boffsety = B.offsety ?? 0;
@@ -418,7 +418,7 @@ namespace DeepNestLib
             return distance;
         }
 
-        public static double polygonArea(Polygon polygon)
+        public static double polygonArea(NFP polygon)
         {
             double area = 0;
             int i, j;
@@ -431,7 +431,7 @@ namespace DeepNestLib
         }
 
         // return true if point is in the polygon, false if outside, and null if exactly on a point or edge
-        public static bool? pointInPolygon(SvgPoint point, Polygon polygon)
+        public static bool? pointInPolygon(SvgPoint point, NFP polygon)
         {
             if (polygon == null || polygon.Points.Length < 3)
             {
@@ -477,7 +477,7 @@ namespace DeepNestLib
         // todo: swap this for a more efficient sweep-line implementation
         // returnEdges: if set, return all edges on A that have intersections
 
-        public static bool intersect(Polygon A, Polygon B)
+        public static bool intersect(NFP A, NFP B)
         {
             var Aoffsetx = A.offsetx ?? 0;
             var Aoffsety = A.offsety ?? 0;
@@ -657,7 +657,7 @@ namespace DeepNestLib
         // searches for an arrangement of A and B such that they do not overlap
         // if an NFP is given, only search for startpoints that have not already been traversed in the given NFP
 
-        public static SvgPoint searchStartPoint(Polygon A, Polygon B, bool inside, NFP[] NFP = null)
+        public static SvgPoint searchStartPoint(NFP A, NFP B, bool inside, NFP[] NFP = null)
         {
             // clone arrays
             A = A.slice(0);
@@ -994,7 +994,7 @@ namespace DeepNestLib
             //return Math.min.apply(Math, distances);
             return distances.Min();
         }
-        public static double? polygonSlideDistance(Polygon A, Polygon B, nVector direction, bool ignoreNegative)
+        public static double? polygonSlideDistance(NFP A, NFP B, nVector direction, bool ignoreNegative)
         {
 
             SvgPoint A1, A2, B1, B2;
@@ -1089,7 +1089,7 @@ namespace DeepNestLib
         // given a static polygon A and a movable polygon B, compute a no fit polygon by orbiting B about A
         // if the inside flag is set, B is orbited inside of A rather than outside
         // if the searchEdges flag is set, all edges of A are explored for NFPs - multiple 
-        public static NFP[] noFitPolygon(Polygon A, Polygon B, bool inside, bool searchEdges)
+        public static NFP[] noFitPolygon(NFP A, NFP B, bool inside, bool searchEdges)
         {
             if (A == null || A.length < 3 || B == null || B.length < 3)
             {

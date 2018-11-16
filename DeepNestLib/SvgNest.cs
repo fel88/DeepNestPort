@@ -516,7 +516,7 @@ namespace DeepNestLib
 
         Dictionary<string, List<NFP>> nfpCache = new Dictionary<string, List<NFP>>();
 
-        public Polygon binPolygon;
+        public NFP binPolygon;
 
 
         public void log(string str)
@@ -535,7 +535,7 @@ namespace DeepNestLib
         }
 
         // converts a polygon from normal float coordinates to integer coordinates used by clipper, as well as x/y -> X/Y
-        public static ClipperLib.IntPoint[] svgToClipper(Polygon polygon)
+        public static ClipperLib.IntPoint[] svgToClipper(NFP polygon)
         {
 
 
@@ -638,12 +638,12 @@ namespace DeepNestLib
             return new NFP() { Points = ret.ToArray() };
         }
 
-        public Polygon[] getParts(XElement[] paths)
+        public NFP[] getParts(XElement[] paths)
         {
 
 
             int i, j;
-            List<Polygon> polygons = new List<Polygon>();
+            List<NFP> polygons = new List<NFP>();
 
             var numchildren = paths.Length;
             for (i = 0; i < numchildren; i++)
@@ -685,7 +685,7 @@ namespace DeepNestLib
 
 
 
-        public bool compare1(Polygon[] p1, PointF[][] p2)
+        public bool compare1(NFP[] p1, PointF[][] p2)
         {
             if (p1.Length != p2.Length) return false;
             double tolerance = 0.1f;
@@ -778,7 +778,7 @@ namespace DeepNestLib
             return id;
         }
 
-        public static NFP cloneTree(Polygon tree)
+        public static NFP cloneTree(NFP tree)
         {
             NFP newtree = new NFP();
             foreach (var t in tree.Points)
@@ -799,9 +799,9 @@ namespace DeepNestLib
 
             return newtree;
         }
-        public Polygon rotatePolygon(Polygon polygon, float degrees)
+        public NFP rotatePolygon(NFP polygon, float degrees)
         {
-            Polygon rotated = new Polygon();
+            NFP rotated = new NFP();
             var angle = degrees * Math.PI / 180;
             for (var i = 0; i < polygon.length; i++)
             {
@@ -817,18 +817,12 @@ namespace DeepNestLib
         }
 
 
-        private object rotatePolygon(Polygon a, object aRotation)
-        {
-            throw new NotImplementedException();
-        }
-
-
 
         public Background background = new Background();
 
 
         PopulationItem individual = null;
-        Polygon[] placelist;
+        NFP[] placelist;
         GeneticAlgorithm ga;
 
         public List<SheetPlacement> nests = new List<SheetPlacement>();
@@ -1008,7 +1002,7 @@ namespace DeepNestLib
     
         
 
-        public static IntPoint[] toClipperCoordinates(Polygon polygon)
+        public static IntPoint[] toClipperCoordinates(NFP polygon)
         {
             var clone = new List<IntPoint>();
             for (var i = 0; i < polygon.length; i++)
@@ -1023,7 +1017,7 @@ namespace DeepNestLib
 
             return clone.ToArray();
         }
-        public static IntPoint[] toClipperCoordinatesToDec(Polygon polygon)
+        public static IntPoint[] toClipperCoordinatesToDec(NFP polygon)
         {
             var clone = new List<IntPoint>();
             for (var i = 0; i < polygon.length; i++)
@@ -1055,7 +1049,7 @@ namespace DeepNestLib
             return clone.ToArray();
         }
 
-        public static NFP[] minkowskiDifference(Polygon A, Polygon B)
+        public static NFP[] minkowskiDifference(NFP A, NFP B)
         {
 
             var Ac = _Clipper.ScaleUpPaths(A, 10000000);
@@ -1067,7 +1061,7 @@ namespace DeepNestLib
                 Bc[i].Y *= -1;
             }
             var solution = ClipperLib.Clipper.MinkowskiSum(new List<IntPoint>(Ac), new List<IntPoint>(Bc), true);
-            Polygon clipperNfp = null;
+            NFP clipperNfp = null;
 
             double? largestArea = null;
             for (int i = 0; i < solution.Count(); i++)
@@ -1233,7 +1227,7 @@ namespace DeepNestLib
 
     public class _Clipper
     {
-        public static ClipperLib.IntPoint[] ScaleUpPaths(Polygon p, double scale = 1)
+        public static ClipperLib.IntPoint[] ScaleUpPaths(NFP p, double scale = 1)
         {
             List<ClipperLib.IntPoint> ret = new List<ClipperLib.IntPoint>();
 
@@ -1305,9 +1299,9 @@ namespace DeepNestLib
             return ret;
         }
 
-        public static Polygon[] splice(this Polygon[] p, int a, int b)
+        public static NFP[] splice(this NFP[] p, int a, int b)
         {
-            List<Polygon> ret = new List<Polygon>();
+            List<NFP> ret = new List<NFP>();
             for (int i = 0; i < p.Length; i++)
             {
                 if (i >= a && i < (a + b)) continue;
@@ -1337,7 +1331,7 @@ namespace DeepNestLib
     }
     public class PolygonTreeItem
     {
-        public Polygon Polygon;
+        public NFP Polygon;
         public PolygonTreeItem Parent;
         public List<PolygonTreeItem> Childs = new List<PolygonTreeItem>();
     }
@@ -1375,8 +1369,8 @@ namespace DeepNestLib
 
     public class NfpPair
     {
-        public Polygon A;
-        public Polygon B;
+        public NFP A;
+        public NFP B;
         public NfpKey Key;
         public NFP nfp;
 
@@ -1413,8 +1407,8 @@ namespace DeepNestLib
     public class NfpKey : IStringify
     {
 
-        public Polygon A;
-        public Polygon B;
+        public NFP A;
+        public NFP B;
         public float ARotation { get; set; }
         public float BRotation { get; set; }
         public bool Inside { get; set; }
@@ -1464,7 +1458,7 @@ namespace DeepNestLib
         public float[] Rotation;
         public List<NFP> placements;
 
-        public Polygon[] paths;
+        public NFP[] paths;
         public double area;
     }
 
@@ -1484,8 +1478,8 @@ namespace DeepNestLib
         public object mergedSegments;
         public List<List<ClipperLib.IntPoint>> nfp;
         public int id;
-        public Polygon hull;
-        public Polygon hullsheet;
+        public NFP hull;
+        public NFP hullsheet;
 
         public float rotation;
         public double x;
@@ -1500,7 +1494,7 @@ namespace DeepNestLib
         public float[] Rotation;
         public List<SheetPlacementItem>[] placements;
 
-        public Polygon[] paths;
+        public NFP[] paths;
         public double area;
         public double mergedLength;
         internal int index;
@@ -1514,7 +1508,7 @@ namespace DeepNestLib
         public double[] Rotation;
         public List<PlacementItem>[] placements;
 
-        public Polygon[] paths;
+        public NFP[] paths;
         public double area;
         public double mergedLength;
     }

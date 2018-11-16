@@ -153,7 +153,7 @@ namespace DeepNestLib
             double totalPartsArea = 0;
 
             PlacedPartsCount = 0;
-            List<Polygon> placed = new List<Polygon>();
+            List<NFP> placed = new List<NFP>();
             foreach (var item in Polygons)
             {
                 item.fitted = false;

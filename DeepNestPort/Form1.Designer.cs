@@ -124,9 +124,7 @@
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(970, 485);
             this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.SizeChanged += new System.EventHandler(this.pictureBox1_SizeChanged);
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.pictureBox1.TabStop = false;                        
             this.pictureBox1.MouseEnter += new System.EventHandler(this.pictureBox1_MouseEnter);
             // 
             // tabControl1
@@ -192,8 +190,7 @@
             this.listView3.Size = new System.Drawing.Size(213, 524);
             this.listView3.TabIndex = 3;
             this.listView3.UseCompatibleStateImageBehavior = false;
-            this.listView3.View = System.Windows.Forms.View.Details;
-            this.listView3.SelectedIndexChanged += new System.EventHandler(this.listView3_SelectedIndexChanged);
+            this.listView3.View = System.Windows.Forms.View.Details;            
             this.listView3.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView3_MouseDoubleClick);
             // 
             // columnHeader5
@@ -434,8 +431,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(63, 20);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Parts: 0";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label1.Text = "Parts: 0";            
             // 
             // listView1
             // 
@@ -528,8 +524,7 @@
             this.tabPage2.Size = new System.Drawing.Size(1176, 561);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Settings";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            this.tabPage2.Click += new System.EventHandler(this.tabPage2_Click);
+            this.tabPage2.UseVisualStyleBackColor = true;            
             // 
             // label6
             // 
@@ -620,8 +615,7 @@
             this.checkBox3.Size = new System.Drawing.Size(149, 24);
             this.checkBox3.TabIndex = 17;
             this.checkBox3.Text = "offset tree phase";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
+            this.checkBox3.UseVisualStyleBackColor = true;            
             // 
             // checkBox2
             // 

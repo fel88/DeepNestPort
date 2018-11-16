@@ -48,8 +48,6 @@
     <Compile Include="GeometryUtil.cs" />
     <Compile Include="NestingContext.cs" />
     <Compile Include="NFP.cs" />
-    <Compile Include="PlacementWorker.cs" />
-    <Compile Include="Polygon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawDetail.cs" />
     <Compile Include="Simplify.cs" />

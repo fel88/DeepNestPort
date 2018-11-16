@@ -14,7 +14,7 @@ namespace DeepNestLib
 
         public static bool EnableCaches = true;
 
-        public static NFP shiftPolygon(Polygon p, PlacementItem shift)
+        public static NFP shiftPolygon(NFP p, PlacementItem shift)
         {
             NFP shifted = new NFP();
             for (var i = 0; i < p.length; i++)
@@ -211,7 +211,7 @@ namespace DeepNestLib
 
             //return newnfp;
         }
-        public static NFP clone(Polygon nfp)
+        public static NFP clone(NFP nfp)
         {
             NFP newnfp = new NFP();
             for (var i = 0; i < nfp.length; i++)
@@ -241,7 +241,7 @@ namespace DeepNestLib
         public static int callCounter = 0;
 
         public static Dictionary<string, NFP[]> cacheProcess = new Dictionary<string, NFP[]>();
-        public static NFP[] Process2(Polygon A, Polygon B)
+        public static NFP[] Process2(NFP A, NFP B)
         {
             var key = A.source + ";" + B.source + ";" + A.rotation + ";" + B.rotation;
             if (cacheProcess.ContainsKey(key))
@@ -368,7 +368,7 @@ namespace DeepNestLib
             return res;
         }
 
-        public static Polygon getFrame(NFP A)
+        public static NFP getFrame(NFP A)
         {
             var bounds = GeometryUtil.getPolygonBounds(A);
 
@@ -378,7 +378,7 @@ namespace DeepNestLib
             bounds.x -= 0.5 * (bounds.width - (bounds.width / 1.1));
             bounds.y -= 0.5 * (bounds.height - (bounds.height / 1.1));
 
-            var frame = new Polygon();
+            var frame = new NFP();
             frame.push(new SvgPoint(bounds.x, bounds.y));
             frame.push(new SvgPoint(bounds.x + bounds.width, bounds.y));
             frame.push(new SvgPoint(bounds.x + bounds.width, bounds.y + bounds.height));
@@ -483,7 +483,7 @@ namespace DeepNestLib
             return f.ToArray();
 
         }
-        public static NFP rotatePolygon(Polygon polygon, float degrees)
+        public static NFP rotatePolygon(NFP polygon, float degrees)
         {
             NFP rotated = new NFP();
 
@@ -549,7 +549,7 @@ namespace DeepNestLib
             while (parts.Length > 0)
             {
 
-                List<Polygon> placed = new List<Polygon>();
+                List<NFP> placed = new List<NFP>();
 
                 List<PlacementItem> placements = new List<PlacementItem>();
 
@@ -748,7 +748,7 @@ namespace DeepNestLib
                     }
 
 
-                    List<Polygon> f = new List<Polygon>();
+                    List<NFP> f = new List<NFP>();
                     for (j = 0; j < _finalNfp.Count; j++)
                     {
                         // back to normal scale
@@ -768,7 +768,7 @@ namespace DeepNestLib
                     minarea = null;
                     double? minx = null;
                     double? miny = null;
-                    Polygon nf;
+                    NFP nf;
                     double area;
                     PlacementItem shiftvector = null;
 
@@ -790,7 +790,7 @@ namespace DeepNestLib
                     {
                         allbounds = GeometryUtil.getPolygonBounds(allpoints);
 
-                        Polygon partpoints = new Polygon();
+                        NFP partpoints = new NFP();
                         for (m = 0; m < part.length; m++)
                         {
                             partpoints.AddPoint(new SvgPoint(part[m].x, part[m].y));
@@ -818,7 +818,7 @@ namespace DeepNestLib
                             PolygonBounds rectbounds = null;
                             if (config.placementType == PlacementTypeEnum.gravity || config.placementType == PlacementTypeEnum.box)
                             {
-                                Polygon poly = new Polygon();
+                                NFP poly = new NFP();
                                 poly.AddPoint(new SvgPoint(allbounds.x, allbounds.y));
                                 poly.AddPoint(new SvgPoint(allbounds.x + allbounds.width, allbounds.y));
                                 poly.AddPoint(new SvgPoint(allbounds.x + allbounds.width, allbounds.y + allbounds.height));
@@ -1122,7 +1122,7 @@ namespace DeepNestLib
                 sync();
             }
         }
-        public Polygon getPart(int source, List<NFP> parts)
+        public NFP getPart(int source, List<NFP> parts)
         {
             for (var k = 0; k < parts.Count; k++)
             {
@@ -1420,7 +1420,7 @@ namespace DeepNestLib
 
             return clipperNfp.ToArray();
         }
-        public static NFP getOuterNfp(Polygon A, Polygon B, bool inside = false)//todo:?inside def?
+        public static NFP getOuterNfp(NFP A, NFP B, bool inside = false)//todo:?inside def?
         {
             NFP[] nfp = null;
 
@@ -1465,7 +1465,7 @@ namespace DeepNestLib
                     Bc[i].Y *= -1;
                 }
                 var solution = ClipperLib.Clipper.MinkowskiSum(new List<IntPoint>(Ac), new List<IntPoint>(Bc), true);
-                Polygon clipperNfp = null;
+                NFP clipperNfp = null;
 
                 double? largestArea = null;
                 for (int i = 0; i < solution.Count(); i++)

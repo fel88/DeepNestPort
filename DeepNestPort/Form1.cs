@@ -8,12 +8,8 @@ using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace DeepNestPort
 {
@@ -30,12 +26,10 @@ namespace DeepNestPort
             sy = -pictureBox1.Height / 2;
             checkBox2.Checked = SvgNest.Config.simplify;
             checkBox4.Checked = Background.UseParallel;
-            form = this;
 
             UpdateFilesList(@"svgs");
-            bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            ctx.gr = Graphics.FromImage(bmp);
-            ctx.gr.SmoothingMode = SmoothingMode.AntiAlias;
+            ctx.Create(pictureBox1);
+
             pictureBox1.MouseDown += PictureBox1_MouseDown;
             pictureBox1.MouseUp += PictureBox1_MouseUp;
             MouseWheel += Form1_MouseWheel;
@@ -58,16 +52,12 @@ namespace DeepNestPort
 
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            isDrag2 = false;
             isDrag = false;
-
 
             var p = pictureBox1.PointToClient(Cursor.Position);
             var pos = pictureBox1.PointToClient(Cursor.Position);
             var posx = (pos.X / zoom - sx);
             var posy = (-pos.Y / zoom - sy);
-
-
         }
 
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -84,25 +74,6 @@ namespace DeepNestPort
                 origsy = sy;
             }
         }
-
-
-        public bool ComparePolygon(Polygon p1, Polygon p2, float tolerance = 0.01f)
-        {
-            if (p1.length != p2.length) return false;
-            for (int i = 0; i < p1.length; i++)
-            {
-                var pp1 = p1[i];
-                var pp2 = p2[i];
-                var d = pp1.DistTo(pp2);
-                if (d > tolerance) return false;
-            }
-            return true;
-        }
-
-
-        Bitmap bmp;
-
-
 
         public void UpdateList()
         {
@@ -127,30 +98,9 @@ namespace DeepNestPort
 
         public NestingContext Context = new NestingContext();
 
-        public List<XElement> parts = new List<XElement>();
-        public void LoadNative(string path)
-        {
-            XDocument doc = XDocument.Load(path);
-            List<GraphicsPath> paths = new List<GraphicsPath>();
-            polygons.Clear();
 
-            foreach (var item in doc.Root.Descendants())
-            {
-                parts.Add(item);
-                //var poly = SvgParser.polygonify(item);
-                //polygons.Add(poly);
-            }
-        }
+        public SvgNest nest { get { return context.Nest; } }
 
-
-
-        public SvgNest nest
-        {
-            get
-            {
-                return context.Nest;
-            }
-        }
         public object selected = null;
 
         Thread dth;
@@ -215,13 +165,9 @@ namespace DeepNestPort
                         points.Add(new SvgPoint(pp[0].X, pp[0].Y));
                     }
 
-                    path.AddPolygon(points.Select(z => new PointF((float)z.x, (float)z.y)).Select(z => ctx.Transform(z)).ToArray());
+                    path.AddPolygon(points.Select(z => new PointF((float)z.x, (float)z.y)).Select(z => ctx.Transform(z)).ToArray());                    
 
-                    //m.Translate(item.x/ctx.zoom, item.y/ctx.zoom);
-
-                    ctx.gr.ResetTransform();
-                    //ctx.gr.RotateTransform(item.Rotation);
-                    //ctx.gr.TranslateTransform(item.x, item.y);
+                    ctx.gr.ResetTransform();                    
 
                     if (selected == item)
                     {
@@ -277,7 +223,7 @@ namespace DeepNestPort
                     }
                 }
             }
-            pictureBox1.Image = bmp;
+            pictureBox1.Image = ctx.bmp;
         }
         public void RedrawAsync()
         {
@@ -290,6 +236,7 @@ namespace DeepNestPort
             dth.IsBackground = true;
             dth.Start();
         }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
             progressBar1.UpdateImg();
@@ -305,36 +252,9 @@ namespace DeepNestPort
         float startx, starty;
         float origsx, origsy;
         bool isDrag = false;
-        bool isDrag2 = false;
 
-        private void pictureBox1_SizeChanged(object sender, EventArgs e)
-        {
-            bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            ctx.gr = Graphics.FromImage(bmp);
 
-        }
 
-        
-        // offset tree recursively
-        public void offsetTree(NFP[] t, float offset)
-        {
-            for (var i = 0; i < t.Length; i++)
-            {
-                var offsetpaths = SvgNest.polygonOffset(new[] { t[i] }, offset);
-                if (offsetpaths.Length == 1)
-                {
-                    // replace array items in place
-                    t[i] = offsetpaths[0];
-                    //throw new NotImplementedException();
-                    //Array.prototype.splice.apply(t[i], [0, t[i].length].concat(offsetpaths[0]));
-                }
-
-                if (t[i].children != null && t[i].children.Count > 0)
-                {
-                    offsetTree(t[i].children.ToArray(), -offset);
-                }
-            }
-        }
         public void UpdateNestsList()
         {
             if (nest != null)
@@ -352,9 +272,8 @@ namespace DeepNestPort
             }
         }
 
-           
-        Thread th;
 
+        Thread th;
 
         internal void displayProgress(float progress)
         {
@@ -363,22 +282,9 @@ namespace DeepNestPort
         }
         public float progressVal = 0;
 
-        public void applyPlacement(Placement item)
-        {
-            foreach (var pitem in item.placements)
-            {
-                foreach (var zitem in pitem)
-                {
-                    var pp = polygons[zitem.id];
-                    pp.rotation = zitem.rotation;
-                    pp.x = zitem.x;
-                    pp.y = zitem.y;
-                }
-            }
-        }
 
-        public static Form1 form;
-        
+
+
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count > 0)
@@ -392,36 +298,7 @@ namespace DeepNestPort
             pictureBox1.Focus();
         }
 
-        private void toolStripButton3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-
-
-        private void toolStripButton4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-
-        public int GetPolygonSource()
-        {
-            int src = 0;
-            if (polygons.Any())
-            {
-                src = polygons.Max(z => z.source.Value) + 1;
-            }
-            if (sheets.Any())
-            {
-                src = Math.Max(src, sheets.Max(z => z.source.Value) + 1);
-            }
-            return src;
-        }
-
-
-
-
+     
         public void UpdateFilesList(string path)
         {
             var di = new DirectoryInfo(path);
@@ -436,11 +313,6 @@ namespace DeepNestPort
                 if (!item.Extension.Contains("svg")) continue;
                 listView3.Items.Add(new ListViewItem(new string[] { item.Name }) { Tag = item });
             }
-
-        }
-
-        private void toolStripButton5_Click(object sender, EventArgs e)
-        {
 
         }
 
@@ -475,41 +347,7 @@ namespace DeepNestPort
             }
         }
 
-        private void circlToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void rectToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        public NFP GetRectPolygon(PointF pos, int ww, int hh)
-        {
-            var xx = pos.X;
-            var yy = pos.Y;
-
-            var pl = new NFP();
-            pl.Points = new SvgPoint[] { };
-            pl.AddPoint(new SvgPoint(xx, yy));
-            pl.AddPoint(new SvgPoint(xx + ww, yy));
-            pl.AddPoint(new SvgPoint(xx + ww, yy + hh));
-            pl.AddPoint(new SvgPoint(xx, yy + hh));
-            return pl;
-        }
-
-        private void trngToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            th.Abort();
-            th = null;
-        }
-
+   
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -567,10 +405,6 @@ namespace DeepNestPort
             }
         }
 
-        private void rectVariousToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void clearAllToolStripMenuItem1_Click(object sender, EventArgs e)
         {
@@ -578,22 +412,6 @@ namespace DeepNestPort
             UpdateList();
         }
 
-        private void tabPage2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-
-
-        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
 
         private void moveToPolygonsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -641,10 +459,6 @@ namespace DeepNestPort
             }
         }
 
-        private void listView3_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void importSelectedToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -686,6 +500,7 @@ namespace DeepNestPort
                     context.StartNest();
                     UpdateNestsList();
                     Background.displayProgress = displayProgress;
+
                     while (true)
                     {
                         Stopwatch sw = new Stopwatch();
@@ -693,7 +508,7 @@ namespace DeepNestPort
 
                         context.NestIterate();
                         UpdateNestsList();
-                        form.displayProgress(1.0f);
+                        displayProgress(1.0f);
                         sw.Stop();
                         toolStripStatusLabel1.Text = "Nesting complete within: " + sw.ElapsedMilliseconds + "ms";
                         if (stop) break;
@@ -707,8 +522,6 @@ namespace DeepNestPort
 
 
         Random r = new Random();
-
-
         private void cloneQntToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count > 0)
@@ -730,17 +543,6 @@ namespace DeepNestPort
             }
         }
 
-        private void button8_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button9_Click(object sender, EventArgs e)
-        {
-
-        }
-
-
 
         private void button10_Click(object sender, EventArgs e)
         {
@@ -748,17 +550,11 @@ namespace DeepNestPort
             {
                 MessageBox.Show("There are no sheets or parts", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
-            }       
+            }
             stop = false;
             progressBar1.Value = 0;
             tabControl1.SelectedTab = tabPage4;
             RunDeepnest();
-        }
-
-
-        private void similarRectsQntToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
 
 
@@ -772,22 +568,6 @@ namespace DeepNestPort
         {
             Background.UseParallel = checkBox4.Checked;
         }
-
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void toolStripButton12_Click(object sender, EventArgs e)
-        {
-
-        }
-
 
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -826,17 +606,6 @@ namespace DeepNestPort
         {
             SvgNest.Config.mutationRate = (int)numericUpDown2.Value;
         }
-
-        private void toolStripButton2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
 
 
         private void button1_Click(object sender, EventArgs e)
@@ -1056,65 +825,5 @@ namespace DeepNestPort
                 SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
         }
-
-        private void textBox6_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox7_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        public static RectanglePolygonSheet GetSheetPolygon(int w, int h)
-        {
-            RectanglePolygonSheet ret = new RectanglePolygonSheet();
-            ret.Points = new SvgPoint[] { };
-            ret.AddPoint(new SvgPoint(w, h));
-            ret.AddPoint(new SvgPoint(0, h));
-            ret.AddPoint(new SvgPoint(0, 0));
-            ret.AddPoint(new SvgPoint(w, 0));
-
-            return ret;
-        }
-        public static NFP GetPolygon(int w, int h)
-        {
-            NFP ret = new NFP();
-            ret.Points = new SvgPoint[] { };
-            ret.AddPoint(new SvgPoint(w, h));
-            ret.AddPoint(new SvgPoint(0, h));
-            ret.AddPoint(new SvgPoint(0, 0));
-            ret.AddPoint(new SvgPoint(w, 0));
-
-            return ret;
-        }
     }
-
-    public static class ControlExtensions
-    {
-        public static void DoubleBuffered(this Control control, bool enable)
-        {
-            var doubleBufferPropertyInfo = control.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
-            doubleBufferPropertyInfo.SetValue(control, enable, null);
-        }
-    }
-
-    public class DrawingContext
-    {
-        public bool DrawHintsAllowed = false;
-        public float sx, sy;
-        public float zoom = 1;
-        public Graphics gr;
-        public bool UseZ { get; set; } = true;
-        public bool PathDrawMode { get; set; } = true;
-        public bool FillPolygons { get; set; } = true;
-
-        public virtual PointF Transform(PointF p1)
-        {
-            return new PointF((p1.X + sx) * zoom, -(p1.Y + sy) * zoom);
-        }
-    }
-
-
 }
