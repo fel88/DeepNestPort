@@ -240,13 +240,13 @@ namespace DeepNestLib
 
         public static int callCounter = 0;
 
-        public static Dictionary<string, NFP[]> cacheProcess2 = new Dictionary<string, NFP[]>();
+        public static Dictionary<string, NFP[]> cacheProcess = new Dictionary<string, NFP[]>();
         public static NFP[] Process2(Polygon A, Polygon B)
         {
             var key = A.source + ";" + B.source + ";" + A.rotation + ";" + B.rotation;
-            if (cacheProcess2.ContainsKey(key))
+            if (cacheProcess.ContainsKey(key))
             {
-                return cacheProcess2[key];
+                return cacheProcess[key];
             }
 
             Stopwatch swg = Stopwatch.StartNew();
@@ -364,7 +364,7 @@ namespace DeepNestLib
             var msg = swg.ElapsedMilliseconds;
             var res = new NFP[] { ret };
 
-            cacheProcess2.Add(key, res);
+            cacheProcess.Add(key, res);
             return res;
         }
 

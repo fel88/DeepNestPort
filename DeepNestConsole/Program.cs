@@ -51,7 +51,7 @@ namespace DeepNestConsole
                         }
                         try
                         {
-                            sample.LoadDataFromXml(args[1]);
+                            sample.Context.LoadXml(args[1]);
                         }
                         catch (Exception ex)
                         {
@@ -82,15 +82,15 @@ namespace DeepNestConsole
 
                         for (int i = 0; i < 10; i++)
                         {
-                            sample.AddSheet(3000, 1500);
+                            sample.Context.AddSheet(3000, 1500);
                         }
-                        
-                        sample.LoadInputData(dir, cnt);
+
+                        sample.Context.LoadInputData(dir, cnt);
                     }
                     break;
                 case "sample":
                     {
-                        sample.LoadSampleData();
+                        sample.Context.LoadSampleData();
                     }
                     break;
                 default:

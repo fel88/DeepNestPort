@@ -43,33 +43,17 @@ namespace DeepNestPort
         PictureBoxProgressBar progressBar1;
         private void Form1_MouseWheel(object sender, MouseEventArgs e)
         {
-            {
-                //zoom *= Math.Sign(e.Delta) * 1.3f;
-                //zoom += Math.Sign(e.Delta) * 0.31f;
 
-                float zold = zoom;
-                if (e.Delta > 0)
-                {
-                    zoom *= 1.5f; ;
-                }
-                else
-                {
-                    zoom *= 0.5f;
-                }
-                if (zoom < 0.08)
-                {
-                    zoom = 0.08f;
-                }
-                if (zoom > 1000)
-                {
-                    zoom = 1000f;
-                }
+            float zold = zoom;
+            if (e.Delta > 0) { zoom *= 1.5f; ; }
+            else { zoom *= 0.5f; }
+            if (zoom < 0.08) { zoom = 0.08f; }
+            if (zoom > 1000) { zoom = 1000f; }
 
-                var pos = pictureBox1.PointToClient(Cursor.Position);
+            var pos = pictureBox1.PointToClient(Cursor.Position);
 
-                sx = -(pos.X / zold - sx - pos.X / zoom);
-                sy = (pos.Y / zold + sy - pos.Y / zoom);
-            }
+            sx = -(pos.X / zold - sx - pos.X / zoom);
+            sy = (pos.Y / zold + sy - pos.Y / zoom);
         }
 
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
@@ -118,8 +102,7 @@ namespace DeepNestPort
 
         Bitmap bmp;
 
-        List<NFP> polygons = new List<NFP>();
-        List<NFP> sheets = new List<NFP>();
+
 
         public void UpdateList()
         {
@@ -142,6 +125,7 @@ namespace DeepNestPort
         }
 
 
+        public NestingContext Context = new NestingContext();
 
         public List<XElement> parts = new List<XElement>();
         public void LoadNative(string path)
@@ -158,9 +142,15 @@ namespace DeepNestPort
             }
         }
 
-        public double materailUtilization = 0;
-        public int placedPartsCount = 0;
-        public int iterations = 0;
+
+
+        public SvgNest nest
+        {
+            get
+            {
+                return context.Nest;
+            }
+        }
         public object selected = null;
 
         Thread dth;
@@ -184,7 +174,7 @@ namespace DeepNestPort
             ctx.gr.DrawLine(Pens.Blue, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(0, 1000)));
             ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), new Font("Arial", 12), Brushes.Blue, 0, 0);
 
-            ctx.gr.DrawString($"Material Utilization: {Math.Round(materailUtilization * 100.0f, 2)}%   Iterations: {iterations}    parts placed: {placedPartsCount}/{polygons.Count}",
+            ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    parts placed: {context.PlacedPartsCount}/{polygons.Count}",
                 new Font("Arial", 20), Brushes.DarkBlue, 0, 20);
 
             ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}",
@@ -316,21 +306,6 @@ namespace DeepNestPort
         float origsx, origsy;
         bool isDrag = false;
         bool isDrag2 = false;
-        public class DrawingContext
-        {
-            public bool DrawHintsAllowed = false;
-            public float sx, sy;
-            public float zoom = 1;
-            public Graphics gr;
-            public bool UseZ { get; set; } = true;
-            public bool PathDrawMode { get; set; } = true;
-            public bool FillPolygons { get; set; } = true;
-
-            public virtual PointF Transform(PointF p1)
-            {
-                return new PointF((p1.X + sx) * zoom, -(p1.Y + sy) * zoom);
-            }
-        }
 
         private void pictureBox1_SizeChanged(object sender, EventArgs e)
         {
@@ -339,7 +314,7 @@ namespace DeepNestPort
 
         }
 
-        SvgNest nest;
+        
         // offset tree recursively
         public void offsetTree(NFP[] t, float offset)
         {
@@ -377,176 +352,7 @@ namespace DeepNestPort
             }
         }
 
-        bool recreate = true;
-        public void DeepNestIterate()
-        {
-            if (recreate || nest == null)
-            {
-                recreate = false;
-                current = null;
-                iterations = 0;
-                nest = new SvgNest();
-                UpdateNestsList();
-                Background.cacheProcess2 = new Dictionary<string, NFP[]>();
-
-                Background.window = new windowUnk();
-                Background.callCounter = 0;
-            }
-            Background.displayProgress = displayProgress;
-            List<NFP> lsheets = new List<NFP>();
-            List<NFP> lpoly = new List<NFP>();
-            for (int i = 0; i < polygons.Count; i++)
-            {
-                polygons[i].id = i;
-            }
-            for (int i = 0; i < sheets.Count; i++)
-            {
-                sheets[i].id = i;
-            }
-            foreach (var item in polygons)
-            {
-                NFP clone = new NFP();
-                clone.id = item.id;
-                clone.source = item.source;
-                clone.Points = item.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
-
-                lpoly.Add(clone);
-            }
-
-
-            foreach (var item in sheets)
-            {
-                RectanglePolygonSheet clone = new RectanglePolygonSheet();
-                clone.id = item.id;
-                clone.source = item.source;
-                clone.Points = item.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
-
-                lsheets.Add(clone);
-            }
-            if (checkBox3.Checked)
-            {
-                var grps = lpoly.GroupBy(z => z.source).ToArray();
-                if (Background.UseParallel)
-                {
-                    Parallel.ForEach(grps, (item) =>
-                    {
-                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
-                        foreach (var zitem in item)
-                        {
-                            zitem.Points = item.First().Points.ToArray();
-                        }
-                        //SvgNest.offsetTree(item, 0.5 * SvgNest.Config.spacing, SvgNest.Config);
-                    });
-
-                }
-                else
-                {
-
-                    foreach (var item in grps)
-                    {
-                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
-                        foreach (var zitem in item)
-                        {
-                            zitem.Points = item.First().Points.ToArray();
-                        }
-                    }
-                    /*foreach (var item in lpoly)
-                    {
-                        SvgNest.offsetTree(item, 0.5 * SvgNest.Config.spacing, SvgNest.Config);
-                    }*/
-                }
-                foreach (var item in lsheets)
-                {
-                    SvgNest.offsetTree(item, -0.5 * SvgNest.Config.spacing, SvgNest.Config, true);
-                }
-            }
-
-
-            List<NestItem> partsLocal = new List<NestItem>();
-            var p1 = lpoly.GroupBy(z => z.source).Select(z => new NestItem()
-            {
-                Polygon = z.First(),
-                IsSheet = false,
-                Quanity = z.Count()
-            });
-
-            var p2 = lsheets.GroupBy(z => z.source).Select(z => new NestItem()
-            {
-                Polygon = z.First(),
-                IsSheet = true,
-                Quanity = z.Count()
-            });
-
-
-            partsLocal.AddRange(p1);
-            partsLocal.AddRange(p2);
-            int srcc = 0;
-            foreach (var item in partsLocal)
-            {
-                item.Polygon.source = srcc++;
-            }
-
-
-            nest.launchWorkers(partsLocal.ToArray());
-            form.displayProgress(1.0f);
-            var plcpr = nest.nests.First();
-            UpdateNestsList();
-
-            iterations++;
-
-            if (current == null || plcpr.fitness < current.fitness)
-            {
-                AssignPlacement(plcpr);
-            }
-        }
-
-        SheetPlacement current = null;
-        public void AssignPlacement(SheetPlacement plcpr)
-        {
-            current = plcpr;
-            double totalSheetsArea = 0;
-            double totalPartsArea = 0;
-
-            placedPartsCount = 0;
-            List<Polygon> placed = new List<Polygon>();
-            foreach (var item in polygons)
-            {
-                item.fitted = false;
-            }
-            foreach (var item in plcpr.placements)
-            {
-                foreach (var zitem in item)
-                {
-                    var sheetid = zitem.sheetId;
-                    var sheet = sheets.First(z => z.id == sheetid);
-                    totalSheetsArea += GeometryUtil.polygonArea(sheet);
-
-                    foreach (var ssitem in zitem.sheetplacements)
-                    {
-                        //var sheet = sheets[sheetid];
-
-                        placedPartsCount++;
-                        var poly = polygons.First(z => z.id == ssitem.id);
-                        totalPartsArea += GeometryUtil.polygonArea(poly);
-                        placed.Add(poly);
-                        poly.fitted = true;
-                        poly.x = ssitem.x + sheet.x;
-                        poly.y = ssitem.y + sheet.y;
-                        poly.rotation = ssitem.rotation;
-                    }
-                }
-            }
-            materailUtilization = Math.Abs(totalPartsArea / totalSheetsArea);
-
-            var ppps = polygons.Where(z => !placed.Contains(z));
-            foreach (var item in ppps)
-            {
-                item.x = -500;
-                item.y = 0;
-            }
-        }
-
-
+           
         Thread th;
 
 
@@ -572,16 +378,7 @@ namespace DeepNestPort
         }
 
         public static Form1 form;
-        public void displayCallback(double koefUtil, int placed, int total)
-        {
-            materailUtilization = koefUtil;
-            placedPartsCount = placed;
-            iterations++;
-        }
-        public void displayCallback()
-        {
-        }
-
+        
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count > 0)
@@ -623,23 +420,7 @@ namespace DeepNestPort
         }
 
 
-        public void ImportFromRawDetail(RawDetail raw, int src)
-        {
-            NFP po = new NFP();
-            po.Name = raw.Name;
-            po.Points = new SvgPoint[] { };
-            //if (raw.Outers.Any())
-            {
-                var tt = raw.Outers.Union(raw.Holes).OrderByDescending(z => z.Len).First();
-                foreach (var item in tt.Points)
-                {
-                    po.AddPoint(new SvgPoint(item.X, item.Y));
-                }
 
-                po.source = src;
-                polygons.Add(po);
-            }
-        }
 
         public void UpdateFilesList(string path)
         {
@@ -673,7 +454,7 @@ namespace DeepNestPort
             tt.Width = w;
             tt.Rebuild();
             UpdateList();
-            ReorderSheets();
+            context.ReorderSheets();
         }
 
         private void clearAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -884,7 +665,7 @@ namespace DeepNestPort
                         }
                         for (int i = 0; i < q.Qnt; i++)
                         {
-                            ImportFromRawDetail(svg, src);
+                            context.ImportFromRawDetail(svg, src);
                         }
                     }
                     UpdateList();
@@ -902,12 +683,17 @@ namespace DeepNestPort
             {
                 th = new Thread(() =>
                 {
+                    context.StartNest();
+                    UpdateNestsList();
+                    Background.displayProgress = displayProgress;
                     while (true)
                     {
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
 
-                        DeepNestIterate();
+                        context.NestIterate();
+                        UpdateNestsList();
+                        form.displayProgress(1.0f);
                         sw.Stop();
                         toolStripStatusLabel1.Text = "Nesting complete within: " + sw.ElapsedMilliseconds + "ms";
                         if (stop) break;
@@ -954,18 +740,6 @@ namespace DeepNestPort
 
         }
 
-        public void ReorderSheets()
-        {
-            double x = 0;
-            double y = 0;
-            for (int i = 0; i < sheets.Count; i++)
-            {
-                sheets[i].x = x;
-                sheets[i].y = y;
-                var r = sheets[i] as RectanglePolygonSheet;
-                x += r.Width + 10;
-            }
-        }
 
 
         private void button10_Click(object sender, EventArgs e)
@@ -974,8 +748,7 @@ namespace DeepNestPort
             {
                 MessageBox.Show("There are no sheets or parts", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
-            }
-            recreate = true;
+            }       
             stop = false;
             progressBar1.Value = 0;
             tabControl1.SelectedTab = tabPage4;
@@ -1045,7 +818,7 @@ namespace DeepNestPort
             if (listView4.SelectedItems.Count > 0)
             {
                 var shp = listView4.SelectedItems[0].Tag as SheetPlacement;
-                AssignPlacement(shp);
+                context.AssignPlacement(shp);
             }
         }
 
@@ -1269,6 +1042,11 @@ namespace DeepNestPort
             stop = true;
         }
 
+        NestingContext context = new NestingContext();
+
+        List<NFP> polygons { get { return context.Polygons; } }
+        List<NFP> sheets { get { return context.Sheets; } }
+
         private void toolStripButton2_Click_1(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -1321,4 +1099,22 @@ namespace DeepNestPort
             doubleBufferPropertyInfo.SetValue(control, enable, null);
         }
     }
+
+    public class DrawingContext
+    {
+        public bool DrawHintsAllowed = false;
+        public float sx, sy;
+        public float zoom = 1;
+        public Graphics gr;
+        public bool UseZ { get; set; } = true;
+        public bool PathDrawMode { get; set; } = true;
+        public bool FillPolygons { get; set; } = true;
+
+        public virtual PointF Transform(PointF p1)
+        {
+            return new PointF((p1.X + sx) * zoom, -(p1.Y + sy) * zoom);
+        }
+    }
+
+
 }

@@ -44,12 +44,14 @@
   <ItemGroup>
     <Compile Include="Background.cs" />
     <Compile Include="D3.cs" />
-    <Compile Include="DoubleConverter.cs" />
     <Compile Include="GeneticAlgorithm.cs" />
     <Compile Include="GeometryUtil.cs" />
+    <Compile Include="NestingContext.cs" />
+    <Compile Include="NFP.cs" />
     <Compile Include="PlacementWorker.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawDetail.cs" />
     <Compile Include="Simplify.cs" />
     <Compile Include="SvgNest.cs" />
     <Compile Include="SvgParser.cs" />

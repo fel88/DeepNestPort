@@ -833,7 +833,7 @@ namespace DeepNestLib
 
         public List<SheetPlacement> nests = new List<SheetPlacement>();
 
-        public void ResponceProcessor(SheetPlacement payload)
+        public void ResponseProcessor(SheetPlacement payload)
         {
             //console.log('ipc response', payload);
             if (ga == null)
@@ -862,7 +862,7 @@ namespace DeepNestLib
         public void launchWorkers(NestItem[] parts)
         {
 
-            background.ResponseAction = ResponceProcessor;
+            background.ResponseAction = ResponseProcessor;
             if (ga == null)
             {
                 List<NFP> adam = new List<NFP>();

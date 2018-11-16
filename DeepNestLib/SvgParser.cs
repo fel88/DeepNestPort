@@ -331,11 +331,6 @@ namespace DeepNestLib
         public List<PointF> Points = new List<PointF>();
         public bool Enable = true;
     }
-    public class RawDetail
-    {
-        public List<LocalContour> Outers = new List<LocalContour>();
-        public List<LocalContour> Holes = new List<LocalContour>();
-
-        public string Name { get; set; }
-    }
+  
+  
 }
