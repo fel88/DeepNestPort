@@ -580,7 +580,7 @@ namespace DeepNestLib
                     NFP[] sheetNfp = null;
                     // try all possible rotations until it fits
                     // (only do this for the first part of each sheet, to ensure that all parts that can be placed are, even if we have to to open a lot of sheets)
-                    for (j = 0; j < (360 / config.rotations); j++)
+                    for (j = 0; j < (360f / config.rotations); j++)
                     {
                         sheetNfp = getInnerNfp(sheet, part, config);
 
@@ -596,8 +596,8 @@ namespace DeepNestLib
                             }
                         }
 
-                        var r = rotatePolygon(part, 360 / config.rotations);
-                        r.rotation = part.rotation + (360 / config.rotations);
+                        var r = rotatePolygon(part, 360f / config.rotations);
+                        r.rotation = part.rotation + (360f / config.rotations);
                         r.source = part.source;
                         r.id = part.id;
 
@@ -605,9 +605,9 @@ namespace DeepNestLib
                         part = r;
                         parts[i] = r;
 
-                        if (part.rotation > 360)
+                        if (part.rotation > 360f)
                         {
-                            part.rotation = part.rotation % 360;
+                            part.rotation = part.rotation % 360f;
                         }
                     }
                     // part unplaceable, skip
@@ -1074,35 +1074,79 @@ namespace DeepNestLib
             // preprocess
             List<NfpPair> pairs = new List<NfpPair>();
 
-
-            for (var i = 0; i < parts.Count; i++)
+            if (Background.UseParallel)
             {
-                var B = parts[i];
-                for (var j = 0; j < i; j++)
+                object lobj = new object();
+                Parallel.For(0, parts.Count, i =>
                 {
-                    var A = parts[j];
-                    var key = new NfpPair()
                     {
-                        A = A,
-                        B = B,
-                        ARotation = A.rotation,
-                        BRotation = B.rotation,
-                        Asource = A.source.Value,
-                        Bsource = B.source.Value
+                        var B = parts[i];
+                        for (var j = 0; j < i; j++)
+                        {
+                            var A = parts[j];
+                            var key = new NfpPair()
+                            {
+                                A = A,
+                                B = B,
+                                ARotation = A.rotation,
+                                BRotation = B.rotation,
+                                Asource = A.source.Value,
+                                Bsource = B.source.Value
 
-                    };
-                    var doc = new DbCacheKey()
+                            };
+                            var doc = new DbCacheKey()
+                            {
+                                A = A.source.Value,
+                                B = B.source.Value,
+
+                                ARotation = A.rotation,
+                                BRotation = B.rotation
+
+                            };
+                            lock (lobj)
+                            {
+                                if (!inpairs(key, pairs.ToArray()) && !window.db.has(doc))
+                                {
+                                    pairs.Add(key);
+                                }
+                            }
+                        }
+                    }
+                });
+                
+               
+            }
+            else
+            {
+                for (var i = 0; i < parts.Count; i++)
+                {
+                    var B = parts[i];
+                    for (var j = 0; j < i; j++)
                     {
-                        A = A.source.Value,
-                        B = B.source.Value,
+                        var A = parts[j];
+                        var key = new NfpPair()
+                        {
+                            A = A,
+                            B = B,
+                            ARotation = A.rotation,
+                            BRotation = B.rotation,
+                            Asource = A.source.Value,
+                            Bsource = B.source.Value
 
-                        ARotation = A.rotation,
-                        BRotation = B.rotation
+                        };
+                        var doc = new DbCacheKey()
+                        {
+                            A = A.source.Value,
+                            B = B.source.Value,
 
-                    };
-                    if (!inpairs(key, pairs.ToArray()) && !window.db.has(doc))
-                    {
-                        pairs.Add(key);
+                            ARotation = A.rotation,
+                            BRotation = B.rotation
+
+                        };
+                        if (!inpairs(key, pairs.ToArray()) && !window.db.has(doc))
+                        {
+                            pairs.Add(key);
+                        }
                     }
                 }
             }
@@ -1561,8 +1605,8 @@ namespace DeepNestLib
         {
             lock (lockobj)
             {
-                var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation)
-                + "Brot" + (int)Math.Round(obj.BRotation);
+                var key = getKey(obj);
+                //var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation)                + "Brot" + (int)Math.Round(obj.BRotation);
                 if (window.nfpCache.ContainsKey(key))
                 {
                     return true;
@@ -1574,10 +1618,16 @@ namespace DeepNestLib
 
         public windowUnk window;
         public object lockobj = new object();
+
+        string getKey(DbCacheKey obj)
+        {
+            var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation * 10000) + "Brot" + (int)Math.Round((obj.BRotation * 10000));
+            return key;
+        }
         internal void insert(DbCacheKey obj, bool inner = false)
         {
 
-            var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation) + "Brot" + (int)Math.Round((obj.BRotation));
+            var key = getKey(obj);
             //if (window.performance.memory.totalJSHeapSize < 0.8 * window.performance.memory.jsHeapSizeLimit)
             {
                 lock (lockobj)
@@ -1588,7 +1638,7 @@ namespace DeepNestLib
                     }
                     else
                     {
-                        throw new Exception("trouble .cache allready has suck key");
+                        throw new Exception("trouble .cache allready has such key");
                         //   window.nfpCache[key] = Background.cloneNfp(new[] { obj.nfp }, inner).ToList();
                     }
                 }
@@ -1600,7 +1650,8 @@ namespace DeepNestLib
         {
             lock (lockobj)
             {
-                var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation) + "Brot" + (int)Math.Round((obj.BRotation));
+                var key = getKey(obj);
+                //var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation) + "Brot" + (int)Math.Round((obj.BRotation));
 
                 //console.log('key: ', key);
                 if (window.nfpCache.ContainsKey(key))

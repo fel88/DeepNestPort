@@ -48,7 +48,7 @@ namespace DeepNestLib
                 }
                 else
                 {
-                    var angle = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360 / Config.rotations);
+                    var angle = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360f / Config.rotations);
                     angles.Add(angle);
                 }
 
@@ -58,62 +58,13 @@ namespace DeepNestLib
             population.Add(new PopulationItem() { placements = adam.ToList(), Rotation = angles.ToArray() });
             while (population.Count() < config.populationSize)
             {
-                var mutant = this.mutateDeepNest(population[0]);
-                population.Add(mutant);
-            }
-        }
-        public GeneticAlgorithm(NFP[] adam, NFP binPolygon, SvgNestConfig config)
-        {
-            Config = config;
-            config.populationSize = 10;
-            config.mutationRate = 10;
-            config.rotations = 4;
-            binBounds = GeometryUtil.getPolygonBounds(binPolygon);
-            binPolygon.Id = -1;
-            List<float> angles = new List<float>();
-            for (int i = 0; i < adam.Length; i++)
-            {
-                angles.Add(randomAngle(adam[i]));
-            }
-            population = new List<PopulationItem>();
-            population.Add(new PopulationItem() { placements = adam.ToList(), Rotation = angles.ToArray() });
-            while (population.Count() < config.populationSize)
-            {
                 var mutant = this.mutate(population[0]);
                 population.Add(mutant);
             }
         }
-
+       
+       
         public PopulationItem mutate(PopulationItem p)
-        {
-            var clone = new PopulationItem();
-
-            clone.placements = p.placements.ToArray().ToList();
-            clone.Rotation = p.Rotation.Clone() as float[];
-            for (int i = 0; i < clone.placements.Count(); i++)
-            {
-                var rand = r.NextDouble();
-                if (rand < 0.01 * Config.mutationRate)
-                {
-                    var j = i + 1;
-                    if (j < clone.placements.Count)
-                    {
-                        var temp = clone.placements[i];
-                        clone.placements[i] = clone.placements[j];
-                        clone.placements[j] = temp;
-                    }
-                }
-                rand = r.NextDouble();                
-                if (rand < 0.01 * Config.mutationRate)
-                {
-                    clone.Rotation[i] = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360 / Config.rotations);
-                }
-            }
-
-
-            return clone;
-        }
-        public PopulationItem mutateDeepNest(PopulationItem p)
         {
             var clone = new PopulationItem();
 
@@ -135,7 +86,7 @@ namespace DeepNestLib
                 rand = r.NextDouble();
                 if (rand < 0.01 * Config.mutationRate)
                 {
-                    clone.Rotation[i] = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360 / Config.rotations);
+                    clone.Rotation[i] = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360f / Config.rotations);
                 }
             }
 
@@ -155,32 +106,7 @@ namespace DeepNestLib
             return array;
         }
 
-        public float randomAngle(NFP part)
-        {
-            List<float> angList = new List<float>();
-            for (int i = 0; i < Math.Max(Config.rotations, 1); i++)
-            {
-                //todo: failed with rotations==0
-                angList.Add(i * (360 / Config.rotations));
-            }
-            angList = shuffleArray(angList.ToArray()).ToList();
-
-
-            for (int i = 0; i < angList.Count; i++)
-            {
-                var rotatedPart = GeometryUtil.rotatePolygon(part, angList[i]);
-
-                // don't use obviously bad angles where the part doesn't fit in the bin
-                if (rotatedPart.width < this.binBounds.width && rotatedPart.height < this.binBounds.height)
-                {
-                    return angList[i];
-                }
-            }
-
-            return 0;
-
-        }
-
+    
         // returns a random individual from the population, weighted to the front of the list (lower fitness value is more likely to be selected)
         public PopulationItem randomWeightedIndividual(PopulationItem exclude = null)
         {
