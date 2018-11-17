@@ -487,42 +487,8 @@ namespace DeepNestLib
 
             return result.ToArray();
         }
-        public static NFP[] polygonOffset(NFP[] polygon, double offset)
-        {
-
-            if (offset == 0 || GeometryUtil._almostEqual(offset, 0))
-            {
-                return polygon;
-            }
-
-            var p = polygon.Select(z => svgToClipper(z).ToList());
-
-            var miterLimit = 2;
-            var co = new ClipperLib.ClipperOffset(miterLimit, SvgNest.Config.curveTolerance * SvgNest.Config.clipperScale);
-            co.AddPaths(p.ToList(), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon);
-
-            var newpaths = new List<List<ClipperLib.IntPoint>>();
-            co.Execute(ref newpaths, offset * SvgNest.Config.clipperScale);
-
-            var result = new List<NFP>();
-            for (var i = 0; i < newpaths.Count; i++)
-            {
-                result.Add(clipperToSvg(newpaths[i]));
-            }
-
-            return result.ToArray();
-        }
-
-
-        Dictionary<string, List<NFP>> nfpCache = new Dictionary<string, List<NFP>>();
-
-        public NFP binPolygon;
-
-
-        public void log(string str)
-        {
-
-        }
+    
+      
 
         // converts a polygon from normal float coordinates to integer coordinates used by clipper, as well as x/y -> X/Y
         public static IntPoint[] svgToClipper2(NFP polygon, double? scale = null)
@@ -626,6 +592,7 @@ namespace DeepNestLib
             return cleaned;
 
         }
+
         public static NFP clipperToSvg(IList<IntPoint> polygon)
         {
             List<SvgPoint> ret = new List<SvgPoint>();
@@ -638,81 +605,7 @@ namespace DeepNestLib
             return new NFP() { Points = ret.ToArray() };
         }
 
-        public NFP[] getParts(XElement[] paths)
-        {
-
-
-            int i, j;
-            List<NFP> polygons = new List<NFP>();
-
-            var numchildren = paths.Length;
-            for (i = 0; i < numchildren; i++)
-            {
-
-
-                var poly = SvgParser.polygonify(paths[i]);
-                poly = cleanPolygon(poly);
-
-                // todo: warn user if poly could not be processed and is excluded from the nest
-
-                if (poly != null && poly.Points.Length > 2
-                    && Math.Abs(GeometryUtil.polygonArea(poly)) > Config.curveTolerance * Config.curveTolerance)
-                {
-                    poly.source = i;
-                    polygons.Add(poly);
-                }
-                else
-                {
-
-                }
-            }
-
-            // turn the list into a tree
-            //var polygons = polys.Select(z => new Polygon() { Points = z.Select(u => new SvgPoint(u.X, u.Y)).ToArray() }).ToList();
-            var list = polygons.Select(z => new PolygonTreeItem() { Polygon = z }).ToList();
-            //compare polygons
-
-
-            //if (!compare1(polygons.ToArray(), polys.Select(z => z.ToArray()).ToArray()))
-            {
-                //throw
-            }
-
-            toTree(list.ToArray());
-
-            return polygons.ToArray();
-        }
-
-
-
-        public bool compare1(NFP[] p1, PointF[][] p2)
-        {
-            if (p1.Length != p2.Length) return false;
-            double tolerance = 0.1f;
-            for (int i = 0; i < p1.Length; i++)
-            {
-                var r1 = p1[i];
-                var r2 = p2[i];
-                if (r1.Points.Count() != r2.Count())
-                {
-                    return false;
-                }
-
-                for (int j = 0; j < r1.Points.Count(); j++)
-                {
-                    var pp1 = r1.Points[j];
-                    var pp2 = r2[j];
-                    var dist = Math.Sqrt(Math.Pow(pp1.x - pp2.X, 2) + Math.Pow(pp1.y - pp2.Y, 2));
-                    if (dist > tolerance)
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-
+    
         public int toTree(PolygonTreeItem[] list, int idstart = 0)
         {
             List<PolygonTreeItem> parents = new List<PolygonTreeItem>();
@@ -799,24 +692,7 @@ namespace DeepNestLib
 
             return newtree;
         }
-        public NFP rotatePolygon(NFP polygon, float degrees)
-        {
-            NFP rotated = new NFP();
-            var angle = degrees * Math.PI / 180;
-            for (var i = 0; i < polygon.length; i++)
-            {
-                var x = polygon[i].x;
-                var y = polygon[i].y;
-                var x1 = (x * Math.Cos(angle) - y * Math.Sin(angle));
-                var y1 = (x * Math.Sin(angle) + y * Math.Cos(angle));
-
-                rotated.AddPoint(new SvgPoint(x1, y1));
-            }
-
-            return rotated;
-        }
-
-
+      
 
         public Background background = new Background();
 
@@ -996,10 +872,9 @@ namespace DeepNestLib
 
         }
         
-        Placement best;
+        
 
-        public PolygonTreeItem[] tree;
-    
+        public PolygonTreeItem[] tree;   
         
 
         public static IntPoint[] toClipperCoordinates(NFP polygon)
@@ -1017,209 +892,9 @@ namespace DeepNestLib
 
             return clone.ToArray();
         }
-        public static IntPoint[] toClipperCoordinatesToDec(NFP polygon)
-        {
-            var clone = new List<IntPoint>();
-            for (var i = 0; i < polygon.length; i++)
-            {
-                clone.Add
-                    (new IntPoint(
-                     polygon[i].x,
-                             polygon[i].y
+          
 
-                        ));
-            }
-
-            return clone.ToArray();
-        }
-
-        public static IntPoint[] toClipperCoordinates(List<SvgPoint> points)
-        {
-            var clone = new List<IntPoint>();
-            for (var i = 0; i < points.Count; i++)
-            {
-                clone.Add
-                    (new IntPoint(
-                     points[i].x,
-                             points[i].y
-
-                        ));
-            }
-
-            return clone.ToArray();
-        }
-
-        public static NFP[] minkowskiDifference(NFP A, NFP B)
-        {
-
-            var Ac = _Clipper.ScaleUpPaths(A, 10000000);
-
-            var Bc = _Clipper.ScaleUpPaths(B, 10000000);
-            for (var i = 0; i < Bc.Length; i++)
-            {
-                Bc[i].X *= -1;
-                Bc[i].Y *= -1;
-            }
-            var solution = ClipperLib.Clipper.MinkowskiSum(new List<IntPoint>(Ac), new List<IntPoint>(Bc), true);
-            NFP clipperNfp = null;
-
-            double? largestArea = null;
-            for (int i = 0; i < solution.Count(); i++)
-            {
-                var n = Background.toNestCoordinates(solution[i].ToArray(), 10000000);
-                var sarea = GeometryUtil.polygonArea(n);
-                if (largestArea == null || largestArea > sarea)
-                {
-                    clipperNfp = n;
-                    largestArea = sarea;
-                }
-            }
-
-            for (var i = 0; i < clipperNfp.length; i++)
-            {
-                clipperNfp[i].x += B[0].x;
-                clipperNfp[i].y += B[0].y;
-            }
-
-            return new NFP[] { new NFP() { Points = clipperNfp.Points } };
-        }
-
-        public NonameReturn map1(NfpPair pair)
-        {
-
-            var A = GeometryUtil.rotatePolygon(pair.A, pair.Key.ARotation);
-            var B = GeometryUtil.rotatePolygon(pair.B, pair.Key.BRotation);
-
-
-            NFP[] nfp = null;
-            if (pair.Key.Inside)
-            {
-                if (GeometryUtil.isRectangle(A, 0.001f))
-                {
-                    nfp = GeometryUtil.noFitPolygonRectangle(A, B);
-                }
-                else
-                {
-                    nfp = GeometryUtil.noFitPolygon(A, B, true, searchEdges);
-                }
-                // ensure all interior NFPs have the same winding direction
-                if (nfp != null && nfp.Length > 0)
-                {
-                    for (var i = 0; i < nfp.Length; i++)
-                    {
-                        if (GeometryUtil.polygonArea(nfp[i]) > 0)
-                        {
-                            nfp[i].reverse();
-                        }
-                    }
-                }
-                else
-                {
-                    // warning on null inner NFP
-                    // this is not an error, as the part may simply be larger than the bin or otherwise unplaceable due to geometry
-                    log("NFP Warning: " + pair.Key);
-                }
-            }
-            else
-            {
-                if (searchEdges)
-                {
-                    nfp = GeometryUtil.noFitPolygon(A, B, false, searchEdges);
-                }
-                else
-                {
-                    nfp = minkowskiDifference(A, B);
-                }
-                // sanity check
-                if (nfp == null || nfp.Count() == 0)
-                {
-                    log("NFP Error: " + pair.Key);
-                    log("A: " + A.stringify());
-                    log("B: " + B.stringify());
-                    return null;
-                }
-
-                for (var i = 0; i < nfp.Length; i++)
-                {
-                    if (!searchEdges || i == 0)
-                    { // if searchedges is active, only the first NFP is guaranteed to pass sanity check
-                        if (Math.Abs(GeometryUtil.polygonArea(nfp[i])) < Math.Abs(GeometryUtil.polygonArea(A)))
-                        {
-                            log("NFP Area Error: " + Math.Abs(GeometryUtil.polygonArea(nfp[i])) + "" + pair.Key);
-                            log("NFP: " + nfp[i].stringify());
-                            log("A: " + A.stringify());
-                            log("B: " + B.stringify());
-                            nfp.splice(i, 1);
-                            return null;
-                        }
-                    }
-                }
-
-                if (nfp.Length == 0)
-                {
-                    return null;
-                }
-
-                // for outer NFPs, the first is guaranteed to be the largest. Any subsequent NFPs that lie inside the first are holes
-                for (var i = 0; i < nfp.Length; i++)
-                {
-                    if (GeometryUtil.polygonArea(nfp[i]) > 0)
-                    {
-                        nfp[i].reverse();
-                    }
-
-                    if (i > 0)
-                    {
-                        if (GeometryUtil.pointInPolygon(nfp[i][0], nfp[0]).Value)
-                        {
-                            if (GeometryUtil.polygonArea(nfp[i]) < 0)
-                            {
-                                nfp[i].reverse();
-                            }
-                        }
-                    }
-                }
-
-                // generate nfps for children (holes of parts) if any exist
-                if (useHoles && A.children != null && A.children.Count > 0)
-                {
-                    var Bbounds = GeometryUtil.getPolygonBounds(B);
-
-                    for (var i = 0; i < A.children.Count; i++)
-                    {
-                        var Abounds = GeometryUtil.getPolygonBounds(A.children[i]);
-
-                        // no need to find nfp if B's bounding box is too big
-                        if (Abounds.width > Bbounds.width && Abounds.height > Bbounds.height)
-                        {
-
-                            var cnfp = GeometryUtil.noFitPolygon(A.children[i], B, true, searchEdges);
-                            // ensure all interior NFPs have the same winding direction
-                            if (cnfp != null && cnfp.Length > 0)
-                            {
-                                for (var j = 0; j < cnfp.Length; j++)
-                                {
-                                    if (GeometryUtil.polygonArea(cnfp[j]) < 0)
-                                    {
-                                        cnfp[j].reverse();
-                                    }
-
-                                    List<NFP> nn = new List<NFP>();
-                                    nn.AddRange(nfp);
-                                    nn.Add(cnfp[j]);
-                                    nfp = nn.ToArray();
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-
-            return new NonameReturn(pair.Key, nfp);
-        }
-
-        
+                
         public bool useHoles;
         public bool searchEdges;
     }
@@ -1430,11 +1105,7 @@ namespace DeepNestLib
     {
         public bool exact = true;
         public override string ToString()
-        {
-            //  var str1 = DoubleConverter.ToExactString(Math.Round(x,14));
-            //var str2 = DoubleConverter.ToExactString(Math.Round(y,14));
-            //var str1 = Math.Round(x, 14);
-            //var str2 = Math.Round(y, 14);
+        {        
             return "x: " + x + "; y: " + y;
         }
         public int id;
@@ -1500,49 +1171,24 @@ namespace DeepNestLib
         internal int index;
     }
 
-    public class Placement
+    
+
+    public class Sheet :NFP
     {
-
-        public double? fitness;
-
-        public double[] Rotation;
-        public List<PlacementItem>[] placements;
-
-        public NFP[] paths;
-        public double area;
-        public double mergedLength;
+        public double Width;
+        public double Height;
     }
-
-    public class RectanglePolygonSheet : NFP
+    
+    public class RectangleSheet : Sheet
     {
-        double _width;
-        double _height;
-        public double Width
-        {
-            get { return _width; }
-            set
-            {
-                _width = value;
-                Rebuild();
-            }
-        }
-        public double Height
-        {
-            get { return _height; }
-            set
-            {
-                _height = value;
-                Rebuild();
-            }
-        }
-
+      
         public void Rebuild()
         {
             Points = new SvgPoint[] { };
             AddPoint(new SvgPoint(x, y));
-            AddPoint(new SvgPoint(x + _width, y));
-            AddPoint(new SvgPoint(x + _width, y + _height));
-            AddPoint(new SvgPoint(x, y + _height));
+            AddPoint(new SvgPoint(x + Width, y));
+            AddPoint(new SvgPoint(x + Width, y + Height));
+            AddPoint(new SvgPoint(x, y + Height));
         }
     }
     public class NestItem

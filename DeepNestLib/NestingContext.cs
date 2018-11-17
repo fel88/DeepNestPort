@@ -60,7 +60,7 @@ namespace DeepNestLib
 
             foreach (var item in Sheets)
             {
-                RectanglePolygonSheet clone = new RectanglePolygonSheet();
+                NFP clone = new NFP();
                 clone.id = item.id;
                 clone.source = item.source;
                 clone.Points = item.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
@@ -184,7 +184,7 @@ namespace DeepNestLib
             var ppps = Polygons.Where(z => !placed.Contains(z));
             foreach (var item in ppps)
             {
-                item.x = -500;
+                item.x = -1000;
                 item.y = 0;
             }
         }
@@ -192,18 +192,29 @@ namespace DeepNestLib
         {
             double x = 0;
             double y = 0;
+            int gap = 10;
             for (int i = 0; i < Sheets.Count; i++)
             {
                 Sheets[i].x = x;
                 Sheets[i].y = y;
-                var r = Sheets[i] as RectanglePolygonSheet;
-                x += r.Width + 10;
+                if (Sheets[i] is Sheet)
+                {
+                    var r = Sheets[i] as Sheet;
+                    x += r.Width + gap;
+                }
+                else
+                {
+                    var maxx = Sheets[i].Points.Max(z => z.x);
+                    var minx = Sheets[i].Points.Min(z => z.x);
+                    var w = maxx - minx;
+                    x += w + gap;
+                }
             }
         }
 
         public void AddSheet(int w, int h)
         {
-            var tt = new RectanglePolygonSheet();
+            var tt = new RectangleSheet();
             tt.Name = "sheet" + (Sheets.Count + 1);
             Sheets.Add(tt);
             var p = Sheets.Last();
@@ -258,12 +269,21 @@ namespace DeepNestLib
             NFP po = new NFP();
             po.Name = raw.Name;
             po.Points = new SvgPoint[] { };
-            //if (raw.Outers.Any())
+            if (raw.Outers.Any())
             {
-                var tt = raw.Outers.Union(raw.Holes).OrderByDescending(z => z.Len).First();
+                var tt = raw.Outers.OrderByDescending(z => z.Len).First();
                 foreach (var item in tt.Points)
                 {
                     po.AddPoint(new SvgPoint(item.X, item.Y));
+                }
+                foreach (var r in raw.Holes)
+                {
+                    var n = new NFP();
+                    foreach (var item in r.Points)
+                    {
+                        n.AddPoint(new SvgPoint(item.X, item.Y));
+                    }
+                    po.children.Add(n);
                 }
 
                 po.source = src;

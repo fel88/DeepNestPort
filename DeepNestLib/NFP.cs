@@ -103,7 +103,7 @@ namespace DeepNestLib
                 Id = value;
             }
         }
-        public XElement orig;
+        
         public double? offsetx;
         public double? offsety;
         public int? source = null;

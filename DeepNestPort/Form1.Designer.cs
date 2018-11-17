@@ -33,6 +33,9 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.listView3 = new System.Windows.Forms.ListView();
@@ -97,9 +100,13 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.label11 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.contextMenuStrip3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -124,7 +131,7 @@
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(970, 485);
             this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;                        
+            this.pictureBox1.TabStop = false;
             this.pictureBox1.MouseEnter += new System.EventHandler(this.pictureBox1_MouseEnter);
             // 
             // tabControl1
@@ -141,6 +148,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.groupBox4);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.groupBox3);
             this.tabPage1.Controls.Add(this.groupBox2);
@@ -156,6 +164,37 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Load";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.button5);
+            this.groupBox4.Controls.Add(this.button6);
+            this.groupBox4.Location = new System.Drawing.Point(753, 203);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(226, 221);
+            this.groupBox4.TabIndex = 12;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Template holes parts";
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(16, 62);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(190, 31);
+            this.button5.TabIndex = 4;
+            this.button5.Text = "Random circles";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(16, 25);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(190, 31);
+            this.button6.TabIndex = 3;
+            this.button6.Text = "Random rectangles";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // label2
             // 
@@ -190,7 +229,7 @@
             this.listView3.Size = new System.Drawing.Size(213, 524);
             this.listView3.TabIndex = 3;
             this.listView3.UseCompatibleStateImageBehavior = false;
-            this.listView3.View = System.Windows.Forms.View.Details;            
+            this.listView3.View = System.Windows.Forms.View.Details;
             this.listView3.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView3_MouseDoubleClick);
             // 
             // columnHeader5
@@ -218,12 +257,12 @@
             this.groupBox2.Controls.Add(this.button15);
             this.groupBox2.Controls.Add(this.button14);
             this.groupBox2.Controls.Add(this.button13);
-            this.groupBox2.Location = new System.Drawing.Point(521, 178);
+            this.groupBox2.Location = new System.Drawing.Point(521, 203);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(306, 221);
+            this.groupBox2.Size = new System.Drawing.Size(226, 221);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Template parts";
+            this.groupBox2.Text = "Template solid parts";
             // 
             // button17
             // 
@@ -277,6 +316,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label11);
+            this.groupBox1.Controls.Add(this.comboBox2);
             this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.label9);
             this.groupBox1.Controls.Add(this.textBox5);
@@ -286,7 +327,7 @@
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Location = new System.Drawing.Point(521, 6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(306, 166);
+            this.groupBox1.Size = new System.Drawing.Size(306, 191);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Sheets";
@@ -358,11 +399,11 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(104, 129);
+            this.button1.Location = new System.Drawing.Point(81, 154);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(102, 31);
             this.button1.TabIndex = 0;
-            this.button1.Text = "Add sheets";
+            this.button1.Text = "Add rectangle";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -396,19 +437,27 @@
             // 
             // columnHeader3
             // 
+            this.columnHeader3.Text = "Id";
             this.columnHeader3.Width = 30;
+            // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Text = "Name";
+            this.columnHeader7.Width = 150;
             // 
             // columnHeader4
             // 
+            this.columnHeader4.Text = "Pnts";
             this.columnHeader4.Width = 100;
             // 
             // contextMenuStrip2
             // 
             this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.deleteToolStripMenuItem1,
             this.clearAllToolStripMenuItem1,
             this.moveToPolygonsToolStripMenuItem});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(171, 48);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(171, 70);
             // 
             // clearAllToolStripMenuItem1
             // 
@@ -431,7 +480,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(63, 20);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Parts: 0";            
+            this.label1.Text = "Parts: 0";
             // 
             // listView1
             // 
@@ -453,15 +502,17 @@
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "id";
+            this.columnHeader1.Text = "Id";
             this.columnHeader1.Width = 30;
             // 
             // columnHeader6
             // 
-            this.columnHeader6.Text = "name";
+            this.columnHeader6.Text = "Name";
+            this.columnHeader6.Width = 150;
             // 
             // columnHeader2
             // 
+            this.columnHeader2.Text = "Pnts";
             this.columnHeader2.Width = 100;
             // 
             // contextMenuStrip1
@@ -524,7 +575,7 @@
             this.tabPage2.Size = new System.Drawing.Size(1176, 561);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Settings";
-            this.tabPage2.UseVisualStyleBackColor = true;            
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // label6
             // 
@@ -615,7 +666,7 @@
             this.checkBox3.Size = new System.Drawing.Size(149, 24);
             this.checkBox3.TabIndex = 17;
             this.checkBox3.Text = "offset tree phase";
-            this.checkBox3.UseVisualStyleBackColor = true;            
+            this.checkBox3.UseVisualStyleBackColor = true;
             // 
             // checkBox2
             // 
@@ -794,6 +845,35 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
+            // deleteToolStripMenuItem1
+            // 
+            this.deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
+            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(170, 22);
+            this.deleteToolStripMenuItem1.Text = "delete";
+            this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Items.AddRange(new object[] {
+            "Rectangle",
+            "Rhombus",
+            "Circle"});
+            this.comboBox2.Location = new System.Drawing.Point(83, 115);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(121, 28);
+            this.comboBox2.TabIndex = 8;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(12, 118);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(43, 20);
+            this.label11.TabIndex = 9;
+            this.label11.Text = "Type";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -809,6 +889,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.contextMenuStrip3.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
@@ -901,6 +982,12 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem1;
+        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.Label label11;
     }
 }
 
