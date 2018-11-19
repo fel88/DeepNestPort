@@ -888,8 +888,8 @@ namespace DeepNestPort
             {
                 var xx = r.Next(2000) + 100;
                 var yy = r.Next(2000);
-                var ww = r.Next(60) + 150;
-                var hh = r.Next(60) + 120;
+                var ww = r.Next(250) + 150;
+                var hh = r.Next(250) + 120;
                 NFP pl = new NFP();
                 int src = 0;
                 if (polygons.Any())

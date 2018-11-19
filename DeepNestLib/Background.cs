@@ -246,7 +246,7 @@ namespace DeepNestLib
             var key = A.source + ";" + B.source + ";" + A.rotation + ";" + B.rotation;
             if (cacheProcess.ContainsKey(key))
             {
-                return cacheProcess[key];
+                //return cacheProcess[key];
             }
 
             Stopwatch swg = Stopwatch.StartNew();
@@ -364,7 +364,7 @@ namespace DeepNestLib
             var msg = swg.ElapsedMilliseconds;
             var res = new NFP[] { ret };
 
-            cacheProcess.Add(key, res);
+            //cacheProcess.Add(key, res);
             return res;
         }
 
@@ -1465,6 +1465,8 @@ namespace DeepNestLib
 
             return clipperNfp.ToArray();
         }
+
+        static object lockobj = new object();
         public static NFP getOuterNfp(NFP A, NFP B, bool inside = false)//todo:?inside def?
         {
             NFP[] nfp = null;
@@ -1498,7 +1500,10 @@ namespace DeepNestLib
             // not found in cache           
             if (inside || (A.children != null && A.children.Count > 0))
             {
-                nfp = Process2(A, B);
+                lock (lockobj)
+                {
+                    nfp = Process2(A, B);
+                }
             }
             else
             {
