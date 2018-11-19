@@ -281,11 +281,11 @@ namespace DeepNestLib
 
             var aa = dic2["A"];
             var bb = dic2["B"];
-            var arr1 = A.children.Select(z => z.Points.Count() * 2).ToArray();           
-            
+            var arr1 = A.children.Select(z => z.Points.Count() * 2).ToArray();
+
             MinkowskiWrapper.setData(aa.Count, aa.ToArray(), A.children.Count, arr1, hdat.ToArray(), bb.Count, bb.ToArray());
             MinkowskiWrapper.calculateNFP();
-            
+
             callCounter++;
 
             int[] sizes = new int[2];
@@ -295,7 +295,7 @@ namespace DeepNestLib
             MinkowskiWrapper.getSizes2(sizes1, sizes2);
             double[] dat1 = new double[sizes1.Sum()];
             double[] hdat1 = new double[sizes2.Sum()];
-            
+
             MinkowskiWrapper.getResults(dat1, hdat1);
 
             if (sizes1.Count() > 1)
@@ -412,6 +412,7 @@ namespace DeepNestLib
                     return res;
                 }
             }
+
 
             var frame = getFrame(A);
 
@@ -1113,8 +1114,8 @@ namespace DeepNestLib
                         }
                     }
                 });
-                
-               
+
+
             }
             else
             {
@@ -1426,9 +1427,9 @@ namespace DeepNestLib
                     {
                         nfp.children[j].reverse();
                     }
-                    var childNfp = SvgNest.toClipperCoordinates(nfp.children[j]);
-                    childNfp = _Clipper.ScaleUpPath(childNfp, config.clipperScale);
-                    //clipperNfp.Add(childNfp);
+                    //var childNfp = SvgNest.toClipperCoordinates(nfp.children[j]);
+                    var childNfp = _Clipper.ScaleUpPaths(nfp.children[j], config.clipperScale);
+                    clipperNfp.Add(childNfp);
                 }
             }
 
@@ -1468,10 +1469,11 @@ namespace DeepNestLib
         {
             NFP[] nfp = null;
 
+
             var key = new DbCacheKey()
             {
-                A = A.source.Value,
-                B = B.source.Value,
+                A = A.source,
+                B = B.source,
                 ARotation = A.rotation,
                 BRotation = B.rotation
             };
@@ -1492,7 +1494,7 @@ namespace DeepNestLib
                 return doc;
             }*/
 
-            
+
             // not found in cache           
             if (inside || (A.children != null && A.children.Count > 0))
             {

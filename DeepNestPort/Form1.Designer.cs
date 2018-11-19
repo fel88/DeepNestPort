@@ -49,6 +49,8 @@
             this.button14 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox5 = new System.Windows.Forms.TextBox();
@@ -62,6 +64,7 @@
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.clearAllToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.moveToPolygonsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
@@ -100,9 +103,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.label11 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -167,6 +168,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.button2);
             this.groupBox4.Controls.Add(this.button5);
             this.groupBox4.Controls.Add(this.button6);
             this.groupBox4.Location = new System.Drawing.Point(753, 203);
@@ -332,6 +334,28 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Sheets";
             // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(12, 118);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(43, 20);
+            this.label11.TabIndex = 9;
+            this.label11.Text = "Type";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Items.AddRange(new object[] {
+            "Rectangle",
+            "Rhombus",
+            "Circle"});
+            this.comboBox2.Location = new System.Drawing.Point(83, 115);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(121, 28);
+            this.comboBox2.TabIndex = 8;
+            // 
             // label10
             // 
             this.label10.AutoSize = true;
@@ -458,6 +482,13 @@
             this.moveToPolygonsToolStripMenuItem});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
             this.contextMenuStrip2.Size = new System.Drawing.Size(171, 70);
+            // 
+            // deleteToolStripMenuItem1
+            // 
+            this.deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
+            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(170, 22);
+            this.deleteToolStripMenuItem1.Text = "delete";
+            this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
             // 
             // clearAllToolStripMenuItem1
             // 
@@ -845,34 +876,15 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
-            // deleteToolStripMenuItem1
+            // button2
             // 
-            this.deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
-            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(170, 22);
-            this.deleteToolStripMenuItem1.Text = "delete";
-            this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
-            // 
-            // comboBox2
-            // 
-            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Items.AddRange(new object[] {
-            "Rectangle",
-            "Rhombus",
-            "Circle"});
-            this.comboBox2.Location = new System.Drawing.Point(83, 115);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(121, 28);
-            this.comboBox2.TabIndex = 8;
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(12, 118);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(43, 20);
-            this.label11.TabIndex = 9;
-            this.label11.Text = "Type";
+            this.button2.Location = new System.Drawing.Point(16, 99);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(190, 31);
+            this.button2.TabIndex = 5;
+            this.button2.Text = "debug 1";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
             // 
@@ -988,6 +1000,7 @@
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem1;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button button2;
     }
 }
 

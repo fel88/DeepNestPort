@@ -7,8 +7,7 @@ using System.Text;
 namespace DeepNestLib
 {
     public class GeneticAlgorithm
-    {
-        PolygonBounds binBounds;
+    {        
         SvgNestConfig Config;
         public List<PopulationItem> population;
 

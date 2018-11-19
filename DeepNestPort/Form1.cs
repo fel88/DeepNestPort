@@ -474,10 +474,18 @@ namespace DeepNestPort
                     QntDialog q = new QntDialog();
                     if (q.ShowDialog() == DialogResult.OK)
                     {
+
+                        var svg = SvgParser.LoadSvg(f.FullName);
+                        int src = 0;
+                        if (polygons.Any())
+                        {
+                            src = polygons.Max(z => z.source.Value) + 1;
+                        }
                         for (int i = 0; i < q.Qnt; i++)
                         {
-
+                            context.ImportFromRawDetail(svg, src);
                         }
+
                         UpdateList();
 
                     }
@@ -955,6 +963,35 @@ namespace DeepNestPort
                 UpdateList();
                 context.ReorderSheets();
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            Random r = new Random();
+
+
+            var xx = r.Next(2000) + 100;
+            var yy = r.Next(2000);
+            var ww = 20;
+            var hh = 20;
+            NFP pl = new NFP();
+            int src = 0;
+            if (polygons.Any())
+            {
+                src = polygons.Max(z => z.source.Value) + 1;
+            }
+            polygons.Add(pl);
+            pl.source = src;
+            pl.x = xx;
+            pl.y = yy;
+            pl.Points = new SvgPoint[] { };
+            pl.AddPoint(new SvgPoint(0, 0));
+            pl.AddPoint(new SvgPoint(ww, 0));
+            pl.AddPoint(new SvgPoint(ww, hh));
+            pl.AddPoint(new SvgPoint(0, hh));
+
+            UpdateList();
         }
 
         List<NFP> sheets { get { return context.Sheets; } }

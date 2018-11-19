@@ -53,7 +53,18 @@ namespace DeepNestLib
                 clone.id = item.id;
                 clone.source = item.source;
                 clone.Points = item.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
-
+                if (item.children != null)
+                {
+                    clone.children = new List<NFP>();
+                    foreach (var citem in item.children)
+                    {
+                        clone.children.Add(new NFP());
+                        var l = clone.children.Last();
+                        l.id = citem.id;
+                        l.source = citem.source;
+                        l.Points = citem.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
+                    }
+                }
                 lpoly.Add(clone);
             }
 
@@ -269,21 +280,30 @@ namespace DeepNestLib
             NFP po = new NFP();
             po.Name = raw.Name;
             po.Points = new SvgPoint[] { };
-            if (raw.Outers.Any())
+            List<NFP> nfps = new List<NFP>();
+            foreach (var item in raw.Outers)
             {
-                var tt = raw.Outers.OrderByDescending(z => z.Len).First();
-                foreach (var item in tt.Points)
+                var nn = new NFP();
+                nfps.Add(nn);
+                foreach (var pitem in item.Points)
                 {
-                    po.AddPoint(new SvgPoint(item.X, item.Y));
+                    nn.AddPoint(new SvgPoint(pitem.X, pitem.Y));
                 }
-                foreach (var r in raw.Holes)
+            }
+
+            if (nfps.Any())
+            {
+                var tt = nfps.OrderByDescending(z => z.Area).First();
+                po = tt;
+
+                foreach (var r in nfps)
                 {
-                    var n = new NFP();
-                    foreach (var item in r.Points)
+                    if (r == tt) continue;
+                    if (po.children == null)
                     {
-                        n.AddPoint(new SvgPoint(item.X, item.Y));
+                        po.children = new List<NFP>();
                     }
-                    po.children.Add(n);
+                    po.children.Add(r);
                 }
 
                 po.source = src;

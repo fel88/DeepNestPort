@@ -417,7 +417,7 @@ namespace DeepNestLib
             simple = simplifyFunction(t, (inside == null) ? false : inside.Value);
 
             var offsetpaths = new NFP[] { simple };
-            if (Math.Abs(offset) > 0)
+            if (offset > 0)
             {
                 offsetpaths = polygonOffsetDeepNest(simple, offset);
             }
@@ -452,7 +452,8 @@ namespace DeepNestLib
             {
                 for (var i = 0; i < t.children.Count; i++)
                 {
-                    offsetTree(t.children[i], -offset, config, !inside);
+
+                    offsetTree(t.children[i], -offset, config, (inside == null) ? true : (!inside));
                 }
             }
         }
@@ -487,8 +488,8 @@ namespace DeepNestLib
 
             return result.ToArray();
         }
-    
-      
+
+
 
         // converts a polygon from normal float coordinates to integer coordinates used by clipper, as well as x/y -> X/Y
         public static IntPoint[] svgToClipper2(NFP polygon, double? scale = null)
@@ -605,7 +606,7 @@ namespace DeepNestLib
             return new NFP() { Points = ret.ToArray() };
         }
 
-    
+
         public int toTree(PolygonTreeItem[] list, int idstart = 0)
         {
             List<PolygonTreeItem> parents = new List<PolygonTreeItem>();
@@ -692,7 +693,7 @@ namespace DeepNestLib
 
             return newtree;
         }
-      
+
 
         public Background background = new Background();
 
@@ -871,11 +872,11 @@ namespace DeepNestLib
 
 
         }
-        
-        
 
-        public PolygonTreeItem[] tree;   
-        
+
+
+        public PolygonTreeItem[] tree;
+
 
         public static IntPoint[] toClipperCoordinates(NFP polygon)
         {
@@ -892,9 +893,9 @@ namespace DeepNestLib
 
             return clone.ToArray();
         }
-          
 
-                
+
+
         public bool useHoles;
         public bool searchEdges;
     }
@@ -917,7 +918,7 @@ namespace DeepNestLib
             }
             return ret.ToArray();
         }
-        public static IntPoint[] ScaleUpPath(IntPoint[] p, double scale = 1)
+        /*public static IntPoint[] ScaleUpPath(IntPoint[] p, double scale = 1)
         {
             for (int i = 0; i < p.Length; i++)
             {
@@ -941,7 +942,7 @@ namespace DeepNestLib
             }
 
 
-        }
+        }*/
     }
 
     public static class Extensions
@@ -1035,8 +1036,8 @@ namespace DeepNestLib
 
     public class DbCacheKey
     {
-        public int A;
-        public int B;
+        public int? A;
+        public int? B;
         public float ARotation;
         public float BRotation;
         public NFP[] nfp;
@@ -1105,7 +1106,7 @@ namespace DeepNestLib
     {
         public bool exact = true;
         public override string ToString()
-        {        
+        {
             return "x: " + x + "; y: " + y;
         }
         public int id;
@@ -1171,17 +1172,17 @@ namespace DeepNestLib
         internal int index;
     }
 
-    
 
-    public class Sheet :NFP
+
+    public class Sheet : NFP
     {
         public double Width;
         public double Height;
     }
-    
+
     public class RectangleSheet : Sheet
     {
-      
+
         public void Rebuild()
         {
             Points = new SvgPoint[] { };

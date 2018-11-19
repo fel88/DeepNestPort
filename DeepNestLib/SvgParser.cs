@@ -84,6 +84,7 @@ namespace DeepNestLib
                 }
                 s.Outers.Add(new LocalContour() { Points = points.ToList() });
             }
+                                   
 
             return s;
         }
@@ -109,7 +110,7 @@ namespace DeepNestLib
                 {
                     fill = "none";
                 }
-                
+
                 sb.AppendLine($"<polygon fill=\"{fill}\"  stroke=\"black\" points=\"{points.Aggregate("", (x, y) => x + y.x.ToString().Replace(",", ".") + "," + y.y.ToString().Replace(",", ".") + " ")}\"/>");
             }
             sb.AppendLine("</svg>");
@@ -319,10 +320,10 @@ namespace DeepNestLib
             get
             {
                 float len = 0;
-                for (int i = 1; i < Points.Count; i++)
+                for (int i = 1; i <= Points.Count; i++)
                 {
                     var p1 = Points[i - 1];
-                    var p2 = Points[i];
+                    var p2 = Points[i % Points.Count];
                     len += (float)Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
                 }
                 return len;
@@ -331,6 +332,6 @@ namespace DeepNestLib
         public List<PointF> Points = new List<PointF>();
         public bool Enable = true;
     }
-  
-  
+
+
 }
