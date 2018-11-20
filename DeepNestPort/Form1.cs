@@ -120,26 +120,34 @@ namespace DeepNestPort
             ctx.gr.Clear(Color.White);
 
             ctx.gr.ResetTransform();
+
             ctx.gr.DrawLine(Pens.Red, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(1000, 0)));
             ctx.gr.DrawLine(Pens.Blue, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(0, 1000)));
-            ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), new Font("Arial", 12), Brushes.Blue, 0, 0);
-
-            ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    parts placed: {context.PlacedPartsCount}/{polygons.Count}",
-                new Font("Arial", 20), Brushes.DarkBlue, 0, 20);
-
-            ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}",
-                new Font("Arial", 15), Brushes.DarkBlue, 0, 50);
-
-            if (nest != null && nest.nests.Any())
+            if (isInfoShow)
             {
-                ctx.gr.DrawString($"Nests: {nest.nests.Count} Fitness: {nest.nests.First().fitness}   Area:{nest.nests.First().area}  ",
-                    new Font("Arial", 15), Brushes.DarkBlue, 0, 80);
+                ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), new Font("Arial", 12), Brushes.Blue, 0, 0);
+
+                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    parts placed: {context.PlacedPartsCount}/{polygons.Count}",
+                    new Font("Arial", 20), Brushes.DarkBlue, 0, 20);
+
+                ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}",
+                    new Font("Arial", 15), Brushes.DarkBlue, 0, 50);
+
+                if (nest != null && nest.nests.Any())
+                {
+                    ctx.gr.DrawString($"Nests: {nest.nests.Count} Fitness: {nest.nests.First().fitness}   Area:{nest.nests.First().area}  ",
+                        new Font("Arial", 15), Brushes.DarkBlue, 0, 80);
+                }
+
+
+                ctx.gr.DrawString($"Call counter: {Background.callCounter};  last placeParts time: {Background.LastPlacePartTime}ms",
+                        new Font("Arial", 15), Brushes.DarkBlue, 0, 110);
             }
-
-
-            ctx.gr.DrawString($"Call counter: {Background.callCounter};  last placeParts time: {Background.LastPlacePartTime}ms",
-                    new Font("Arial", 15), Brushes.DarkBlue, 0, 110);
-
+            else
+            {
+                ctx.gr.DrawString($"Iterations: {context.Iterations}    parts placed: {context.PlacedPartsCount}/{polygons.Count}", new Font("Arial", 20), Brushes.DarkBlue, 0, 20);
+                ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    Parts types: {polygons.GroupBy(z => z.source).Count()}", new Font("Arial", 15), Brushes.DarkBlue, 0, 50);
+            }
 
             foreach (var item in polygons.Union(sheets))
             {
@@ -221,7 +229,7 @@ namespace DeepNestPort
                             }
                             var res = Math.Abs(Math.Round((100.0) * (tot2 / tot1), 2));
                             var trans1 = ctx.Transform(new PointF((float)pnts[0].X, (float)pnts[0].Y - 30));
-                            if (was)
+                            if (was && isInfoShow)
                             {
                                 ctx.gr.DrawString("util: " + res + "%", new Font("Arial", 18), Brushes.Black, trans1);
                             }
@@ -355,6 +363,34 @@ namespace DeepNestPort
             UpdateList();
             context.ReorderSheets();
         }
+
+        public void AddCircleSheet(int w = 3000)
+        {
+            var tt = new Sheet();
+            tt.Name = "circleSheet" + (sheets.Count + 1);
+            sheets.Add(tt);
+            var p = sheets.Last();
+            tt.Height = w;
+            tt.Width = w;
+            tt.Points = new SvgPoint[] { };
+            int x = 0;
+            int y = 0;
+
+
+
+            for (int i = 0; i < 360; i += 5)
+            {
+                var xx = w / 2 * Math.Cos(i * Math.PI / 180.0f);
+                var yy = w / 2 * Math.Sin(i * Math.PI / 180.0f);
+                tt.AddPoint(new SvgPoint(xx + w / 2, yy + w / 2));
+            }
+
+
+
+            UpdateList();
+            context.ReorderSheets();
+        }
+
         private void clearAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             polygons.Clear();
@@ -688,25 +724,21 @@ namespace DeepNestPort
             }
             label11.BackColor = label11.Parent.BackColor;
             label11.ForeColor = label11.Parent.ForeColor;
-
-            switch (comboBox2.SelectedItem.ToString())
+            for (int i = 0; i < cnt; i++)
             {
-                case "Rectangle":
-                    for (int i = 0; i < cnt; i++)
-                    {
+                switch (comboBox2.SelectedItem.ToString())
+                {
+                    case "Rectangle":
                         AddSheet(ww.Value, hh.Value);
-                    }
-                    break;
-                case "Rhombus":
-                    for (int i = 0; i < cnt; i++)
-                    {
+                        break;
+                    case "Rhombus":
                         AddRhombusSheet(ww.Value, hh.Value);
-                    }
-                    break;
-                case "Circle":
-                    break;
+                        break;
+                    case "Circle":
+                        AddCircleSheet(ww.Value);
+                        break;
+                }
             }
-
         }
 
         public int GetCountFromDialog()
@@ -930,6 +962,7 @@ namespace DeepNestPort
                 var xx = r.Next(2000) + 100;
                 var yy = r.Next(2000);
                 var rad = r.Next(60) + 10;
+                int rad2 = rad - 8;
 
                 NFP pl = new NFP();
                 int src = 0;
@@ -940,12 +973,19 @@ namespace DeepNestPort
                 pl.source = src;
                 polygons.Add(pl);
                 pl.Points = new SvgPoint[] { };
+
+                NFP hole = new NFP();
                 for (int ang = 0; ang < 360; ang += 15)
                 {
                     var xx1 = (float)(rad * Math.Cos(ang * Math.PI / 180.0f));
                     var yy1 = (float)(rad * Math.Sin(ang * Math.PI / 180.0f));
                     pl.AddPoint(new SvgPoint(xx1, yy1));
+                    var xx2 = (float)(rad2 * Math.Cos(ang * Math.PI / 180.0f));
+                    var yy2 = (float)(rad2 * Math.Sin(ang * Math.PI / 180.0f));
+                    hole.AddPoint(new SvgPoint(xx2, yy2));
                 }
+                pl.children = new List<NFP>();
+                pl.children.Add(hole);
                 pl.x = xx;
                 pl.y = yy;
 
@@ -992,6 +1032,11 @@ namespace DeepNestPort
             pl.AddPoint(new SvgPoint(0, hh));
 
             UpdateList();
+        }
+        bool isInfoShow = false;
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            isInfoShow = !isInfoShow;
         }
 
         List<NFP> sheets { get { return context.Sheets; } }

@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <task gap="10">
-  <sheet width="3000" height="1500" count="10"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg0.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg1.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg2.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg3.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg4.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg5.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg6.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg7.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg8.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg9.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg10.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg11.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg12.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg13.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg14.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg15.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg16.svg" count="30"/>
-  <part path="..\..\..\DeepNestPort\svgs\svg17.svg" count="30"/>  
+  <sheet width="3000" height="1500" count="10"/>  
+  <part path="..\..\..\DeepNestPort\svgs\1.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\2.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\3.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\4.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\5.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\6.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\7.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\8.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\9.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\10.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\11.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\12.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\13.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\14.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\15.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\16.svg" count="30"/>
+  <part path="..\..\..\DeepNestPort\svgs\17.svg" count="30"/>  
+  <part path="..\..\..\DeepNestPort\svgs\18.svg" count="30"/>  
 </task>
