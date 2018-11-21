@@ -275,11 +275,9 @@ namespace DeepNestLib
                 }
             }
         }
-        public void ImportFromRawDetail(RawDetail raw, int src)
+        public NFP ImportFromRawDetail(RawDetail raw, int src)
         {
-            NFP po = new NFP();
-            po.Name = raw.Name;
-            po.Points = new SvgPoint[] { };
+            NFP po = null;
             List<NFP> nfps = new List<NFP>();
             foreach (var item in raw.Outers)
             {
@@ -295,6 +293,7 @@ namespace DeepNestLib
             {
                 var tt = nfps.OrderByDescending(z => z.Area).First();
                 po = tt;
+                po.Name = raw.Name;
 
                 foreach (var r in nfps)
                 {
@@ -309,6 +308,7 @@ namespace DeepNestLib
                 po.source = src;
                 Polygons.Add(po);
             }
+            return po;
         }
         public int GetNextSource()
         {

@@ -18,81 +18,40 @@ namespace DeepNestPort
         public Form1()
         {
             InitializeComponent();
+            ctx = new DrawingContext(pictureBox1);
+            ctx2 = new DrawingContext(pictureBox2);
+
             listView4.DoubleBuffered(true);
             progressBar1 = new PictureBoxProgressBar();
             progressBar1.Dock = DockStyle.Fill;
             panel1.Controls.Add(progressBar1);
-            sx = pictureBox1.Width / 2;
-            sy = -pictureBox1.Height / 2;
+
             checkBox2.Checked = SvgNest.Config.simplify;
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"svgs");
             ctx.Create(pictureBox1);
 
-            pictureBox1.MouseDown += PictureBox1_MouseDown;
-            pictureBox1.MouseUp += PictureBox1_MouseUp;
-            MouseWheel += Form1_MouseWheel;
+            
         }
         PictureBoxProgressBar progressBar1;
-        private void Form1_MouseWheel(object sender, MouseEventArgs e)
-        {
-
-            float zold = zoom;
-            if (e.Delta > 0) { zoom *= 1.5f; ; }
-            else { zoom *= 0.5f; }
-            if (zoom < 0.08) { zoom = 0.08f; }
-            if (zoom > 1000) { zoom = 1000f; }
-
-            var pos = pictureBox1.PointToClient(Cursor.Position);
-
-            sx = -(pos.X / zold - sx - pos.X / zoom);
-            sy = (pos.Y / zold + sy - pos.Y / zoom);
-        }
-
-        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
-        {
-            isDrag = false;
-
-            var p = pictureBox1.PointToClient(Cursor.Position);
-            var pos = pictureBox1.PointToClient(Cursor.Position);
-            var posx = (pos.X / zoom - sx);
-            var posy = (-pos.Y / zoom - sy);
-        }
-
-        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
-        {
-            var pos = pictureBox1.PointToClient(Cursor.Position);
-            var p = ctx.Transform(pos);
-
-            if (e.Button == MouseButtons.Right)
-            {
-                isDrag = true;
-                startx = pos.X;
-                starty = pos.Y;
-                origsx = sx;
-                origsy = sy;
-            }
-        }
+        
 
         public void UpdateList()
         {
             listView1.Items.Clear();
             foreach (var item in polygons)
             {
-                listView1.Items.Add(new ListViewItem(new string[] { item.id+"",item.Name,
-                    item.Points.Count() + "" })
-                { Tag = item });
+                listView1.Items.Add(new ListViewItem(new string[] { item.id + "", item.Name, item.Points.Count() + "" }) { Tag = item });
             }
             listView2.Items.Clear();
             foreach (var item in sheets)
             {
-                listView2.Items.Add(new ListViewItem(new string[] { ""+item.id,item.Name,
-                    item.Points.Count() + "" })
-                { Tag = item });
+                listView2.Items.Add(new ListViewItem(new string[] { "" + item.id, item.Name, item.Points.Count() + "" }) { Tag = item });
             }
 
-            label1.Text = "parts: " + polygons.Count() + "; sheets: " + sheets.Count;
+            groupBox5.Text = "Parts: " + polygons.Count();
+            groupBox6.Text = "Sheets: " + sheets.Count;
         }
 
 
@@ -104,18 +63,54 @@ namespace DeepNestPort
         public object selected = null;
 
         Thread dth;
+
+        object Preview;
         public void Redraw()
         {
             var pos = pictureBox1.PointToClient(Cursor.Position);
-            var posx = (pos.X / zoom - sx);
-            var posy = (-pos.Y / zoom - sy);
-            if (isDrag)
-            {
-                var p = pictureBox1.PointToClient(Cursor.Position);
+            var pos1 = ctx.GetPos();
+            var posx = pos1.X;
+            var posy = pos1.Y;
+            ctx.Update();
+            ctx2.Update();
 
-                sx = origsx + ((p.X - startx) / zoom);
-                sy = origsy + (-(p.Y - starty) / zoom);
+
+            #region preview draw
+            ctx2.gr.Clear(Color.White);
+
+            if (Preview != null)
+            {
+                ctx2.gr.ResetTransform();
+                GraphicsPath gp = new GraphicsPath();
+                if (Preview is RawDetail)
+                {
+                    foreach (var item in (Preview as RawDetail).Outers)
+                    {
+                        gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z)).ToArray());
+                    }
+                }
+                if (Preview is NFP)
+                {
+                    var nfp = (Preview as NFP);
+
+                    gp.AddPolygon(nfp.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
+                    if (nfp.children != null)
+                    {
+                        foreach (var item in nfp.children)
+                        {
+                            gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
+                        }
+                    }
+
+                }
+
+                ctx2.gr.FillPath(Brushes.LightBlue, gp);
+                ctx2.gr.DrawPath(Pens.Black, gp);
             }
+            ctx2.Setup();
+
+            #endregion
+
             ctx.gr.SmoothingMode = SmoothingMode.AntiAlias;
             ctx.gr.Clear(Color.White);
 
@@ -123,30 +118,33 @@ namespace DeepNestPort
 
             ctx.gr.DrawLine(Pens.Red, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(1000, 0)));
             ctx.gr.DrawLine(Pens.Blue, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(0, 1000)));
+            int yy = 0;
+            int gap = (int)Font.Size;
             if (isInfoShow)
             {
-                ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), new Font("Arial", 12), Brushes.Blue, 0, 0);
-
-                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    parts placed: {context.PlacedPartsCount}/{polygons.Count}",
-                    new Font("Arial", 20), Brushes.DarkBlue, 0, 20);
-
-                ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}",
-                    new Font("Arial", 15), Brushes.DarkBlue, 0, 50);
+                ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), Font, Brushes.Blue, 0, yy);
+                yy += (int)Font.Size + gap;
+                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    Parts placed: {context.PlacedPartsCount}/{polygons.Count}", Font, Brushes.DarkBlue, 0, yy);
+                yy += (int)Font.Size + gap;
+                ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}", Font, Brushes.DarkBlue, 0, yy);
+                yy += (int)Font.Size + gap;
 
                 if (nest != null && nest.nests.Any())
                 {
-                    ctx.gr.DrawString($"Nests: {nest.nests.Count} Fitness: {nest.nests.First().fitness}   Area:{nest.nests.First().area}  ",
-                        new Font("Arial", 15), Brushes.DarkBlue, 0, 80);
+                    ctx.gr.DrawString($"Nests: {nest.nests.Count} Fitness: {nest.nests.First().fitness}   Area:{nest.nests.First().area}  ", Font, Brushes.DarkBlue, 0, yy);
+                    yy += (int)Font.Size + gap;
                 }
 
 
-                ctx.gr.DrawString($"Call counter: {Background.callCounter};  last placeParts time: {Background.LastPlacePartTime}ms",
-                        new Font("Arial", 15), Brushes.DarkBlue, 0, 110);
+                ctx.gr.DrawString($"Call counter: {Background.callCounter};  Last placing time: {Background.LastPlacePartTime}ms", Font, Brushes.DarkBlue, 0, yy);
+                yy += (int)Font.Size + gap;
             }
             else
             {
-                ctx.gr.DrawString($"Iterations: {context.Iterations}    parts placed: {context.PlacedPartsCount}/{polygons.Count}", new Font("Arial", 20), Brushes.DarkBlue, 0, 20);
-                ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    Parts types: {polygons.GroupBy(z => z.source).Count()}", new Font("Arial", 15), Brushes.DarkBlue, 0, 50);
+                ctx.gr.DrawString($"Iterations: {context.Iterations}    Parts placed: {context.PlacedPartsCount}/{polygons.Count}", Font, Brushes.DarkBlue, 0, yy);
+                yy += (int)Font.Size + gap;
+                ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    Parts types: {polygons.GroupBy(z => z.source).Count()}", Font, Brushes.DarkBlue, 0, yy);
+                yy += (int)Font.Size + gap;
             }
 
             foreach (var item in polygons.Union(sheets))
@@ -154,7 +152,7 @@ namespace DeepNestPort
 
                 if (!(item is Sheet))
                 {
-                    //if (!item.fitted) continue;                    
+                    if (!item.fitted) continue;                    
                 }
 
                 GraphicsPath path = new GraphicsPath();
@@ -183,13 +181,13 @@ namespace DeepNestPort
                     }
                     ctx.gr.ResetTransform();
 
-                    if (selected == item)
+                    /*if (selected == item)
                     {
                         ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.Orange)), path);
                         ctx.gr.DrawPath(Pens.DarkBlue, path);
 
                     }
-                    else
+                    else*/
                     {
                         if (!sheets.Contains(item))
                         {
@@ -231,14 +229,15 @@ namespace DeepNestPort
                             var trans1 = ctx.Transform(new PointF((float)pnts[0].X, (float)pnts[0].Y - 30));
                             if (was && isInfoShow)
                             {
-                                ctx.gr.DrawString("util: " + res + "%", new Font("Arial", 18), Brushes.Black, trans1);
+                                ctx.gr.DrawString("util: " + res + "%", Font, Brushes.Black, trans1);
                             }
                         }
                     }
                 }
             }
-            pictureBox1.Image = ctx.bmp;
+            ctx.Setup();
         }
+
         public void RedrawAsync()
         {
             if (dth != null) return;
@@ -258,17 +257,9 @@ namespace DeepNestPort
             Redraw();
         }
 
-        public static DrawingContext ctx = new DrawingContext();
-        float sx { get { return ctx.sx; } set { ctx.sx = value; } }
-        float sy { get { return ctx.sy; } set { ctx.sy = value; } }
-        float zoom { get { return ctx.zoom; } set { ctx.zoom = value; } }
-
-        float startx, starty;
-        float origsx, origsy;
-        bool isDrag = false;
-
-
-
+        public DrawingContext ctx;
+        public DrawingContext ctx2;
+        
         public void UpdateNestsList()
         {
             if (nest != null)
@@ -304,6 +295,7 @@ namespace DeepNestPort
             if (listView1.SelectedItems.Count > 0)
             {
                 selected = listView1.SelectedItems[0].Tag;
+                Preview = selected;
             }
         }
 
@@ -316,6 +308,7 @@ namespace DeepNestPort
         public void UpdateFilesList(string path)
         {
             var di = new DirectoryInfo(path);
+            groupBox3.Text = "Files: " + di.FullName;
             listView3.Items.Clear();
             listView3.Items.Add(new ListViewItem(new string[] { ".." }) { Tag = di.Parent, BackColor = Color.LightBlue });
             foreach (var item in di.GetDirectories())
@@ -491,6 +484,7 @@ namespace DeepNestPort
             if (listView2.SelectedItems.Count > 0)
             {
                 selected = listView2.SelectedItems[0].Tag;
+                Preview = selected;
             }
         }
 
@@ -580,7 +574,7 @@ namespace DeepNestPort
                         UpdateNestsList();
                         displayProgress(1.0f);
                         sw.Stop();
-                        toolStripStatusLabel1.Text = "Nesting complete within: " + sw.ElapsedMilliseconds + "ms";
+                        toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
                         if (stop) break;
                     }
                     th = null;
@@ -602,14 +596,11 @@ namespace DeepNestPort
                     var nfp = (listView1.SelectedItems[0].Tag as NFP);
                     for (int i = 0; i < qd.Qnt; i++)
                     {
-
-
                         var r = Background.clone(nfp);
                         polygons.Add(r);
                     }
                     UpdateList();
                 }
-
             }
         }
 
@@ -1039,6 +1030,36 @@ namespace DeepNestPort
             isInfoShow = !isInfoShow;
         }
 
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Font = new Font(Font.FontFamily.Name, Font.Size + 1);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Font = new Font(Font.FontFamily.Name, Font.Size - 1);
+        }
+
+        private void listView3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listView3.SelectedItems.Count > 0 && listView3.SelectedItems[0].Tag is FileInfo)
+            {
+                try
+                {
+                    var path = (FileInfo)listView3.SelectedItems[0].Tag;
+                    var svg = SvgParser.LoadSvg(path.FullName);
+
+
+                    Preview = svg;
+                }
+                catch (Exception ex)
+                {
+                    Preview = null;
+                }
+
+            }
+        }
+
         List<NFP> sheets { get { return context.Sheets; } }
 
         private void toolStripButton2_Click_1(object sender, EventArgs e)
@@ -1049,6 +1070,18 @@ namespace DeepNestPort
             {
                 SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
+        }
+
+        private void listView3_MouseMove(object sender, MouseEventArgs e)
+        {
+            var ch = listView3.GetChildAtPoint(listView3.PointToClient(Cursor.Position));
+
+            if (ch != null)
+            {
+
+            }
+
+
         }
     }
 }
