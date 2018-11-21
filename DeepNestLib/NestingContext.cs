@@ -169,11 +169,18 @@ namespace DeepNestLib
             {
                 item.fitted = false;
             }
+            List<int> sheetsIds = new List<int>();
+
             foreach (var item in plcpr.placements)
             {
                 foreach (var zitem in item)
                 {
                     var sheetid = zitem.sheetId;
+                    if (!sheetsIds.Contains(sheetid))
+                    {
+                        sheetsIds.Add(sheetid);
+                    }
+
                     var sheet = Sheets.First(z => z.id == sheetid);
                     totalSheetsArea += GeometryUtil.polygonArea(sheet);
 
@@ -190,6 +197,9 @@ namespace DeepNestLib
                     }
                 }
             }
+
+            var emptySheets = Sheets.Where(z => !sheetsIds.Contains(z.id)).ToArray();
+
             MaterialUtilization = Math.Abs(totalPartsArea / totalSheetsArea);
 
             var ppps = Polygons.Where(z => !placed.Contains(z));
@@ -199,6 +209,7 @@ namespace DeepNestLib
                 item.y = 0;
             }
         }
+
         public void ReorderSheets()
         {
             double x = 0;
