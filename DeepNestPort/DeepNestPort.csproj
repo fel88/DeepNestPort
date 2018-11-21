@@ -105,59 +105,59 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="svgs\svg0.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\1.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg1.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\10.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg10.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\11.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg11.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\12.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg12.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\13.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg13.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\14.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg14.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\15.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg15.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\16.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg16.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\17.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg17.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\18.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg2.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\2.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg3.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\3.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg4.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\4.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg5.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\5.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg6.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\6.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg7.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\7.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg8.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\8.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="svgs\svg9.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="svgs\9.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
