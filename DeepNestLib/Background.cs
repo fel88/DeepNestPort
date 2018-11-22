@@ -241,12 +241,12 @@ namespace DeepNestLib
         public static int callCounter = 0;
 
         public static Dictionary<string, NFP[]> cacheProcess = new Dictionary<string, NFP[]>();
-        public static NFP[] Process2(NFP A, NFP B)
+        public static NFP[] Process2(NFP A, NFP B, int type)
         {
             var key = A.source + ";" + B.source + ";" + A.rotation + ";" + B.rotation;
-            if (cacheProcess.ContainsKey(key))
+            if (cacheProcess.ContainsKey(key) && type == 0)
             {
-                //return cacheProcess[key];
+                return cacheProcess[key];
             }
 
             Stopwatch swg = Stopwatch.StartNew();
@@ -364,7 +364,10 @@ namespace DeepNestLib
             var msg = swg.ElapsedMilliseconds;
             var res = new NFP[] { ret };
 
-            //cacheProcess.Add(key, res);
+            if (type == 0)
+            {
+                cacheProcess.Add(key, res);
+            }
             return res;
         }
 
@@ -416,7 +419,7 @@ namespace DeepNestLib
 
             var frame = getFrame(A);
 
-            var nfp = getOuterNfp(frame, B, true);
+            var nfp = getOuterNfp(frame, B, 1, true);
 
             if (nfp == null || nfp.children == null || nfp.children.Count == 0)
             {
@@ -427,7 +430,7 @@ namespace DeepNestLib
             {
                 for (var i = 0; i < A.children.Count; i++)
                 {
-                    var hnfp = getOuterNfp(A.children[i], B);
+                    var hnfp = getOuterNfp(A.children[i], B, 1);
                     if (hnfp != null)
                     {
                         holes.Add(hnfp);
@@ -680,7 +683,7 @@ namespace DeepNestLib
 
                     for (j = startindex; j < placed.Count; j++)
                     {
-                        nfp = getOuterNfp(placed[j], part);
+                        nfp = getOuterNfp(placed[j], part, 0);
                         // minkowski difference failed. very rare but could happen
                         if (nfp == null)
                         {
@@ -1467,7 +1470,7 @@ namespace DeepNestLib
         }
 
         static object lockobj = new object();
-        public static NFP getOuterNfp(NFP A, NFP B, bool inside = false)//todo:?inside def?
+        public static NFP getOuterNfp(NFP A, NFP B, int type, bool inside = false)//todo:?inside def?
         {
             NFP[] nfp = null;
 
@@ -1502,7 +1505,7 @@ namespace DeepNestLib
             {
                 lock (lockobj)
                 {
-                    nfp = Process2(A, B);
+                    nfp = Process2(A, B, type);
                 }
             }
             else

@@ -84,7 +84,7 @@ namespace DeepNestLib
                 }
                 s.Outers.Add(new LocalContour() { Points = points.ToList() });
             }
-                                   
+
 
             return s;
         }
@@ -95,23 +95,63 @@ namespace DeepNestLib
 
             foreach (var item in polygons.Union(sheets))
             {
+                if (!sheets.Contains(item))
+                {
+                    if (!item.fitted) continue;
+                }
                 var m = new Matrix();
                 m.Translate((float)item.x, (float)item.y);
                 m.Rotate(item.rotation);
-                List<SvgPoint> points = new List<SvgPoint>();
-                foreach (var pitem in item.Points)
-                {
-                    PointF[] pp = new[] { new PointF((float)pitem.x, (float)pitem.y) };
-                    m.TransformPoints(pp);
-                    points.Add(new SvgPoint(pp[0].X, pp[0].Y));
-                }
+
+                PointF[] pp = item.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                m.TransformPoints(pp);
+                var points = pp.Select(z => new SvgPoint(z.X, z.Y)).ToArray();
+
                 string fill = "lightblue";
                 if (sheets.Contains(item))
                 {
                     fill = "none";
                 }
 
-                sb.AppendLine($"<polygon fill=\"{fill}\"  stroke=\"black\" points=\"{points.Aggregate("", (x, y) => x + y.x.ToString().Replace(",", ".") + "," + y.y.ToString().Replace(",", ".") + " ")}\"/>");
+                sb.AppendLine($"<path fill=\"{fill}\"  stroke=\"black\" d=\"");
+                for (int i = 0; i < points.Count(); i++)
+                {
+                    var p = points[i];
+                    string coord = p.x.ToString().Replace(",", ".") + " " + p.y.ToString().Replace(",", ".");
+                    if (i == 0)
+                    {
+                        sb.Append("M" + coord + " ");
+                        continue;
+                    }
+
+                    sb.Append("L" + coord + " ");
+                }
+                sb.Append("z ");
+                if (item.children != null)
+                {
+                    foreach (var citem in item.children)
+                    {
+                        pp = citem.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                        m.TransformPoints(pp);
+                        points = pp.Select(z => new SvgPoint(z.X, z.Y)).Reverse().ToArray();
+
+                        for (int i = 0; i < points.Count(); i++)
+                        {
+                            var p = points[i];
+                            string coord = p.x.ToString().Replace(",", ".") + " " + p.y.ToString().Replace(",", ".");
+                            if (i == 0)
+                            {
+                                sb.Append("M" + coord + " ");
+                                continue;
+                            }
+
+                            sb.Append("L" + coord + " ");
+                        }
+                        sb.Append("z ");
+                    }
+                }
+                sb.Append("\"/>");
+
             }
             sb.AppendLine("</svg>");
             File.WriteAllText(path, sb.ToString());

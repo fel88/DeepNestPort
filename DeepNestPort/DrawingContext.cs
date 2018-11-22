@@ -77,18 +77,16 @@ namespace DeepNestPort
         public float zoom = 1;
         public Graphics gr;
         public Bitmap bmp;
+        public bool InvertY = true;
         public virtual PointF Transform(PointF p1)
         {
-            return new PointF((p1.X + sx) * zoom, -(p1.Y + sy) * zoom);
+            return new PointF((p1.X + sx) * zoom, (InvertY ? (-1) : 1) * (p1.Y + sy) * zoom);
         }
         public virtual PointF Transform(double x, double y)
         {
-            return new PointF(((float)(x) + sx) * zoom, -((float)(y) + sy) * zoom);
+            return new PointF(((float)(x) + sx) * zoom, (InvertY ? (-1) : 1) * ((float)(y) + sy) * zoom);
         }
-        public void Create(PictureBox pb)
-        {
-
-        }
+        
 
         private void Pb_SizeChanged(object sender, EventArgs e)
         {

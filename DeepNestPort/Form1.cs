@@ -21,6 +21,9 @@ namespace DeepNestPort
             ctx = new DrawingContext(pictureBox1);
             ctx2 = new DrawingContext(pictureBox2);
 
+            listView1.DoubleBuffered(true);
+            listView2.DoubleBuffered(true);
+            listView3.DoubleBuffered(true);
             listView4.DoubleBuffered(true);
             progressBar1 = new PictureBoxProgressBar();
             progressBar1.Dock = DockStyle.Fill;
@@ -30,12 +33,11 @@ namespace DeepNestPort
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"svgs");
-            ctx.Create(pictureBox1);
 
-            
+
         }
         PictureBoxProgressBar progressBar1;
-        
+
 
         public void UpdateList()
         {
@@ -147,12 +149,24 @@ namespace DeepNestPort
                 yy += (int)Font.Size + gap;
             }
 
+            if (!checkBox1.Checked)
+            {
+                if (bb != null)
+                {
+                    //ctx.gr.TranslateTransform((float)sheets[0].x, (float)sheets[0].y);
+                    var pp = ctx.Transform((float)sheets[0].x, (float)sheets[0].y);
+                    ctx.gr.DrawImage(bb, new RectangleF(pp.X, pp.Y, bb.Width * ctx.zoom, bb.Height * ctx.zoom), new Rectangle(0, 0, bb.Width, bb.Height), GraphicsUnit.Pixel);
+                }
+            }
             foreach (var item in polygons.Union(sheets))
             {
-
+                if (!checkBox1.Checked)
+                {
+                    continue;
+                }
                 if (!(item is Sheet))
                 {
-                    if (!item.fitted) continue;                    
+                    if (!item.fitted) continue;
                 }
 
                 GraphicsPath path = new GraphicsPath();
@@ -238,6 +252,60 @@ namespace DeepNestPort
             ctx.Setup();
         }
 
+
+        public void RenderSheet()
+        {
+            ctx.gr.SmoothingMode = SmoothingMode.AntiAlias;
+            ctx.gr.Clear(Color.White);
+
+            ctx.gr.ResetTransform();
+
+
+            foreach (var item in polygons.Union(sheets))
+            {
+
+                if (!(item is Sheet))
+                {
+                    if (!item.fitted) continue;
+                }
+
+                GraphicsPath path = new GraphicsPath();
+                if (item.Points != null && item.Points.Any())
+                {
+                    //rotate first;
+                    var m = new Matrix();
+                    m.Translate((float)item.x, (float)item.y);
+                    m.Rotate(item.rotation);
+
+
+
+                    var pnts = item.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                    m.TransformPoints(pnts);
+
+                    path.AddPolygon(pnts.Select(z => ctx.Transform(z)).ToArray());
+                    if (item.children != null)
+                    {
+                        foreach (var citem in item.children)
+                        {
+                            var pnts2 = citem.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                            m.TransformPoints(pnts2);
+                            path.AddPolygon(pnts2.Select(z => ctx.Transform(z)).ToArray());
+
+                        }
+                    }
+                    ctx.gr.ResetTransform();
+
+
+                    if (!sheets.Contains(item))
+                    {
+                        ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
+                    }
+                    ctx.gr.DrawPath(Pens.Black, path);
+
+
+                }
+            }
+        }
         public void RedrawAsync()
         {
             if (dth != null) return;
@@ -259,7 +327,7 @@ namespace DeepNestPort
 
         public DrawingContext ctx;
         public DrawingContext ctx2;
-        
+
         public void UpdateNestsList()
         {
             if (nest != null)
@@ -1082,6 +1150,84 @@ namespace DeepNestPort
             }
 
 
+        }
+
+        Bitmap bb;
+        private void button7_Click(object sender, EventArgs e)
+        {
+            var sh = sheets[0];
+            ctx.sx = (float)sh.x;
+            ctx.sy = (float)sh.y;
+            ctx.InvertY = false;
+            bb = new Bitmap(1 + (int)sh.width, 1 + (int)sh.height);
+            var gr = Graphics.FromImage(bb);
+            var tempgr = ctx.gr;
+            var tmpbmp = ctx.bmp;
+            ctx.gr = gr;
+            ctx.bmp = bb;
+
+            RenderSheet();
+            ctx.gr = gr;
+            ctx.bmp = tmpbmp;
+            ctx.InvertY = true;
+            //bb = ctx.bmp.Clone(new Rectangle(0, 0, ctx.bmp.Width, ctx.bmp.Height), ctx.bmp.PixelFormat);
+            Clipboard.SetImage(bb);
+
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+
+            var xx = r.Next(2000) + 100;
+            var yy = r.Next(2000);
+            var ww = r.Next(250) + 150;
+            var hh = r.Next(250) + 120;
+            NFP pl = new NFP();
+            int src = 0;
+            if (polygons.Any())
+            {
+                src = polygons.Max(z => z.source.Value) + 1;
+            }
+            polygons.Add(pl);
+            pl.source = src;
+            pl.Points = new SvgPoint[] { };
+            pl.AddPoint(new SvgPoint(0, 0));
+            pl.AddPoint(new SvgPoint(0 + ww, 0));
+            pl.AddPoint(new SvgPoint(0 + ww, 0 + hh));
+            pl.AddPoint(new SvgPoint(0, 0 + hh));
+            pl.x = xx;
+            pl.y = yy;
+            pl.children = new List<NFP>();
+            int gap = 10;
+            int szx = ww/4;
+            int szy = hh / 3;
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+
+                    var hole = new NFP();
+
+                
+                    pl.children.Add(hole);
+                    hole.Points = new SvgPoint[] { };
+                 
+
+                    int hx = (i * ww / 4) + gap*(i+1);
+                    int hy = (j * hh / 3) + gap*(j+1);
+
+                    hole.AddPoint(new SvgPoint(hx + szx, hy + szy));
+                    hole.AddPoint(new SvgPoint(hx, hy + szy));
+                    hole.AddPoint(new SvgPoint(hx, hy));
+                    hole.AddPoint(new SvgPoint(hx + szx, hy));
+                    hole.x = xx;
+                    hole.y = yy;
+                }
+            }
+
+
+
+            UpdateList();
         }
     }
 }
