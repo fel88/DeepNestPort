@@ -16,12 +16,7 @@ namespace DeepNestConsole
             Console.WriteLine("deepnest console tool. usage:");
             Console.WriteLine("Runing sample:");
             Console.WriteLine("deepNestConsole sample");
-            Console.WriteLine("");
-            Console.WriteLine("Runing nesting from directory:");
-            //todo:
-            //Console.WriteLine("deepNestConsole dir [svgs directory] [count] [sheet width] [sheet height] [sheets count] [gap]");
-            Console.WriteLine("deepNestConsole dir [svgs directory] [count]");
-            Console.WriteLine("");
+            Console.WriteLine("");            
             Console.WriteLine("Runing nesting from xml plan:");
             Console.WriteLine("deepNestConsole xml [xml]");
         }
@@ -59,35 +54,7 @@ namespace DeepNestConsole
                             return;
                         }
                     }
-                    break;
-                case "dir":
-                    {
-                        if (args.Count() < 3)
-                        {
-                            Console.WriteLine("wrong format");
-                            return;
-                        }
-                        var dir = args[1];
-                        if (!Directory.Exists(dir))
-                        {
-                            Console.WriteLine("Directory: " + dir + " not exist!");
-                            return;
-                        }
-                        int cnt;
-                        if (!int.TryParse(args[2], out cnt))
-                        {
-                            Console.WriteLine("error count");
-                            return;
-                        }
-
-                        for (int i = 0; i < 10; i++)
-                        {
-                            sample.Context.AddSheet(3000, 1500);
-                        }
-
-                        sample.Context.LoadInputData(dir, cnt);
-                    }
-                    break;
+                    break;             
                 case "sample":
                     {
                         sample.Context.LoadSampleData();

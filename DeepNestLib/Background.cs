@@ -244,7 +244,8 @@ namespace DeepNestLib
         public static NFP[] Process2(NFP A, NFP B, int type)
         {
             var key = A.source + ";" + B.source + ";" + A.rotation + ";" + B.rotation;
-            if (cacheProcess.ContainsKey(key) && type == 0)
+            bool cacheAllow = type != 1;            
+            if (cacheProcess.ContainsKey(key) && cacheAllow)
             {
                 return cacheProcess[key];
             }
@@ -364,7 +365,7 @@ namespace DeepNestLib
             var msg = swg.ElapsedMilliseconds;
             var res = new NFP[] { ret };
 
-            if (type == 0)
+            if (cacheAllow)
             {
                 cacheProcess.Add(key, res);
             }
@@ -395,7 +396,7 @@ namespace DeepNestLib
             return frame;
         }
 
-        public static NFP[] getInnerNfp(NFP A, NFP B, SvgNestConfig config)
+        public static NFP[] getInnerNfp(NFP A, NFP B, int type, SvgNestConfig config)
         {
             if (A.source != null && B.source != null)
             {
@@ -419,7 +420,7 @@ namespace DeepNestLib
 
             var frame = getFrame(A);
 
-            var nfp = getOuterNfp(frame, B, 1, true);
+            var nfp = getOuterNfp(frame, B,  type, true);
 
             if (nfp == null || nfp.children == null || nfp.children.Count == 0)
             {
@@ -586,7 +587,7 @@ namespace DeepNestLib
                     // (only do this for the first part of each sheet, to ensure that all parts that can be placed are, even if we have to to open a lot of sheets)
                     for (j = 0; j < (360f / config.rotations); j++)
                     {
-                        sheetNfp = getInnerNfp(sheet, part, config);
+                        sheetNfp = getInnerNfp(sheet, part, 0, config);
 
                         if (sheetNfp != null && sheetNfp.Count() > 0)
                         {
@@ -1212,7 +1213,7 @@ namespace DeepNestLib
                     var cbounds = GeometryUtil.getPolygonBounds(Achildren[j]);
                     if (cbounds.width > bbounds.width && cbounds.height > bbounds.height)
                     {
-                        var n = getInnerNfp(Achildren[j], Brotated, data.config);
+                        var n = getInnerNfp(Achildren[j], Brotated, 1, data.config);
                         if (n != null && n.Count() > 0)
                         {
                             cnfp.AddRange(n);
@@ -1480,7 +1481,8 @@ namespace DeepNestLib
                 A = A.source,
                 B = B.source,
                 ARotation = A.rotation,
-                BRotation = B.rotation
+                BRotation = B.rotation,
+                //Type = type
             };
 
             var doc = window.db.find(key);
@@ -1631,7 +1633,7 @@ namespace DeepNestLib
 
         string getKey(DbCacheKey obj)
         {
-            var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation * 10000) + "Brot" + (int)Math.Round((obj.BRotation * 10000));
+            var key = "A" + obj.A + "B" + obj.B + "Arot" + (int)Math.Round(obj.ARotation * 10000) + "Brot" + (int)Math.Round((obj.BRotation * 10000)) + ";" + obj.Type;
             return key;
         }
         internal void insert(DbCacheKey obj, bool inner = false)

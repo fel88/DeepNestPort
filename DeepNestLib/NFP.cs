@@ -81,8 +81,8 @@ namespace DeepNestLib
             }
         }
 
-        public float? width;
-        public float? height;
+        //public float? width;
+        //public float? height;
         public int length
         {
             get

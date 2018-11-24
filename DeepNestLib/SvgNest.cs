@@ -1041,6 +1041,7 @@ namespace DeepNestLib
         public float ARotation;
         public float BRotation;
         public NFP[] nfp;
+        public int Type;
     }
 
     public class NfpPair

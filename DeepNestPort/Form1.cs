@@ -44,12 +44,12 @@ namespace DeepNestPort
             listView1.Items.Clear();
             foreach (var item in polygons)
             {
-                listView1.Items.Add(new ListViewItem(new string[] { item.id + "", item.Name, item.Points.Count() + "" }) { Tag = item });
+                listView1.Items.Add(new ListViewItem(new string[] { item.id.ToString(), item.source.ToString(), item.Name, item.Points.Count().ToString() }) { Tag = item });
             }
             listView2.Items.Clear();
             foreach (var item in sheets)
             {
-                listView2.Items.Add(new ListViewItem(new string[] { "" + item.id, item.Name, item.Points.Count() + "" }) { Tag = item });
+                listView2.Items.Add(new ListViewItem(new string[] { item.id.ToString(), item.source.ToString(), item.Name, item.Points.Count().ToString() }) { Tag = item });
             }
 
             groupBox5.Text = "Parts: " + polygons.Count();
@@ -391,24 +391,21 @@ namespace DeepNestPort
 
         }
 
-        public void AddSheet(int w = 3000, int h = 1500)
+        public Sheet NewSheet(int w = 3000, int h = 1500)
         {
             var tt = new RectangleSheet();
-            tt.Name = "rectSheet" + (sheets.Count + 1);
-            sheets.Add(tt);
-            var p = sheets.Last();
+            tt.Name = "rectSheet" + (sheets.Count + 1);            
             tt.Height = h;
             tt.Width = w;
             tt.Rebuild();
-            UpdateList();
-            context.ReorderSheets();
+            
+            return tt;
         }
-        public void AddRhombusSheet(int w = 3000, int h = 1500)
+        public Sheet NewRhombusSheet(int w = 3000, int h = 1500)
         {
             var tt = new Sheet();
-            tt.Name = "rhombSheet" + (sheets.Count + 1);
-            sheets.Add(tt);
-            var p = sheets.Last();
+            tt.Name = "rhombSheet" + (sheets.Count + 1);        
+            
             tt.Height = h;
             tt.Width = w;
             tt.Points = new SvgPoint[] { };
@@ -421,16 +418,15 @@ namespace DeepNestPort
             tt.AddPoint(new SvgPoint(x, y + _height / 2));
             tt.AddPoint(new SvgPoint(x + _width / 2, y + _height));
             tt.AddPoint(new SvgPoint(x + _width, y + _height / 2));
-            UpdateList();
-            context.ReorderSheets();
+
+            return tt;
         }
 
-        public void AddCircleSheet(int w = 3000)
+        public Sheet NewCircleSheet(int w = 3000)
         {
             var tt = new Sheet();
-            tt.Name = "circleSheet" + (sheets.Count + 1);
-            sheets.Add(tt);
-            var p = sheets.Last();
+            tt.Name = "circleSheet" + (sheets.Count + 1);            
+            
             tt.Height = w;
             tt.Width = w;
             tt.Points = new SvgPoint[] { };
@@ -448,8 +444,7 @@ namespace DeepNestPort
 
 
 
-            UpdateList();
-            context.ReorderSheets();
+            return tt;
         }
 
         private void clearAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -519,11 +514,39 @@ namespace DeepNestPort
 
         private void moveToSheetsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+
             if (listView1.SelectedItems.Count > 0)
             {
                 var pol = listView1.SelectedItems[0].Tag as NFP;
                 polygons.Remove(pol);
-                sheets.Add(pol);
+                var b = GeometryUtil.getPolygonBounds(pol);
+                Sheet sheet = new Sheet();
+                sheet.Points = new SvgPoint[] { };
+                foreach (var item in pol.Points)
+                {
+                    sheet.AddPoint(new SvgPoint(item.x - b.x, item.y - b.y));
+                }
+                /*if (pol.children != null)
+                {
+                    sheet.children = new List<NFP>();
+                    for (int i = 0; i < pol.children.Count; i++)
+                    {
+                        var child = pol.children[i];
+                        NFP newchild = new NFP();
+                        for (var j = 0; j < child.length; j++)
+                        {
+                            newchild.AddPoint(new SvgPoint(child[j].x - b.x, child[j].y - b.y));
+                        }
+                        sheet.children.Add(newchild);
+                    }
+                }*/
+
+                sheet.Width = (float)b.width;
+                sheet.Height = (float)b.height;
+
+                sheet.source = context.GetNextSheetSource();
+                sheets.Add(sheet);
+                context.ReorderSheets();
                 UpdateList();
             }
         }
@@ -783,21 +806,30 @@ namespace DeepNestPort
             }
             label11.BackColor = label11.Parent.BackColor;
             label11.ForeColor = label11.Parent.ForeColor;
+            List<Sheet> sh = new List<Sheet>();
+            var src = context.GetNextSheetSource();
             for (int i = 0; i < cnt; i++)
             {
                 switch (comboBox2.SelectedItem.ToString())
                 {
                     case "Rectangle":
-                        AddSheet(ww.Value, hh.Value);
+                        sh.Add(NewSheet(ww.Value, hh.Value));
                         break;
                     case "Rhombus":
-                        AddRhombusSheet(ww.Value, hh.Value);
+                        sh.Add(NewRhombusSheet(ww.Value, hh.Value));
                         break;
                     case "Circle":
-                        AddCircleSheet(ww.Value);
+                        sh.Add(NewCircleSheet(ww.Value));
                         break;
                 }
             }
+            foreach (var item in sh)
+            {
+                item.source = src;
+                context.Sheets.Add(item);
+            }
+            UpdateList();
+            context.ReorderSheets();
         }
 
         public int GetCountFromDialog()
@@ -1155,11 +1187,11 @@ namespace DeepNestPort
         Bitmap bb;
         private void button7_Click(object sender, EventArgs e)
         {
-            var sh = sheets[0];
+            var sh = sheets[0] as Sheet;
             ctx.sx = (float)sh.x;
             ctx.sy = (float)sh.y;
             ctx.InvertY = false;
-            bb = new Bitmap(1 + (int)sh.width, 1 + (int)sh.height);
+            bb = new Bitmap(1 + (int)sh.Width, 1 + (int)sh.Height);
             var gr = Graphics.FromImage(bb);
             var tempgr = ctx.gr;
             var tmpbmp = ctx.bmp;
@@ -1199,7 +1231,7 @@ namespace DeepNestPort
             pl.y = yy;
             pl.children = new List<NFP>();
             int gap = 10;
-            int szx = ww/4;
+            int szx = ww / 4;
             int szy = hh / 3;
             for (int i = 0; i < 3; i++)
             {
@@ -1208,13 +1240,13 @@ namespace DeepNestPort
 
                     var hole = new NFP();
 
-                
+
                     pl.children.Add(hole);
                     hole.Points = new SvgPoint[] { };
-                 
 
-                    int hx = (i * ww / 4) + gap*(i+1);
-                    int hy = (j * hh / 3) + gap*(j+1);
+
+                    int hx = (i * ww / 4) + gap * (i + 1);
+                    int hy = (j * hh / 3) + gap * (j + 1);
 
                     hole.AddPoint(new SvgPoint(hx + szx, hy + szy));
                     hole.AddPoint(new SvgPoint(hx, hy + szy));

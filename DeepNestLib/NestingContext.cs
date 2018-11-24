@@ -39,6 +39,7 @@ namespace DeepNestLib
         {
             List<NFP> lsheets = new List<NFP>();
             List<NFP> lpoly = new List<NFP>();
+
             for (int i = 0; i < Polygons.Count; i++)
             {
                 Polygons[i].id = i;
@@ -47,7 +48,7 @@ namespace DeepNestLib
             {
                 Sheets[i].id = i;
             }
-            foreach (var item in Polygons)
+             foreach (var item in Polygons)
             {
                 NFP clone = new NFP();
                 clone.id = item.id;
@@ -75,7 +76,18 @@ namespace DeepNestLib
                 clone.id = item.id;
                 clone.source = item.source;
                 clone.Points = item.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
-
+                if (item.children != null)
+                {
+                    clone.children = new List<NFP>();
+                    foreach (var citem in item.children)
+                    {
+                        clone.children.Add(new NFP());
+                        var l = clone.children.Last();
+                        l.id = citem.id;
+                        l.source = citem.source;
+                        l.Points = citem.Points.Select(z => new SvgPoint(z.x, z.y) { exact = z.exact }).ToArray();
+                    }
+                }
                 lsheets.Add(clone);
             }
 
@@ -234,12 +246,13 @@ namespace DeepNestLib
             }
         }
 
-        public void AddSheet(int w, int h)
+        public void AddSheet(int w, int h, int src)
         {
             var tt = new RectangleSheet();
             tt.Name = "sheet" + (Sheets.Count + 1);
             Sheets.Add(tt);
-            var p = Sheets.Last();
+
+            tt.source = src;
             tt.Height = h;
             tt.Width = w;
             tt.Rebuild();
@@ -255,7 +268,7 @@ namespace DeepNestLib
             //add sheets
             for (int i = 0; i < 5; i++)
             {
-                AddSheet(3000, 1500);
+                AddSheet(3000, 1500, 0);
             }
 
             Console.WriteLine("Adding parts..");
@@ -329,6 +342,14 @@ namespace DeepNestLib
             }
             return 0;
         }
+        public int GetNextSheetSource()
+        {
+            if (Sheets.Any())
+            {
+                return Sheets.Max(z => z.source.Value) + 1;
+            }
+            return 0;
+        }
         public void AddRectanglePart(int src, int ww = 50, int hh = 80)
         {
             int xx = 0;
@@ -352,13 +373,14 @@ namespace DeepNestLib
 
             foreach (var item in d.Descendants("sheet"))
             {
+                int src = GetNextSheetSource();
                 var cnt = int.Parse(item.Attribute("count").Value);
                 var ww = int.Parse(item.Attribute("width").Value);
                 var hh = int.Parse(item.Attribute("height").Value);
 
                 for (int i = 0; i < cnt; i++)
                 {
-                    AddSheet(ww, hh);
+                    AddSheet(ww, hh, src);
                 }
             }
             foreach (var item in d.Descendants("part"))
