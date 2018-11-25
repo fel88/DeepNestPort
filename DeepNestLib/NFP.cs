@@ -8,7 +8,8 @@ namespace DeepNestLib
 {
     public class NFP : IStringify
     {
-        public bool fitted;
+        public bool fitted { get { return sheet != null; } }
+        public NFP sheet;
         public override string ToString()
         {
             var str1 = (Points != null) ? Points.Count() + "" : "null";

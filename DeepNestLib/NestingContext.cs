@@ -48,7 +48,7 @@ namespace DeepNestLib
             {
                 Sheets[i].id = i;
             }
-             foreach (var item in Polygons)
+            foreach (var item in Polygons)
             {
                 NFP clone = new NFP();
                 clone.id = item.id;
@@ -178,8 +178,8 @@ namespace DeepNestLib
             PlacedPartsCount = 0;
             List<NFP> placed = new List<NFP>();
             foreach (var item in Polygons)
-            {
-                item.fitted = false;
+            {                
+                item.sheet = null;
             }
             List<int> sheetsIds = new List<int>();
 
@@ -201,8 +201,8 @@ namespace DeepNestLib
                         PlacedPartsCount++;
                         var poly = Polygons.First(z => z.id == ssitem.id);
                         totalPartsArea += GeometryUtil.polygonArea(poly);
-                        placed.Add(poly);
-                        poly.fitted = true;
+                        placed.Add(poly);                        
+                        poly.sheet = sheet;
                         poly.x = ssitem.x + sheet.x;
                         poly.y = ssitem.y + sheet.y;
                         poly.rotation = ssitem.rotation;
