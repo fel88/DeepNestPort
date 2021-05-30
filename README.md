@@ -1,7 +1,9 @@
 # DeepNestPort
 DeepNest C# Port (https://github.com/Jack000/Deepnest)
 
-**Project progress: 80%**
+DXF Import: https://github.com/IxMilia/Dxf
+
+**Project status: WIP**
 
 <img src="imgs/img1.png"/>
 
