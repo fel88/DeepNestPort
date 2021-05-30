@@ -32,7 +32,7 @@ namespace DeepNestPort
             checkBox2.Checked = SvgNest.Config.simplify;
             checkBox4.Checked = Background.UseParallel;
 
-            UpdateFilesList(@"svgs");
+            UpdateFilesList(@"dxfs");
 
 
         }
@@ -595,8 +595,16 @@ namespace DeepNestPort
                     QntDialog q = new QntDialog();
                     if (q.ShowDialog() == DialogResult.OK)
                     {
+                        RawDetail det = null;
+                        if (f.Extension == ".svg")
+                        {
+                            det = SvgParser.LoadSvg(f.FullName);
+                        }
+                        if (f.Extension == ".dxf")
+                        {
+                            det = DxfParser.loadDxf(f.FullName);
+                        }
 
-                        var svg = SvgParser.LoadSvg(f.FullName);
                         int src = 0;
                         if (polygons.Any())
                         {
@@ -604,7 +612,7 @@ namespace DeepNestPort
                         }
                         for (int i = 0; i < q.Qnt; i++)
                         {
-                            context.ImportFromRawDetail(svg, src);
+                            context.ImportFromRawDetail(det, src);
                         }
 
                         UpdateList();
