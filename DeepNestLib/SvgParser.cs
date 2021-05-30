@@ -372,6 +372,4 @@ namespace DeepNestLib
         public List<PointF> Points = new List<PointF>();
         public bool Enable = true;
     }
-
-
 }

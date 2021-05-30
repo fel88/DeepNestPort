@@ -213,7 +213,9 @@ namespace DeepNestLib
         }
         public static NFP clone(NFP nfp)
         {
+
             NFP newnfp = new NFP();
+            newnfp.source = nfp.source;
             for (var i = 0; i < nfp.length; i++)
             {
                 newnfp.AddPoint(new SvgPoint(nfp[i].x, nfp[i].y));
@@ -244,7 +246,7 @@ namespace DeepNestLib
         public static NFP[] Process2(NFP A, NFP B, int type)
         {
             var key = A.source + ";" + B.source + ";" + A.rotation + ";" + B.rotation;
-            bool cacheAllow = type != 1;            
+            bool cacheAllow = type != 1;
             if (cacheProcess.ContainsKey(key) && cacheAllow)
             {
                 return cacheProcess[key];
@@ -420,7 +422,7 @@ namespace DeepNestLib
 
             var frame = getFrame(A);
 
-            var nfp = getOuterNfp(frame, B,  type, true);
+            var nfp = getOuterNfp(frame, B, type, true);
 
             if (nfp == null || nfp.children == null || nfp.children.Count == 0)
             {
@@ -551,6 +553,7 @@ namespace DeepNestLib
             double sheetarea = -1;
             int totalPlaced = 0;
             int totalParts = parts.Count();
+
             while (parts.Length > 0)
             {
 
@@ -961,8 +964,6 @@ namespace DeepNestLib
                 //}
                 for (i = 0; i < placed.Count; i++)
                 {
-
-
                     var index = Array.IndexOf(parts, placed[i]);
                     if (index >= 0)
                     {
@@ -1326,8 +1327,6 @@ namespace DeepNestLib
         }
         public NfpPair process(NfpPair pair)
         {
-
-
             var A = rotatePolygon(pair.A, pair.ARotation);
             var B = rotatePolygon(pair.B, pair.BRotation);
 

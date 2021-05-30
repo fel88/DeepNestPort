@@ -385,7 +385,7 @@ namespace DeepNestPort
             }
             foreach (var item in di.GetFiles())
             {
-                if (!item.Extension.Contains("svg")) continue;
+                if (!(item.Extension.Contains("svg") || item.Extension.Contains("dxf"))) continue;
                 listView3.Items.Add(new ListViewItem(new string[] { item.Name }) { Tag = item });
             }
 
@@ -625,8 +625,15 @@ namespace DeepNestPort
                     foreach (var item in listView3.SelectedItems)
                     {
                         var t = (item as ListViewItem).Tag as FileInfo;
-
-                        var svg = SvgParser.LoadSvg(t.FullName);
+                        RawDetail det = null;
+                        if (t.Extension == ".svg")
+                        {
+                            det = SvgParser.LoadSvg(t.FullName);
+                        }
+                        if (t.Extension == ".dxf")
+                        {
+                            det = DxfParser.loadDxf(t.FullName);
+                        }
                         int src = 0;
                         if (polygons.Any())
                         {
@@ -634,7 +641,7 @@ namespace DeepNestPort
                         }
                         for (int i = 0; i < q.Qnt; i++)
                         {
-                            context.ImportFromRawDetail(svg, src);
+                            context.ImportFromRawDetail(det, src);
                         }
                     }
                     UpdateList();
@@ -1147,10 +1154,17 @@ namespace DeepNestPort
                 try
                 {
                     var path = (FileInfo)listView3.SelectedItems[0].Tag;
-                    var svg = SvgParser.LoadSvg(path.FullName);
+                    RawDetail det = null;
+                    if (path.Extension == ".svg")
+                    {
+                        det = SvgParser.LoadSvg(path.FullName);
+                    }
+                    if (path.Extension == ".dxf")
+                    {
+                        det = DxfParser.loadDxf(path.FullName);
+                    }
 
-
-                    Preview = svg;
+                    Preview = det;
                 }
                 catch (Exception ex)
                 {

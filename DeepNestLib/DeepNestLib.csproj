@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IxMilia.Dxf, Version=0.7.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IxMilia.Dxf.0.7.2\lib\net35\IxMilia.Dxf.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -44,8 +47,11 @@
   <ItemGroup>
     <Compile Include="Background.cs" />
     <Compile Include="D3.cs" />
+    <Compile Include="DxfParser.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GeneticAlgorithm.cs" />
     <Compile Include="GeometryUtil.cs" />
+    <Compile Include="LineElement.cs" />
     <Compile Include="NestingContext.cs" />
     <Compile Include="NFP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +69,9 @@
       <Project>{e09e5402-28cf-4c96-9410-1af2a44833e0}</Project>
       <Name>MinkowskiWrapper</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
