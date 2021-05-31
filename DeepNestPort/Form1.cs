@@ -18,8 +18,15 @@ namespace DeepNestPort
         public Form1()
         {
             InitializeComponent();
+
+            sheetsInfos.Add(new SheetLoadInfo() { Width = 3000, Height = 1500, Quantity = 10 });
+
+            objectListView2.SetObjects(sheetsInfos);
+
+
             ctx = new DrawingContext(pictureBox1);
             ctx2 = new DrawingContext(pictureBox2);
+            ctx3 = new DrawingContext(pictureBox3);
 
             listView1.DoubleBuffered(true);
             listView2.DoubleBuffered(true);
@@ -33,11 +40,9 @@ namespace DeepNestPort
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"dxfs");
-
-
         }
-        PictureBoxProgressBar progressBar1;
 
+        PictureBoxProgressBar progressBar1;
 
         public void UpdateList()
         {
@@ -67,6 +72,43 @@ namespace DeepNestPort
         Thread dth;
 
         object Preview;
+
+        public void RedrawPreview(DrawingContext ctx2, object previewObject)
+        {
+
+            ctx2.Update();
+
+            ctx2.gr.Clear(Color.White);
+
+            if (previewObject != null)
+            {
+                ctx2.gr.ResetTransform();
+                GraphicsPath gp = new GraphicsPath();
+                if (previewObject is RawDetail raw)
+                {
+                    foreach (var item in raw.Outers)
+                    {
+                        gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z)).ToArray());
+                    }
+                }
+                if (previewObject is NFP nfp)
+                {
+                    gp.AddPolygon(nfp.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
+                    if (nfp.children != null)
+                    {
+                        foreach (var item in nfp.children)
+                        {
+                            gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
+                        }
+                    }
+                }
+
+                ctx2.gr.FillPath(Brushes.LightBlue, gp);
+                ctx2.gr.DrawPath(Pens.Black, gp);
+            }
+            ctx2.Setup();
+
+        }
         public void Redraw()
         {
             var pos = pictureBox1.PointToClient(Cursor.Position);
@@ -74,11 +116,13 @@ namespace DeepNestPort
             var posx = pos1.X;
             var posy = pos1.Y;
             ctx.Update();
-            ctx2.Update();
+            //ctx2.Update();
 
 
             #region preview draw
-            ctx2.gr.Clear(Color.White);
+            RedrawPreview(ctx2, Preview);
+            RedrawPreview(ctx3, Preview);
+            /*ctx2.gr.Clear(Color.White);
 
             if (Preview != null)
             {
@@ -109,7 +153,7 @@ namespace DeepNestPort
                 ctx2.gr.FillPath(Brushes.LightBlue, gp);
                 ctx2.gr.DrawPath(Pens.Black, gp);
             }
-            ctx2.Setup();
+            ctx2.Setup();*/
 
             #endregion
 
@@ -327,6 +371,7 @@ namespace DeepNestPort
 
         public DrawingContext ctx;
         public DrawingContext ctx2;
+        public DrawingContext ctx3;
 
         public void UpdateNestsList()
         {
@@ -394,18 +439,18 @@ namespace DeepNestPort
         public Sheet NewSheet(int w = 3000, int h = 1500)
         {
             var tt = new RectangleSheet();
-            tt.Name = "rectSheet" + (sheets.Count + 1);            
+            tt.Name = "rectSheet" + (sheets.Count + 1);
             tt.Height = h;
             tt.Width = w;
             tt.Rebuild();
-            
+
             return tt;
         }
         public Sheet NewRhombusSheet(int w = 3000, int h = 1500)
         {
             var tt = new Sheet();
-            tt.Name = "rhombSheet" + (sheets.Count + 1);        
-            
+            tt.Name = "rhombSheet" + (sheets.Count + 1);
+
             tt.Height = h;
             tt.Width = w;
             tt.Points = new SvgPoint[] { };
@@ -425,8 +470,8 @@ namespace DeepNestPort
         public Sheet NewCircleSheet(int w = 3000)
         {
             var tt = new Sheet();
-            tt.Name = "circleSheet" + (sheets.Count + 1);            
-            
+            tt.Name = "circleSheet" + (sheets.Count + 1);
+
             tt.Height = w;
             tt.Width = w;
             tt.Points = new SvgPoint[] { };
@@ -581,80 +626,76 @@ namespace DeepNestPort
 
         private void listView3_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (listView3.SelectedItems.Count > 0)
+            if (listView3.SelectedItems.Count <= 0) return;
+
+            var si = listView3.SelectedItems[0].Tag;
+            if (si is DirectoryInfo)
             {
-                var si = listView3.SelectedItems[0].Tag;
-                if (si is DirectoryInfo)
-                {
-                    UpdateFilesList((si as DirectoryInfo).FullName);
+                UpdateFilesList((si as DirectoryInfo).FullName);
 
-                }
-                if (si is FileInfo)
+            }
+            if (si is FileInfo)
+            {
+                var f = (si as FileInfo);
+                QntDialog q = new QntDialog();
+                if (q.ShowDialog() == DialogResult.OK)
                 {
-                    var f = (si as FileInfo);
-                    QntDialog q = new QntDialog();
-                    if (q.ShowDialog() == DialogResult.OK)
+                    RawDetail det = null;
+                    if (f.Extension == ".svg")
                     {
-                        RawDetail det = null;
-                        if (f.Extension == ".svg")
-                        {
-                            det = SvgParser.LoadSvg(f.FullName);
-                        }
-                        if (f.Extension == ".dxf")
-                        {
-                            det = DxfParser.loadDxf(f.FullName);
-                        }
-
-                        int src = 0;
-                        if (polygons.Any())
-                        {
-                            src = polygons.Max(z => z.source.Value) + 1;
-                        }
-                        for (int i = 0; i < q.Qnt; i++)
-                        {
-                            context.ImportFromRawDetail(det, src);
-                        }
-
-                        UpdateList();
-
+                        det = SvgParser.LoadSvg(f.FullName);
                     }
+                    if (f.Extension == ".dxf")
+                    {
+                        det = DxfParser.loadDxf(f.FullName);
+                    }
+
+                    int src = 0;
+                    if (polygons.Any())
+                    {
+                        src = polygons.Max(z => z.source.Value) + 1;
+                    }
+                    for (int i = 0; i < q.Qnt; i++)
+                    {
+                        context.ImportFromRawDetail(det, src);
+                    }
+
+                    UpdateList();
+
                 }
             }
         }
 
-
         private void importSelectedToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (listView3.SelectedItems.Count > 0)
-            {
-                QntDialog q = new QntDialog();
-                if (q.ShowDialog() == DialogResult.OK)
-                {
-                    foreach (var item in listView3.SelectedItems)
-                    {
-                        var t = (item as ListViewItem).Tag as FileInfo;
-                        RawDetail det = null;
-                        if (t.Extension == ".svg")
-                        {
-                            det = SvgParser.LoadSvg(t.FullName);
-                        }
-                        if (t.Extension == ".dxf")
-                        {
-                            det = DxfParser.loadDxf(t.FullName);
-                        }
-                        int src = 0;
-                        if (polygons.Any())
-                        {
-                            src = polygons.Max(z => z.source.Value) + 1;
-                        }
-                        for (int i = 0; i < q.Qnt; i++)
-                        {
-                            context.ImportFromRawDetail(det, src);
-                        }
-                    }
-                    UpdateList();
-                }
+            if (listView3.SelectedItems.Count <= 0) return;
 
+            QntDialog q = new QntDialog();
+            if (q.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var item in listView3.SelectedItems)
+                {
+                    var t = (item as ListViewItem).Tag as FileInfo;
+                    RawDetail det = null;
+                    if (t.Extension == ".svg")
+                    {
+                        det = SvgParser.LoadSvg(t.FullName);
+                    }
+                    if (t.Extension == ".dxf")
+                    {
+                        det = DxfParser.loadDxf(t.FullName);
+                    }
+                    int src = 0;
+                    if (polygons.Any())
+                    {
+                        src = polygons.Max(z => z.source.Value) + 1;
+                    }
+                    for (int i = 0; i < q.Qnt; i++)
+                    {
+                        context.ImportFromRawDetail(det, src);
+                    }
+                }
+                UpdateList();
             }
         }
 
@@ -662,32 +703,31 @@ namespace DeepNestPort
         bool stop = false;
         public void RunDeepnest()
         {
+            if (th != null) return;
 
-            if (th == null)
+            th = new Thread(() =>
             {
-                th = new Thread(() =>
+                context.StartNest();
+                UpdateNestsList();
+                Background.displayProgress = displayProgress;
+
+                while (true)
                 {
-                    context.StartNest();
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+
+                    context.NestIterate();
                     UpdateNestsList();
-                    Background.displayProgress = displayProgress;
+                    displayProgress(1.0f);
+                    sw.Stop();
+                    toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
+                    if (stop) break;
+                }
+                th = null;
+            });
+            th.IsBackground = true;
+            th.Start();
 
-                    while (true)
-                    {
-                        Stopwatch sw = new Stopwatch();
-                        sw.Start();
-
-                        context.NestIterate();
-                        UpdateNestsList();
-                        displayProgress(1.0f);
-                        sw.Stop();
-                        toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
-                        if (stop) break;
-                    }
-                    th = null;
-                });
-                th.IsBackground = true;
-                th.Start();
-            }
         }
 
 
@@ -710,8 +750,7 @@ namespace DeepNestPort
             }
         }
 
-
-        private void button10_Click(object sender, EventArgs e)
+        void run()
         {
             if (sheets.Count == 0 || polygons.Count == 0)
             {
@@ -725,18 +764,20 @@ namespace DeepNestPort
             RunDeepnest();
         }
 
+        private void button10_Click(object sender, EventArgs e)
+        {
+            run();
+        }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             SvgNest.Config.simplify = checkBox2.Checked;
         }
 
-
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
             Background.UseParallel = checkBox4.Checked;
         }
-
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1157,28 +1198,25 @@ namespace DeepNestPort
 
         private void listView3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listView3.SelectedItems.Count > 0 && listView3.SelectedItems[0].Tag is FileInfo)
+            if (!(listView3.SelectedItems.Count > 0 && listView3.SelectedItems[0].Tag is FileInfo)) return;
+            try
             {
-                try
+                var path = (FileInfo)listView3.SelectedItems[0].Tag;
+                RawDetail det = null;
+                if (path.Extension == ".svg")
                 {
-                    var path = (FileInfo)listView3.SelectedItems[0].Tag;
-                    RawDetail det = null;
-                    if (path.Extension == ".svg")
-                    {
-                        det = SvgParser.LoadSvg(path.FullName);
-                    }
-                    if (path.Extension == ".dxf")
-                    {
-                        det = DxfParser.loadDxf(path.FullName);
-                    }
-
-                    Preview = det;
+                    det = SvgParser.LoadSvg(path.FullName);
                 }
-                catch (Exception ex)
+                if (path.Extension == ".dxf")
                 {
-                    Preview = null;
+                    det = DxfParser.loadDxf(path.FullName);
                 }
 
+                Preview = det;
+            }
+            catch (Exception ex)
+            {
+                Preview = null;
             }
         }
 
@@ -1282,6 +1320,101 @@ namespace DeepNestPort
 
 
             UpdateList();
+        }
+
+        private void toolStripButton5_Click(object sender, EventArgs e)
+        {
+            run();
+        }
+
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Multiselect = true;
+            ofd.Filter = "DXF files (*.dxf)|*.dxf";
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            for (int i = 0; i < ofd.FileNames.Length; i++)
+            {
+                var det = DxfParser.loadDxf(ofd.FileNames[i]);
+                Infos.Add(new DetailLoadInfo() { Quantity = 1, Name = new FileInfo(ofd.FileNames[i]).Name, Path = ofd.FileNames[i] });
+            }
+            UpdateInfos();
+        }
+
+        public void UpdateInfos()
+        {
+            objectListView1.SetObjects(Infos);
+        }
+
+        public List<DetailLoadInfo> Infos = new List<DetailLoadInfo>();
+
+        public class DetailLoadInfo
+        {
+            public string Name { get; set; }
+            public string Path { get; set; }
+            public int Quantity { get; set; }
+        }
+
+        private void toolStripButton6_Click(object sender, EventArgs e)
+        {
+            context = new NestingContext();
+            int src = 0;
+            foreach (var item in sheetsInfos)
+            {
+                src = context.GetNextSheetSource();
+                for (int i = 0; i < item.Quantity; i++)
+                {
+                    var ns = NewSheet(item.Width, item.Height);
+                    sheets.Add(ns);
+                    ns.source = src;
+                }
+            }
+
+            context.ReorderSheets();
+
+            src = 0;
+            foreach (var item in Infos)
+            {
+                var det = DxfParser.loadDxf(item.Path);
+
+                for (int i = 0; i < item.Quantity; i++)
+                {
+                    context.ImportFromRawDetail(det, src);
+                }
+                src++;
+            }
+            run();
+        }
+
+        private void objectListView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (objectListView1.SelectedObject == null) return;
+            Preview = DxfParser.loadDxf((objectListView1.SelectedObject as DetailLoadInfo).Path);
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Infos.Clear();
+            objectListView1.SetObjects(Infos);
+        }
+        List<SheetLoadInfo> sheetsInfos = new List<SheetLoadInfo>();
+
+        private void deleteToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (objectListView1.SelectedObject == null) return;
+            Infos.Remove(objectListView1.SelectedObject as DetailLoadInfo);
+            objectListView1.SetObjects(Infos);
+        }
+        public class SheetLoadInfo
+        {
+            public int Width { get; set; }
+            public int Height { get; set; }
+            public int Quantity { get; set; }
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(linkLabel1.Text);
         }
     }
 }
