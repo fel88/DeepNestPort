@@ -16,11 +16,11 @@ namespace DeepNestLib
             DxfFile dxffile = DxfFile.Load(fi.FullName);
             RawDetail s = new RawDetail();
 
-            
-            s.Name = fi.FullName;            
+
+            s.Name = fi.FullName;
             IEnumerable<DxfEntity> entities = dxffile.Entities.ToArray();
 
-            
+
             LocalContour points = new LocalContour();
             List<LineElement> elems = new List<LineElement>();
 
@@ -110,11 +110,14 @@ namespace DeepNestLib
                             }
                             break;
                         }
+                    default:
+                        throw new ArgumentException("unsupported entity type: " + ent);
+
                 };
             }
 
-
-            elems = elems.Where(z => z.Start.DistTo(z.End) > 10e-5).ToList();
+            
+            elems = elems.Where(z => z.Start.DistTo(z.End) > RemoveThreshold).ToList();
             var cntrs2 = ConnectElements(elems.ToArray());
             s.Outers.AddRange(cntrs2);
             if (s.Outers.Any(z => z.Points.Count < 3))
@@ -124,6 +127,8 @@ namespace DeepNestLib
 
             return s;
         }
+        public static double RemoveThreshold = 10e-5;
+        public static double ClosingThreshold = 10e-4;
 
         public static LocalContour[] ConnectElements(LineElement[] elems)
         {
@@ -147,7 +152,7 @@ namespace DeepNestLib
                     var f1 = last.OrderBy(z => Math.Min(z.Start.DistTo(ll), z.End.DistTo(ll))).First();
 
                     var dist = Math.Min(f1.Start.DistTo(ll), f1.End.DistTo(ll));
-                    if (dist > 10e-4)
+                    if (dist > ClosingThreshold)
                     {
                         ret.Add(new LocalContour() { Points = pp.ToList() });
                         pp.Clear();

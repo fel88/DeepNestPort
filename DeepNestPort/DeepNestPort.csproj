@@ -145,6 +145,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="settings.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="svgs\1.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

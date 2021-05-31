@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<setting name="closingThreshold" value="10e-3"/>
+	<setting name="removeThreshold" value="10e-5"/>
+</root>

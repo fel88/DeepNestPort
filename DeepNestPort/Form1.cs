@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace DeepNestPort
 {
@@ -19,6 +20,7 @@ namespace DeepNestPort
         {
             InitializeComponent();
 
+            LoadSettings();
             sheetsInfos.Add(new SheetLoadInfo() { Width = 3000, Height = 1500, Quantity = 10 });
 
             objectListView2.SetObjects(sheetsInfos);
@@ -40,6 +42,28 @@ namespace DeepNestPort
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"dxfs");
+        }
+
+        private void LoadSettings()
+        {
+            if (!File.Exists("settings.xml")) return;
+            var doc = XDocument.Load("settings.xml");
+            foreach (var item in doc.Descendants("setting"))
+            {
+                switch (item.Attribute("name").Value)
+                {
+                    case "closingThreshold":
+                        {
+                            DxfParser.ClosingThreshold = double.Parse(item.Attribute("value").Value.Replace(",", "."), CultureInfo.InvariantCulture);
+                        }
+                        break;
+                    case "removeThreshold":
+                        {
+                            DxfParser.RemoveThreshold = double.Parse(item.Attribute("value").Value.Replace(",", "."), CultureInfo.InvariantCulture);
+                        }
+                        break;
+                }
+            }
         }
 
         PictureBoxProgressBar progressBar1;
@@ -1335,8 +1359,24 @@ namespace DeepNestPort
             if (ofd.ShowDialog() != DialogResult.OK) return;
             for (int i = 0; i < ofd.FileNames.Length; i++)
             {
-                var det = DxfParser.loadDxf(ofd.FileNames[i]);
-                Infos.Add(new DetailLoadInfo() { Quantity = 1, Name = new FileInfo(ofd.FileNames[i]).Name, Path = ofd.FileNames[i] });
+                try
+                {
+                    DxfParser.loadDxf(ofd.FileNames[i]);
+                    var fr = Infos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
+                    if (fr != null)
+                    {
+                        fr.Quantity++;
+                    }
+                    else
+                    {
+                        Infos.Add(new DetailLoadInfo() { Quantity = 1, Name = new FileInfo(ofd.FileNames[i]).Name, Path = ofd.FileNames[i] });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ofd.FileNames[i]}: {ex.Message}", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
             }
             UpdateInfos();
         }
@@ -1415,6 +1455,16 @@ namespace DeepNestPort
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(linkLabel1.Text);
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
