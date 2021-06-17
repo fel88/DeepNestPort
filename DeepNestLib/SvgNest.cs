@@ -410,13 +410,9 @@ namespace DeepNestLib
         // offset tree recursively
         public static void offsetTree(NFP t, double offset, SvgNestConfig config, bool? inside = null)
         {
-
-            var simple = t;
-
-            simple = simplifyFunction(t, (inside == null) ? false : inside.Value);
-
+            var simple = simplifyFunction(t, (inside == null) ? false : inside.Value);
             var offsetpaths = new NFP[] { simple };
-            if (offset > 0)
+            if (Math.Abs(offset) > 0)
             {
                 offsetpaths = polygonOffsetDeepNest(simple, offset);
             }
@@ -971,23 +967,6 @@ namespace DeepNestLib
     public enum PlacementTypeEnum
     {
         box, gravity, squeeze
-    }
-    public class SvgNestConfig
-    {
-        public PlacementTypeEnum placementType = PlacementTypeEnum.box;
-        public double curveTolerance = 0.72;
-        public double scale = 25;
-        public double clipperScale = 10000000;
-        public bool exploreConcave = false;
-        public int mutationRate = 10;
-        public int populationSize = 10;
-        public int rotations = 4;
-        public double spacing = 10;
-        public double sheetSpacing = 0;
-        public bool useHoles = false;
-        public double timeRatio = 0.5;
-        public bool mergeLines = false;
-        public bool simplify;
     }
 
     public class DbCacheKey

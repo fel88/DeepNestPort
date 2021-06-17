@@ -58,6 +58,7 @@
     <Compile Include="RawDetail.cs" />
     <Compile Include="Simplify.cs" />
     <Compile Include="SvgNest.cs" />
+    <Compile Include="SvgNestConfig.cs" />
     <Compile Include="SvgParser.cs" />
   </ItemGroup>
   <ItemGroup>

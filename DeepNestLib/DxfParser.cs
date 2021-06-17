@@ -10,7 +10,7 @@ namespace DeepNestLib
 {
     public class DxfParser
     {
-        public static RawDetail loadDxf(string path)
+        public static RawDetail LoadDxf(string path)
         {
             FileInfo fi = new FileInfo(path);
             DxfFile dxffile = DxfFile.Load(fi.FullName);
@@ -30,7 +30,6 @@ namespace DeepNestLib
                 {
                     case DxfEntityType.LwPolyline:
                         {
-
                             DxfLwPolyline poly = (DxfLwPolyline)ent;
                             if (poly.Vertices.Count() < 2)
                             {

@@ -85,9 +85,7 @@ namespace DeepNestPort
             groupBox6.Text = "Sheets: " + sheets.Count;
         }
 
-
         public NestingContext Context = new NestingContext();
-
 
         public SvgNest nest { get { return context.Nest; } }
 
@@ -99,7 +97,6 @@ namespace DeepNestPort
 
         public void RedrawPreview(DrawingContext ctx2, object previewObject)
         {
-
             ctx2.Update();
 
             ctx2.gr.Clear(Color.White);
@@ -133,6 +130,7 @@ namespace DeepNestPort
             ctx2.Setup();
 
         }
+
         public void Redraw()
         {
             var pos = pictureBox1.PointToClient(Cursor.Position);
@@ -146,39 +144,6 @@ namespace DeepNestPort
             #region preview draw
             RedrawPreview(ctx2, Preview);
             RedrawPreview(ctx3, Preview);
-            /*ctx2.gr.Clear(Color.White);
-
-            if (Preview != null)
-            {
-                ctx2.gr.ResetTransform();
-                GraphicsPath gp = new GraphicsPath();
-                if (Preview is RawDetail)
-                {
-                    foreach (var item in (Preview as RawDetail).Outers)
-                    {
-                        gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z)).ToArray());
-                    }
-                }
-                if (Preview is NFP)
-                {
-                    var nfp = (Preview as NFP);
-
-                    gp.AddPolygon(nfp.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
-                    if (nfp.children != null)
-                    {
-                        foreach (var item in nfp.children)
-                        {
-                            gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
-                        }
-                    }
-
-                }
-
-                ctx2.gr.FillPath(Brushes.LightBlue, gp);
-                ctx2.gr.DrawPath(Pens.Black, gp);
-            }
-            ctx2.Setup();*/
-
             #endregion
 
             ctx.gr.SmoothingMode = SmoothingMode.AntiAlias;
@@ -204,7 +169,6 @@ namespace DeepNestPort
                     ctx.gr.DrawString($"Nests: {nest.nests.Count} Fitness: {nest.nests.First().fitness}   Area:{nest.nests.First().area}  ", Font, Brushes.DarkBlue, 0, yy);
                     yy += (int)Font.Size + gap;
                 }
-
 
                 ctx.gr.DrawString($"Call counter: {Background.callCounter};  Last placing time: {Background.LastPlacePartTime}ms", Font, Brushes.DarkBlue, 0, yy);
                 yy += (int)Font.Size + gap;
@@ -423,9 +387,6 @@ namespace DeepNestPort
 
         }
         public float progressVal = 0;
-
-
-
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -671,7 +632,7 @@ namespace DeepNestPort
                     }
                     if (f.Extension == ".dxf")
                     {
-                        det = DxfParser.loadDxf(f.FullName);
+                        det = DxfParser.LoadDxf(f.FullName);
                     }
 
                     int src = 0;
@@ -707,7 +668,7 @@ namespace DeepNestPort
                     }
                     if (t.Extension == ".dxf")
                     {
-                        det = DxfParser.loadDxf(t.FullName);
+                        det = DxfParser.LoadDxf(t.FullName);
                     }
                     int src = 0;
                     if (polygons.Any())
@@ -1233,7 +1194,7 @@ namespace DeepNestPort
                 }
                 if (path.Extension == ".dxf")
                 {
-                    det = DxfParser.loadDxf(path.FullName);
+                    det = DxfParser.LoadDxf(path.FullName);
                 }
 
                 Preview = det;
@@ -1321,13 +1282,10 @@ namespace DeepNestPort
             {
                 for (int j = 0; j < 2; j++)
                 {
-
                     var hole = new NFP();
-
 
                     pl.children.Add(hole);
                     hole.Points = new SvgPoint[] { };
-
 
                     int hx = (i * ww / 4) + gap * (i + 1);
                     int hy = (j * hh / 3) + gap * (j + 1);
@@ -1340,8 +1298,6 @@ namespace DeepNestPort
                     hole.y = yy;
                 }
             }
-
-
 
             UpdateList();
         }
@@ -1361,7 +1317,7 @@ namespace DeepNestPort
             {
                 try
                 {
-                    DxfParser.loadDxf(ofd.FileNames[i]);
+                    DxfParser.LoadDxf(ofd.FileNames[i]);
                     var fr = Infos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
                     if (fr != null)
                     {
@@ -1388,12 +1344,6 @@ namespace DeepNestPort
 
         public List<DetailLoadInfo> Infos = new List<DetailLoadInfo>();
 
-        public class DetailLoadInfo
-        {
-            public string Name { get; set; }
-            public string Path { get; set; }
-            public int Quantity { get; set; }
-        }
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
@@ -1415,7 +1365,7 @@ namespace DeepNestPort
             src = 0;
             foreach (var item in Infos)
             {
-                var det = DxfParser.loadDxf(item.Path);
+                var det = DxfParser.LoadDxf(item.Path);
 
                 for (int i = 0; i < item.Quantity; i++)
                 {
@@ -1429,32 +1379,46 @@ namespace DeepNestPort
         private void objectListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (objectListView1.SelectedObject == null) return;
-            Preview = DxfParser.loadDxf((objectListView1.SelectedObject as DetailLoadInfo).Path);
+            Preview = DxfParser.LoadDxf((objectListView1.SelectedObject as DetailLoadInfo).Path);
+        }
+
+        public void ShowMessage(string text, MessageBoxIcon type)
+        {
+            MessageBox.Show(text, Text, MessageBoxButtons.OK, type);
+        }
+
+        public DialogResult ShowQuestion(string text)
+        {
+            return MessageBox.Show(text, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         }
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (Infos.Count == 0) { ShowMessage("There are no parts.", MessageBoxIcon.Warning); return; }
+            if (ShowQuestion("Are you to sure to delete all items?") == DialogResult.No) return;
             Infos.Clear();
             objectListView1.SetObjects(Infos);
+            Preview = null;
         }
+
         List<SheetLoadInfo> sheetsInfos = new List<SheetLoadInfo>();
 
         private void deleteToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            if (objectListView1.SelectedObject == null) return;
-            Infos.Remove(objectListView1.SelectedObject as DetailLoadInfo);
+            if (objectListView1.SelectedObjects.Count == 0) return;
+            if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No) return;
+            foreach (var item in objectListView1.SelectedObjects)
+            {
+                if (Preview != null && (item as DetailLoadInfo).Path == (Preview as RawDetail).Name) Preview = null;
+                Infos.Remove(item as DetailLoadInfo);
+            }
             objectListView1.SetObjects(Infos);
         }
-        public class SheetLoadInfo
-        {
-            public int Width { get; set; }
-            public int Height { get; set; }
-            public int Quantity { get; set; }
-        }
+
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start(linkLabel1.Text);
+            Process.Start(linkLabel1.Text);
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)

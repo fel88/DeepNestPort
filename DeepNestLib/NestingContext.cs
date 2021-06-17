@@ -109,7 +109,6 @@ namespace DeepNestLib
                 }
                 else
                 {
-
                     foreach (var item in grps)
                     {
                         SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
@@ -122,11 +121,10 @@ namespace DeepNestLib
 
                 foreach (var item in lsheets)
                 {
-                    SvgNest.offsetTree(item, -0.5 * SvgNest.Config.spacing, SvgNest.Config, true);
+                    var gap = SvgNest.Config.sheetSpacing - SvgNest.Config.spacing / 2;
+                    SvgNest.offsetTree(item, -gap, SvgNest.Config, true);
                 }
             }
-
-
 
             List<NestItem> partsLocal = new List<NestItem>();
             var p1 = lpoly.GroupBy(z => z.source).Select(z => new NestItem()

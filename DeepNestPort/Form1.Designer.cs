@@ -259,6 +259,7 @@
             this.objectListView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectListView1.FullRowSelect = true;
             this.objectListView1.GridLines = true;
+            this.objectListView1.HideSelection = false;
             this.objectListView1.Location = new System.Drawing.Point(3, 3);
             this.objectListView1.Name = "objectListView1";
             this.objectListView1.ShowGroups = false;
@@ -317,6 +318,7 @@
             this.objectListView2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectListView2.FullRowSelect = true;
             this.objectListView2.GridLines = true;
+            this.objectListView2.HideSelection = false;
             this.objectListView2.Location = new System.Drawing.Point(3, 246);
             this.objectListView2.Name = "objectListView2";
             this.objectListView2.ShowGroups = false;
@@ -686,6 +688,7 @@
             this.listView4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView4.FullRowSelect = true;
             this.listView4.GridLines = true;
+            this.listView4.HideSelection = false;
             this.listView4.Location = new System.Drawing.Point(2, 27);
             this.listView4.Margin = new System.Windows.Forms.Padding(2);
             this.listView4.Name = "listView4";
@@ -938,7 +941,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(84, 20);
             this.button1.TabIndex = 0;
-            this.button1.Text = "Add rectangle";
+            this.button1.Text = "Add sheet";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
