@@ -23,12 +23,18 @@ namespace DeepNestPort
             LoadSettings();
             sheetsInfos.Add(new SheetLoadInfo() { Width = 3000, Height = 1500, Quantity = 10 });
 
-            objectListView2.SetObjects(sheetsInfos);
+            //hack
+            toolStripButton9.BackgroundImageLayout = ImageLayout.None;
+            toolStripButton9.BackgroundImage = new Bitmap(1, 1);
+            toolStripButton9.BackColor = Color.LightGreen;
 
+            objectListView2.SetObjects(sheetsInfos);
 
             ctx = new DrawingContext(pictureBox1);
             ctx2 = new DrawingContext(pictureBox2);
             ctx3 = new DrawingContext(pictureBox3);
+            ctx3.FocusOnMove = false;
+            ctx2.FocusOnMove = false;
 
             listView1.DoubleBuffered(true);
             listView2.DoubleBuffered(true);
@@ -42,7 +48,16 @@ namespace DeepNestPort
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"dxfs");
+            Load += Form1_Load;
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            mf = new MessageFilter();
+            Application.AddMessageFilter(mf);
+        }
+
+        MessageFilter mf = null;
 
         private void LoadSettings()
         {
@@ -101,15 +116,21 @@ namespace DeepNestPort
 
             ctx2.gr.Clear(Color.White);
 
+            //ctx2.gr.DrawLine(Pens.Blue, ctx2.Transform(new PointF(0, 0)), ctx2.Transform(100, 0));
+            //ctx2.gr.DrawLine(Pens.Red, ctx2.Transform(new PointF(0, 0)), ctx2.Transform(0, 100));
+
             if (previewObject != null)
             {
                 ctx2.gr.ResetTransform();
                 GraphicsPath gp = new GraphicsPath();
+                GraphicsPath gp2 = new GraphicsPath();
+
                 if (previewObject is RawDetail raw)
                 {
                     foreach (var item in raw.Outers)
                     {
                         gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z)).ToArray());
+                        gp2.AddPolygon(item.Points.ToArray());
                     }
                 }
                 if (previewObject is NFP nfp)
@@ -123,9 +144,17 @@ namespace DeepNestPort
                         }
                     }
                 }
+                var bnd = gp2.GetBounds();
 
                 ctx2.gr.FillPath(Brushes.LightBlue, gp);
                 ctx2.gr.DrawPath(Pens.Black, gp);
+                
+                ctx2.gr.ResetTransform();
+                var cap = $"{bnd.Width:N2} x {bnd.Height:N2}";
+                var ms = ctx2.gr.MeasureString(cap, SystemFonts.DefaultFont);
+                ctx2.gr.FillRectangle(new SolidBrush(Color.FromArgb(128, Color.LightGreen)), 5, 5, ms.Width, ms.Height);
+
+                ctx2.gr.DrawString(cap, SystemFonts.DefaultFont, Brushes.Black, 5, 5);
             }
             ctx2.Setup();
 
@@ -399,7 +428,7 @@ namespace DeepNestPort
 
         private void pictureBox1_MouseEnter(object sender, EventArgs e)
         {
-            pictureBox1.Focus();
+            //pictureBox1.Focus();
         }
 
 
@@ -1380,6 +1409,7 @@ namespace DeepNestPort
         {
             if (objectListView1.SelectedObject == null) return;
             Preview = DxfParser.LoadDxf((objectListView1.SelectedObject as DetailLoadInfo).Path);
+            if (autoFit) fitAll();
         }
 
         public void ShowMessage(string text, MessageBoxIcon type)
@@ -1429,6 +1459,44 @@ namespace DeepNestPort
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void toolStripButton8_Click(object sender, EventArgs e)
+        {
+            fitAll();
+        }
+
+        void fitAll()
+        {
+            if (Preview == null) return;
+            if (!(Preview is RawDetail raw)) return;
+
+            GraphicsPath gp = new GraphicsPath();
+            foreach (var item in raw.Outers)
+            {
+                gp.AddPolygon(item.Points.ToArray());
+            }
+            ctx3.FitToPoints(gp.PathPoints, 5);
+        }
+
+        bool autoFit = true;
+        private void toolStripButton9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripButton9_CheckedChanged(object sender, EventArgs e)
+        {
+            autoFit = toolStripButton9.Checked;
+            if (autoFit)
+            {
+                fitAll();                
+                toolStripButton9.BackColor = Color.LightGreen;
+            }
+            else
+            {
+                toolStripButton9.BackColor = Color.Transparent;
+            }
         }
     }
 }

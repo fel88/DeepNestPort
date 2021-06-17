@@ -40,8 +40,10 @@ namespace DeepNestPort
             sy = (pos.Y / zold + sy - pos.Y / zoom);
         }
 
+        public bool FocusOnMove = true;
         private void Pb_MouseMove(object sender, MouseEventArgs e)
         {
+            if (!FocusOnMove) return;
             box.Focus();
         }
 
@@ -87,7 +89,7 @@ namespace DeepNestPort
         {
             return new PointF(((float)(x) + sx) * zoom, (InvertY ? (-1) : 1) * ((float)(y) + sy) * zoom);
         }
-        
+
 
         private void Pb_SizeChanged(object sender, EventArgs e)
         {
@@ -121,12 +123,12 @@ namespace DeepNestPort
             box.Invalidate();
         }
 
-        public void FitToPoints(PointF[] points)
+        public void FitToPoints(PointF[] points, int gap = 0)
         {
-            var maxx = points.Max(z => z.X);
-            var minx = points.Min(z => z.X);
-            var maxy = points.Max(z => z.Y);
-            var miny = points.Min(z => z.Y);
+            var maxx = points.Max(z => z.X) + gap;
+            var minx = points.Min(z => z.X) - gap;
+            var maxy = points.Max(z => z.Y) + gap;
+            var miny = points.Min(z => z.Y) - gap;
 
             var w = box.Width;
             var h = box.Height;
@@ -140,13 +142,12 @@ namespace DeepNestPort
             var sz1 = new Size((int)(dx * kx), (int)(dy * kx));
             var sz2 = new Size((int)(dx * ky), (int)(dy * ky));
             zoom = kx;
-            if (sz1.Width > w || sz1.Height > h) zoom = ky;           
+            if (sz1.Width > w || sz1.Height > h) zoom = ky;
 
             var x = dx / 2 + minx;
             var y = dy / 2 + miny;
 
-
-            sx = (w / 2f) / zoom - x;
+            sx = ((w / 2f) / zoom - x);
             sy = -((h / 2f) / zoom + y);
 
             var test = Transform(new PointF(x, y));

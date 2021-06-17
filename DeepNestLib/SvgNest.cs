@@ -191,8 +191,6 @@ namespace DeepNestLib
                 simple = polygon;
             }
 
-
-
             var offsets = polygonOffsetDeepNest(simple, inside ? -tolerance : tolerance);
 
             NFP offset = null;
