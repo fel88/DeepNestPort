@@ -115,7 +115,7 @@ namespace DeepNestLib
                 };
             }
 
-            
+
             elems = elems.Where(z => z.Start.DistTo(z.End) > RemoveThreshold).ToList();
             var cntrs2 = ConnectElements(elems.ToArray());
             s.Outers.AddRange(cntrs2);
@@ -173,6 +173,12 @@ namespace DeepNestLib
                 ret.Add(new LocalContour() { Points = pp.ToList() });
             }
             return ret.ToArray();
+        }
+
+        
+        public static int Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
+        {
+            throw new NotImplementedException();
         }
     }
 }

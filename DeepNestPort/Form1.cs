@@ -148,7 +148,7 @@ namespace DeepNestPort
 
                 ctx2.gr.FillPath(Brushes.LightBlue, gp);
                 ctx2.gr.DrawPath(Pens.Black, gp);
-                
+
                 ctx2.gr.ResetTransform();
                 var cap = $"{bnd.Width:N2} x {bnd.Height:N2}";
                 var ms = ctx2.gr.MeasureString(cap, SystemFonts.DefaultFont);
@@ -1236,26 +1236,23 @@ namespace DeepNestPort
 
         List<NFP> sheets { get { return context.Sheets; } }
 
+        int lastSaveFilterIndex = 1;
         private void toolStripButton2_Click_1(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Svgs files (*.svg)|*.svg";
+            sfd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            sfd.FilterIndex = lastSaveFilterIndex;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+                lastSaveFilterIndex = sfd.FilterIndex;
+                if (sfd.FilterIndex == 1)
+                {
+                    ShowMessage("Not implemented yet", MessageBoxIcon.Warning);
+                    //DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+                }
+                if (sfd.FilterIndex == 2)
+                    SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
-        }
-
-        private void listView3_MouseMove(object sender, MouseEventArgs e)
-        {
-            var ch = listView3.GetChildAtPoint(listView3.PointToClient(Cursor.Position));
-
-            if (ch != null)
-            {
-
-            }
-
-
         }
 
         Bitmap bb;
@@ -1266,8 +1263,7 @@ namespace DeepNestPort
             ctx.sy = (float)sh.y;
             ctx.InvertY = false;
             bb = new Bitmap(1 + (int)sh.Width, 1 + (int)sh.Height);
-            var gr = Graphics.FromImage(bb);
-            var tempgr = ctx.gr;
+            var gr = Graphics.FromImage(bb);            
             var tmpbmp = ctx.bmp;
             ctx.gr = gr;
             ctx.bmp = bb;
@@ -1275,15 +1271,12 @@ namespace DeepNestPort
             RenderSheet();
             ctx.gr = gr;
             ctx.bmp = tmpbmp;
-            ctx.InvertY = true;
-            //bb = ctx.bmp.Clone(new Rectangle(0, 0, ctx.bmp.Width, ctx.bmp.Height), ctx.bmp.PixelFormat);
+            ctx.InvertY = true;            
             Clipboard.SetImage(bb);
-
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-
             var xx = r.Next(2000) + 100;
             var yy = r.Next(2000);
             var ww = r.Next(250) + 150;
@@ -1336,26 +1329,33 @@ namespace DeepNestPort
             run();
         }
 
+        int lastOpenFilterIndex = 1;
+
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            ofd.FilterIndex = lastOpenFilterIndex;
             ofd.Multiselect = true;
-            ofd.Filter = "DXF files (*.dxf)|*.dxf";
             if (ofd.ShowDialog() != DialogResult.OK) return;
             for (int i = 0; i < ofd.FileNames.Length; i++)
             {
+                lastOpenFilterIndex = ofd.FilterIndex;
                 try
                 {
-                    DxfParser.LoadDxf(ofd.FileNames[i]);
+                    //try to load
+                    if (ofd.FileNames[i].ToLower().EndsWith("dxf"))
+                        DxfParser.LoadDxf(ofd.FileNames[i]);
+
+                    if (ofd.FileNames[i].ToLower().EndsWith("svg"))
+                        SvgParser.LoadSvg(ofd.FileNames[i]);
+
                     var fr = Infos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
                     if (fr != null)
-                    {
                         fr.Quantity++;
-                    }
                     else
-                    {
                         Infos.Add(new DetailLoadInfo() { Quantity = 1, Name = new FileInfo(ofd.FileNames[i]).Name, Path = ofd.FileNames[i] });
-                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -1372,7 +1372,6 @@ namespace DeepNestPort
         }
 
         public List<DetailLoadInfo> Infos = new List<DetailLoadInfo>();
-
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
@@ -1394,7 +1393,15 @@ namespace DeepNestPort
             src = 0;
             foreach (var item in Infos)
             {
-                var det = DxfParser.LoadDxf(item.Path);
+                RawDetail det = null;
+                if (item.Path.ToLower().EndsWith("dxf"))
+                {
+                    det = DxfParser.LoadDxf(item.Path);
+                }
+                else if (item.Path.ToLower().EndsWith("svg"))
+                {
+                    det = SvgParser.LoadSvg(item.Path);
+                }
 
                 for (int i = 0; i < item.Quantity; i++)
                 {
@@ -1408,7 +1415,15 @@ namespace DeepNestPort
         private void objectListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (objectListView1.SelectedObject == null) return;
-            Preview = DxfParser.LoadDxf((objectListView1.SelectedObject as DetailLoadInfo).Path);
+            var path = (objectListView1.SelectedObject as DetailLoadInfo).Path.ToLower();
+            if (path.EndsWith("dxf"))
+            {
+                Preview = DxfParser.LoadDxf(path);
+            }
+            else if (path.EndsWith("svg"))
+            {
+                Preview = SvgParser.LoadSvg(path);
+            }
             if (autoFit) fitAll();
         }
 
@@ -1490,12 +1505,27 @@ namespace DeepNestPort
             autoFit = toolStripButton9.Checked;
             if (autoFit)
             {
-                fitAll();                
+                fitAll();
                 toolStripButton9.BackColor = Color.LightGreen;
             }
             else
             {
                 toolStripButton9.BackColor = Color.Transparent;
+            }
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                SvgNest.Config.curveTolerance = double.Parse(textBox6.Text.Replace(",", "."), CultureInfo.InvariantCulture);
+                textBox6.BackColor = Color.White;
+                textBox6.ForeColor = Color.Black;
+            }
+            catch
+            {
+                textBox6.BackColor = Color.Red;
+                textBox6.ForeColor = Color.White;
             }
         }
     }
