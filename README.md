@@ -5,7 +5,9 @@ DXF Import: https://github.com/IxMilia/Dxf
 
 **Project status: WIP**
 
-<img src="imgs/img1.png"/>
+<img src="imgs/2.png"/>
+<img src="imgs/3.png"/>
+
 
 ## Compiling minkowski.dll
 1. Replace <boost_1.62_path> with your real BOOST (1.62) path in compile.bat
