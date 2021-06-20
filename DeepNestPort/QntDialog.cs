@@ -27,7 +27,7 @@ namespace DeepNestPort
                 DialogResult = DialogResult.OK;
                 Close();
             }
-            catch (Exception ex)
+            catch 
             {
                 textBox1.BackColor = Color.Red;
                 textBox1.ForeColor = Color.White;
@@ -43,7 +43,6 @@ namespace DeepNestPort
             if (e.KeyCode == Keys.Enter)
             {
                 Quit();
-
             }
         }
 

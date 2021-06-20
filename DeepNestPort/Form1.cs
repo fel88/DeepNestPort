@@ -1263,7 +1263,7 @@ namespace DeepNestPort
             ctx.sy = (float)sh.y;
             ctx.InvertY = false;
             bb = new Bitmap(1 + (int)sh.Width, 1 + (int)sh.Height);
-            var gr = Graphics.FromImage(bb);            
+            var gr = Graphics.FromImage(bb);
             var tmpbmp = ctx.bmp;
             ctx.gr = gr;
             ctx.bmp = bb;
@@ -1271,7 +1271,7 @@ namespace DeepNestPort
             RenderSheet();
             ctx.gr = gr;
             ctx.bmp = tmpbmp;
-            ctx.InvertY = true;            
+            ctx.InvertY = true;
             Clipboard.SetImage(bb);
         }
 
@@ -1494,11 +1494,7 @@ namespace DeepNestPort
             ctx3.FitToPoints(gp.PathPoints, 5);
         }
 
-        bool autoFit = true;
-        private void toolStripButton9_Click(object sender, EventArgs e)
-        {
-
-        }
+        bool autoFit = true;        
 
         private void toolStripButton9_CheckedChanged(object sender, EventArgs e)
         {
@@ -1527,6 +1523,45 @@ namespace DeepNestPort
                 textBox6.BackColor = Color.Red;
                 textBox6.ForeColor = Color.White;
             }
+        }
+
+        private void setToToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (objectListView1.SelectedObjects.Count == 0) return;
+            QntDialog q = new QntDialog();
+            q.ShowDialog();
+
+            foreach (var item in objectListView1.SelectedObjects)
+            {
+                (item as DetailLoadInfo).Quantity = q.Qnt;
+            }
+            objectListView1.RefreshObjects(objectListView1.SelectedObjects);
+        }
+
+        private void multiplyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (objectListView1.SelectedObjects.Count == 0) return;
+            QntDialog q = new QntDialog();
+            q.ShowDialog();
+
+            foreach (var item in objectListView1.SelectedObjects)
+            {
+                (item as DetailLoadInfo).Quantity *= q.Qnt;
+            }
+            objectListView1.RefreshObjects(objectListView1.SelectedObjects);
+        }
+
+        private void divideToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (objectListView1.SelectedObjects.Count == 0) return;
+            QntDialog q = new QntDialog();
+            q.ShowDialog();
+            if (q.Qnt == 0) return;
+            foreach (var item in objectListView1.SelectedObjects)
+            {
+                (item as DetailLoadInfo).Quantity /= q.Qnt;
+            }
+            objectListView1.RefreshObjects(objectListView1.SelectedObjects);
         }
     }
 }
