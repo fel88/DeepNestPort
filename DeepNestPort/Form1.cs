@@ -1245,11 +1245,9 @@ namespace DeepNestPort
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 lastSaveFilterIndex = sfd.FilterIndex;
-                if (sfd.FilterIndex == 1)
-                {
-                    ShowMessage("Not implemented yet", MessageBoxIcon.Warning);
-                    //DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
-                }
+                if (sfd.FilterIndex == 1)                            
+                    DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+                
                 if (sfd.FilterIndex == 2)
                     SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
@@ -1459,8 +1457,6 @@ namespace DeepNestPort
             }
             objectListView1.SetObjects(Infos);
         }
-
-
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(linkLabel1.Text);
