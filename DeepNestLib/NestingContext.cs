@@ -161,11 +161,15 @@ namespace DeepNestLib
             Iterations++;
         }
 
-        public void ExportSvg(string v)
+        public void Export(string v)
         {
-            SvgParser.Export(v, Polygons, Sheets);
+            if (v.ToLower().EndsWith("svg"))
+                SvgParser.Export(v, Polygons, Sheets);
+            else if (v.ToLower().EndsWith("dxf"))
+                DxfParser.Export(v, Polygons, Sheets);
+            else
+                throw new NotImplementedException($"unknown format: {v}");
         }
-
 
         public void AssignPlacement(SheetPlacement plcpr)
         {
@@ -176,7 +180,7 @@ namespace DeepNestLib
             PlacedPartsCount = 0;
             List<NFP> placed = new List<NFP>();
             foreach (var item in Polygons)
-            {                
+            {
                 item.sheet = null;
             }
             List<int> sheetsIds = new List<int>();
@@ -199,7 +203,7 @@ namespace DeepNestLib
                         PlacedPartsCount++;
                         var poly = Polygons.First(z => z.id == ssitem.id);
                         totalPartsArea += GeometryUtil.polygonArea(poly);
-                        placed.Add(poly);                        
+                        placed.Add(poly);
                         poly.sheet = sheet;
                         poly.x = ssitem.x + sheet.x;
                         poly.y = ssitem.y + sheet.y;
@@ -385,7 +389,20 @@ namespace DeepNestLib
             {
                 var cnt = int.Parse(item.Attribute("count").Value);
                 var path = item.Attribute("path").Value;
-                var r = SvgParser.LoadSvg(path);
+                RawDetail r = null;
+                if (path.ToLower().EndsWith("svg"))
+                {
+                    r = SvgParser.LoadSvg(path);
+                }
+                else if (path.ToLower().EndsWith("dxf"))
+                {
+                    r = DxfParser.LoadDxf(path);
+                }
+                else
+                {
+                    continue;
+                }
+
                 var src = GetNextSource();
 
                 for (int i = 0; i < cnt; i++)

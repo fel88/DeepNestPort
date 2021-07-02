@@ -128,7 +128,7 @@ namespace DeepNestLib
             return s;
         }
         public static double RemoveThreshold = 10e-5;
-        public static double ClosingThreshold = 10e-4;
+        public static double ClosingThreshold = 10e-2;
 
         public static LocalContour[] ConnectElements(LineElement[] elems)
         {

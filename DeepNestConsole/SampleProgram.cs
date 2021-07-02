@@ -1,13 +1,7 @@
 ﻿using DeepNestLib;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace DeepNestConsole
 {
@@ -19,6 +13,7 @@ namespace DeepNestConsole
             //insert you code here            
             return Context.Iterations >= 3;
         }
+
         public void Run()
         {
             Background.UseParallel = true;
@@ -39,9 +34,10 @@ namespace DeepNestConsole
             } while (!IsFinished());
 
             #region convert results
-            Context.ExportSvg("temp.svg");
-            Console.WriteLine("Results exported in: temp.svg");
+            string path = "output.dxf";
+            Context.Export(path);
+            Console.WriteLine($"Results exported in: {path}");
             #endregion            
-        }        
+        }
     }
 }
