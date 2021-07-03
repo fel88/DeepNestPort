@@ -21,3 +21,4 @@ cl /Ox ..... -I "C:\boost_1_62_0" /LD minkowski.cc
 
 ## Contributors
 * https://github.com/Daniel-t-1/DeepNestPort (dxf export)
+* https://github.com/9swampy/DeepNestPort (simplification features)
