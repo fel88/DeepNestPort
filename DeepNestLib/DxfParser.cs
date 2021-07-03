@@ -20,7 +20,6 @@ namespace DeepNestLib
             s.Name = fi.FullName;
             IEnumerable<DxfEntity> entities = dxffile.Entities.ToArray();
 
-            LocalContour points = new LocalContour();
             List<LineElement> elems = new List<LineElement>();
 
             foreach (DxfEntity ent in entities)
@@ -34,9 +33,16 @@ namespace DeepNestLib
                             {
                                 continue;
                             }
+                            LocalContour points = new LocalContour();
                             foreach (DxfLwPolylineVertex vert in poly.Vertices)
                             {
                                 points.Points.Add(new PointF((float)vert.X, (float)vert.Y));
+                            }
+                            for (int i = 0; i < points.Points.Count; i++)
+                            {
+                                var p0 = points.Points[i];
+                                var p1 = points.Points[(i + 1) % points.Points.Count];
+                                elems.Add(new LineElement() { Start = p0, End = p1 });
                             }
                         }
                         break;
@@ -100,11 +106,18 @@ namespace DeepNestLib
                             {
                                 continue;
                             }
-
-                            foreach (DxfVertex vert in poly.Vertices)
+                            LocalContour points = new LocalContour();
+                            for (int i = 0; i < poly.Vertices.Count; i++)
                             {
+                                DxfVertex vert = poly.Vertices[i];
                                 points.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
 
+                            }
+                            for (int i = 0; i < points.Points.Count; i++)
+                            {
+                                var p0 = points.Points[i];
+                                var p1 = points.Points[(i + 1) % points.Points.Count];
+                                elems.Add(new LineElement() { Start = p0, End = p1 });
                             }
                             break;
                         }
@@ -199,7 +212,7 @@ namespace DeepNestLib
                     }
 
                     double sheetXoffset = -sheetwidth * i;
-                    
+
                     DxfPoint offsetdistance = new DxfPoint(nFP.x + sheetXoffset, nFP.y, 0D);
                     List<DxfEntity> newlist = OffsetToNest(fl.Entities, new DxfPoint(pivot.x, pivot.y, 0), offsetdistance, nFP.Rotation);
 
