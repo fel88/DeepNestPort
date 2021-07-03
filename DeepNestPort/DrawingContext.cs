@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeepNestLib;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -24,6 +25,62 @@ namespace DeepNestPort
             sx = box.Width / 2;
             sy = -box.Height / 2;
             pb.MouseWheel += Pb_MouseWheel;
+        }
+
+        GraphicsPath getGraphicsPath(NFP nfp)
+        {
+            GraphicsPath gp = new GraphicsPath();
+            gp.AddPolygon(nfp.Points.Select(z => Transform(z.x, z.y)).ToArray());
+            if (nfp.children != null)
+            {
+                foreach (var item in nfp.children)
+                {
+                    gp.AddPolygon(item.Points.Select(z => Transform(z.x, z.y)).ToArray());
+                }
+            }
+            return gp;
+        }
+        GraphicsPath getGraphicsPath(RawDetail det)
+        {
+            GraphicsPath gp = new GraphicsPath();
+            foreach (var item in det.Outers)
+            {
+                gp.AddPolygon(item.Points.Select(z => Transform(z)).ToArray());
+            }
+            return gp;
+        }
+
+        public float GetLabelHeight()
+        {
+            return SystemFonts.DefaultFont.GetHeight();
+        }
+
+        public SizeF DrawLabel(string text, Brush fontBrush, Color backColor, int x, int y, int opacity = 128)
+        {
+            var ms = gr.MeasureString(text, SystemFonts.DefaultFont);
+            gr.FillRectangle(new SolidBrush(Color.FromArgb(opacity, backColor)), x, y, ms.Width, ms.Height);
+            gr.DrawString(text, SystemFonts.DefaultFont, fontBrush, x, y);
+            return ms;
+        }
+
+        public GraphicsPath Draw(NFP nfp, Pen pen = null, Brush brush = null)
+        {
+            var gp = getGraphicsPath(nfp);
+            if (brush != null)
+                gr.FillPath(brush, gp);
+            if (pen != null)
+                gr.DrawPath(pen, gp);
+            return gp;
+        }
+
+        public GraphicsPath Draw(RawDetail det, Pen pen = null, Brush brush = null)
+        {
+            var gp = getGraphicsPath(det);
+            if (brush != null)
+                gr.FillPath(brush, gp);
+            if (pen != null)
+                gr.DrawPath(pen, gp);
+            return gp;
         }
 
         private void Pb_MouseWheel(object sender, MouseEventArgs e)
@@ -71,7 +128,19 @@ namespace DeepNestPort
                 origsy = sy;
             }
         }
+
+        internal void Clear(Color color)
+        {
+            gr.Clear(color);
+        }
+
         float startx, starty;
+
+        internal void Reset()
+        {
+            gr.ResetTransform();
+        }
+
         float origsx, origsy;
         bool isDrag = false;
 

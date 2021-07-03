@@ -50,10 +50,15 @@
             this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.quantityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.multiplyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.divideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
@@ -149,10 +154,8 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.quantityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.setToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.multiplyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.divideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -191,6 +194,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.tabPage5.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -301,7 +305,7 @@
             this.toolStripButton9.Name = "toolStripButton9";
             this.toolStripButton9.Size = new System.Drawing.Size(97, 22);
             this.toolStripButton9.Text = "fit automatically";
-            this.toolStripButton9.CheckedChanged += new System.EventHandler(this.toolStripButton9_CheckedChanged);            
+            this.toolStripButton9.CheckedChanged += new System.EventHandler(this.toolStripButton9_CheckedChanged);
             // 
             // objectListView2
             // 
@@ -395,21 +399,52 @@
             this.deleteToolStripMenuItem2,
             this.quantityToolStripMenuItem});
             this.contextMenuStrip4.Name = "contextMenuStrip4";
-            this.contextMenuStrip4.Size = new System.Drawing.Size(181, 92);
+            this.contextMenuStrip4.Size = new System.Drawing.Size(119, 70);
             // 
             // clearToolStripMenuItem
             // 
             this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.clearToolStripMenuItem.Text = "clear";
             this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem2
             // 
             this.deleteToolStripMenuItem2.Name = "deleteToolStripMenuItem2";
-            this.deleteToolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
+            this.deleteToolStripMenuItem2.Size = new System.Drawing.Size(118, 22);
             this.deleteToolStripMenuItem2.Text = "delete";
             this.deleteToolStripMenuItem2.Click += new System.EventHandler(this.deleteToolStripMenuItem2_Click);
+            // 
+            // quantityToolStripMenuItem
+            // 
+            this.quantityToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.setToToolStripMenuItem,
+            this.multiplyToolStripMenuItem,
+            this.divideToolStripMenuItem});
+            this.quantityToolStripMenuItem.Name = "quantityToolStripMenuItem";
+            this.quantityToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.quantityToolStripMenuItem.Text = "quantity";
+            // 
+            // setToToolStripMenuItem
+            // 
+            this.setToToolStripMenuItem.Name = "setToToolStripMenuItem";
+            this.setToToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.setToToolStripMenuItem.Text = "set to";
+            this.setToToolStripMenuItem.Click += new System.EventHandler(this.setToToolStripMenuItem_Click);
+            // 
+            // multiplyToolStripMenuItem
+            // 
+            this.multiplyToolStripMenuItem.Name = "multiplyToolStripMenuItem";
+            this.multiplyToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.multiplyToolStripMenuItem.Text = "multiply";
+            this.multiplyToolStripMenuItem.Click += new System.EventHandler(this.multiplyToolStripMenuItem_Click);
+            // 
+            // divideToolStripMenuItem
+            // 
+            this.divideToolStripMenuItem.Name = "divideToolStripMenuItem";
+            this.divideToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.divideToolStripMenuItem.Text = "divide";
+            this.divideToolStripMenuItem.Click += new System.EventHandler(this.divideToolStripMenuItem_Click);
             // 
             // toolStrip2
             // 
@@ -444,6 +479,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.groupBox9);
+            this.tabPage2.Controls.Add(this.checkBox5);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.textBox6);
             this.tabPage2.Controls.Add(this.groupBox8);
@@ -470,6 +507,17 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Settings";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Location = new System.Drawing.Point(389, 11);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(111, 17);
+            this.checkBox5.TabIndex = 31;
+            this.checkBox5.Text = "simplification draw";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            this.checkBox5.CheckedChanged += new System.EventHandler(this.checkBox5_CheckedChanged);
             // 
             // label2
             // 
@@ -1522,36 +1570,26 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(13, 17);
             this.toolStripStatusLabel1.Text = "..";
             // 
-            // quantityToolStripMenuItem
+            // groupBox9
             // 
-            this.quantityToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.setToToolStripMenuItem,
-            this.multiplyToolStripMenuItem,
-            this.divideToolStripMenuItem});
-            this.quantityToolStripMenuItem.Name = "quantityToolStripMenuItem";
-            this.quantityToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.quantityToolStripMenuItem.Text = "quantity";
+            this.groupBox9.Controls.Add(this.checkBox6);
+            this.groupBox9.Location = new System.Drawing.Point(10, 228);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(200, 100);
+            this.groupBox9.TabIndex = 32;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "Port features";
             // 
-            // setToToolStripMenuItem
+            // checkBox6
             // 
-            this.setToToolStripMenuItem.Name = "setToToolStripMenuItem";
-            this.setToToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.setToToolStripMenuItem.Text = "set to";
-            this.setToToolStripMenuItem.Click += new System.EventHandler(this.setToToolStripMenuItem_Click);
-            // 
-            // multiplyToolStripMenuItem
-            // 
-            this.multiplyToolStripMenuItem.Name = "multiplyToolStripMenuItem";
-            this.multiplyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.multiplyToolStripMenuItem.Text = "multiply";
-            this.multiplyToolStripMenuItem.Click += new System.EventHandler(this.multiplyToolStripMenuItem_Click);
-            // 
-            // divideToolStripMenuItem
-            // 
-            this.divideToolStripMenuItem.Name = "divideToolStripMenuItem";
-            this.divideToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.divideToolStripMenuItem.Text = "divide";
-            this.divideToolStripMenuItem.Click += new System.EventHandler(this.divideToolStripMenuItem_Click);
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Location = new System.Drawing.Point(6, 21);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(169, 17);
+            this.checkBox6.TabIndex = 33;
+            this.checkBox6.Text = "clip by hull during simplification";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            this.checkBox6.CheckedChanged += new System.EventHandler(this.checkBox6_CheckedChanged);
             // 
             // Form1
             // 
@@ -1614,6 +1652,8 @@
             this.tabPage5.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1743,6 +1783,9 @@
         private System.Windows.Forms.ToolStripMenuItem setToToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem multiplyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem divideToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBox5;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.CheckBox checkBox6;
     }
 }
 

@@ -49,6 +49,8 @@ namespace DeepNestPort
 
             UpdateFilesList(@"dxfs");
             Load += Form1_Load;
+
+            checkBox6.Checked = SvgNest.Config.clipByHull;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -110,54 +112,51 @@ namespace DeepNestPort
 
         object Preview;
 
-        public void RedrawPreview(DrawingContext ctx2, object previewObject)
+        object lastSimplified;
+        NFP lastSimplifiedResult;
+
+        public void RedrawPreview(DrawingContext ctx, object previewObject)
         {
-            ctx2.Update();
+            ctx.Update();
+            ctx.Clear(Color.White);
 
-            ctx2.gr.Clear(Color.White);
-
-            //ctx2.gr.DrawLine(Pens.Blue, ctx2.Transform(new PointF(0, 0)), ctx2.Transform(100, 0));
-            //ctx2.gr.DrawLine(Pens.Red, ctx2.Transform(new PointF(0, 0)), ctx2.Transform(0, 100));
-
+            //ctx2.gr.DrawLine(Pens.Blue, ctx.Transform(new PointF(0, 0)), ctx2.Transform(100, 0));
+            //ctx2.gr.DrawLine(Pens.Red, ctx.Transform(new PointF(0, 0)), ctx2.Transform(0, 100));
+            ctx.Reset();
             if (previewObject != null)
             {
-                ctx2.gr.ResetTransform();
-                GraphicsPath gp = new GraphicsPath();
-                GraphicsPath gp2 = new GraphicsPath();
-
+                RectangleF? bnd = null;
                 if (previewObject is RawDetail raw)
                 {
-                    foreach (var item in raw.Outers)
+                    var _nfp = raw.ToNfp();
+
+                    ctx.Draw(raw, Pens.Black, Brushes.LightBlue);
+                    if (drawSimplification)
                     {
-                        gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z)).ToArray());
-                        gp2.AddPolygon(item.Points.ToArray());
-                    }
-                }
-                if (previewObject is NFP nfp)
-                {
-                    gp.AddPolygon(nfp.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
-                    if (nfp.children != null)
-                    {
-                        foreach (var item in nfp.children)
+                        NFP s = lastSimplifiedResult;
+                        if (lastSimplified != raw)
                         {
-                            gp.AddPolygon(item.Points.Select(z => ctx2.Transform(z.x, z.y)).ToArray());
+                            s = SvgNest.simplifyFunction(_nfp, false);
+                            lastSimplifiedResult = s;
+                            lastSimplified = raw;
                         }
+
+                        ctx.Draw(s, Pens.Red);
+                        var pointsChange = $"{_nfp.Points.Length} => {s.Points.Length} points";
+                        ctx.DrawLabel(pointsChange, Brushes.Black, Color.Orange, 5, (int)(10 + ctx.GetLabelHeight()));
                     }
+                    bnd = raw.BoundingBox();
                 }
-                var bnd = gp2.GetBounds();
+                else if (previewObject is NFP nfp)
+                {
+                    var g = ctx.Draw(nfp, Pens.Black, Brushes.LightBlue);
+                    bnd = g.GetBounds();
+                }
 
-                ctx2.gr.FillPath(Brushes.LightBlue, gp);
-                ctx2.gr.DrawPath(Pens.Black, gp);
-
-                ctx2.gr.ResetTransform();
-                var cap = $"{bnd.Width:N2} x {bnd.Height:N2}";
-                var ms = ctx2.gr.MeasureString(cap, SystemFonts.DefaultFont);
-                ctx2.gr.FillRectangle(new SolidBrush(Color.FromArgb(128, Color.LightGreen)), 5, 5, ms.Width, ms.Height);
-
-                ctx2.gr.DrawString(cap, SystemFonts.DefaultFont, Brushes.Black, 5, 5);
+                var cap = $"{bnd.Value.Width:N2} x {bnd.Value.Height:N2}";
+                ctx.DrawLabel(cap, Brushes.Black, Color.LightGreen, 5, 5);
             }
-            ctx2.Setup();
-
+            ctx.Setup();
         }
 
         public void Redraw()
@@ -176,9 +175,9 @@ namespace DeepNestPort
             #endregion
 
             ctx.gr.SmoothingMode = SmoothingMode.AntiAlias;
-            ctx.gr.Clear(Color.White);
+            ctx.Clear(Color.White);
 
-            ctx.gr.ResetTransform();
+            ctx.Reset();
 
             ctx.gr.DrawLine(Pens.Red, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(1000, 0)));
             ctx.gr.DrawLine(Pens.Blue, ctx.Transform(new PointF(0, 0)), ctx.Transform(new PointF(0, 1000)));
@@ -317,9 +316,9 @@ namespace DeepNestPort
         public void RenderSheet()
         {
             ctx.gr.SmoothingMode = SmoothingMode.AntiAlias;
-            ctx.gr.Clear(Color.White);
+            ctx.Clear(Color.White);
 
-            ctx.gr.ResetTransform();
+            ctx.Reset();
 
 
             foreach (var item in polygons.Union(sheets))
@@ -786,6 +785,7 @@ namespace DeepNestPort
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             SvgNest.Config.simplify = checkBox2.Checked;
+            lastSimplified = null;
         }
 
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
@@ -1245,9 +1245,9 @@ namespace DeepNestPort
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 lastSaveFilterIndex = sfd.FilterIndex;
-                if (sfd.FilterIndex == 1)                            
+                if (sfd.FilterIndex == 1)
                     DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
-                
+
                 if (sfd.FilterIndex == 2)
                     SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
@@ -1490,7 +1490,7 @@ namespace DeepNestPort
             ctx3.FitToPoints(gp.PathPoints, 5);
         }
 
-        bool autoFit = true;        
+        bool autoFit = true;
 
         private void toolStripButton9_CheckedChanged(object sender, EventArgs e)
         {
@@ -1513,6 +1513,7 @@ namespace DeepNestPort
                 SvgNest.Config.curveTolerance = double.Parse(textBox6.Text.Replace(",", "."), CultureInfo.InvariantCulture);
                 textBox6.BackColor = Color.White;
                 textBox6.ForeColor = Color.Black;
+                lastSimplified = null;
             }
             catch
             {
@@ -1558,6 +1559,18 @@ namespace DeepNestPort
                 (item as DetailLoadInfo).Quantity /= q.Qnt;
             }
             objectListView1.RefreshObjects(objectListView1.SelectedObjects);
+        }
+
+        bool drawSimplification = false;
+        private void checkBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            drawSimplification = checkBox5.Checked;
+        }
+
+        private void checkBox6_CheckedChanged(object sender, EventArgs e)
+        {
+            SvgNest.Config.clipByHull = checkBox6.Checked;
+            lastSimplified = null;
         }
     }
 }

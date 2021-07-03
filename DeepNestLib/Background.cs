@@ -1371,6 +1371,7 @@ namespace DeepNestLib
 
 
         }
+        
         public static NFP toNestCoordinates(IntPoint[] polygon, double scale)
         {
             var clone = new List<SvgPoint>();
@@ -1384,6 +1385,7 @@ namespace DeepNestLib
             }
             return new NFP() { Points = clone.ToArray() };
         }
+        
         public static NFP getHull(NFP polygon)
         {
             // convert to hulljs format

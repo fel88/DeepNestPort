@@ -16,5 +16,9 @@
         public double timeRatio = 0.5;
         public bool mergeLines = false;
         public bool simplify;
+
+        #region port features (don't exist in the original DeepNest project)
+        public bool clipByHull = false;
+        #endregion
     }
 }

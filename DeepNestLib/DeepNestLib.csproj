@@ -60,6 +60,8 @@
     <Compile Include="SvgNest.cs" />
     <Compile Include="SvgNestConfig.cs" />
     <Compile Include="SvgParser.cs" />
+    <Compile Include="SvgPoint.cs" />
+    <Compile Include="_Clipper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\clipper_library\clipper_library.csproj">

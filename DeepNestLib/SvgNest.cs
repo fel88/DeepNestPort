@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace DeepNestLib
@@ -19,6 +18,30 @@ namespace DeepNestLib
         {
             public SvgPoint point;
             public double distance;
+        }
+        /// <summary>
+        /// Clip the subject so it stays inside the clipBounds.
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="clipBounds"></param>
+        /// <param name="clipperScale"></param>
+        /// <returns></returns>
+        internal static NFP ClipSubject(NFP subject, NFP clipBounds, double clipperScale)
+        {
+            var clipperSubject = Background.innerNfpToClipperCoordinates(new NFP[] { subject }, SvgNest.Config);
+            var clipperClip = Background.innerNfpToClipperCoordinates(new NFP[] { clipBounds }, SvgNest.Config);
+
+            var clipper = new Clipper();
+            clipper.AddPaths(clipperClip.Select(z => z.ToList()).ToList(), PolyType.ptClip, true);
+            clipper.AddPaths(clipperSubject.Select(z => z.ToList()).ToList(), PolyType.ptSubject, true);
+
+            List<List<IntPoint>> finalNfp = new List<List<IntPoint>>();
+            if (clipper.Execute(ClipType.ctIntersection, finalNfp, PolyFillType.pftNonZero, PolyFillType.pftNonZero) && finalNfp != null && finalNfp.Count > 0)
+            {
+                return Background.toNestCoordinates(finalNfp[0].ToArray(), clipperScale);
+            }
+
+            return subject;
         }
         public static SvgPoint getTarget(SvgPoint o, NFP simple, double tol)
         {
@@ -122,14 +145,18 @@ namespace DeepNestLib
 
         public static NFP simplifyFunction(NFP polygon, bool inside)
         {
-            var tolerance = 4 * Config.curveTolerance;
+            return simplifyFunction(polygon, inside, SvgNest.Config);
+        }
+        public static NFP simplifyFunction(NFP polygon, bool inside, SvgNestConfig config)
+        {
+            var tolerance = 4 * config.curveTolerance;
 
             // give special treatment to line segments above this length (squared)
-            var fixedTolerance = 40 * Config.curveTolerance * 40 * Config.curveTolerance;
+            var fixedTolerance = 40 * config.curveTolerance * 40 * config.curveTolerance;
             int i, j, k;
 
-
-            if (Config.simplify)
+            var hull = Background.getHull(polygon);
+            if (config.simplify)
             {
                 /*
 				// use convex hull
@@ -139,7 +166,6 @@ namespace DeepNestLib
 				}
 			
 				return hull.getHull();*/
-                var hull = Background.getHull(polygon);
                 if (hull != null)
                 {
                     return hull;
@@ -317,8 +343,8 @@ namespace DeepNestLib
                     if ((GeometryUtil._almostEqual(s1.x, s2.x) || GeometryUtil._almostEqual(s1.y, s2.y)) && // we only really care about vertical and horizontal lines
                     GeometryUtil._withinDistance(p1, s1, 2 * tolerance) &&
                     GeometryUtil._withinDistance(p2, s2, 2 * tolerance) &&
-                    (!GeometryUtil._withinDistance(p1, s1, Config.curveTolerance / 1000) ||
-                    !GeometryUtil._withinDistance(p2, s2, Config.curveTolerance / 1000)))
+                    (!GeometryUtil._withinDistance(p1, s1, config.curveTolerance / 1000) ||
+                    !GeometryUtil._withinDistance(p2, s2, config.curveTolerance / 1000)))
                     {
                         p1.x = s1.x;
                         p1.y = s1.y;
@@ -329,38 +355,44 @@ namespace DeepNestLib
                 }
             }
 
-            //if(straightened){
-
-            var Ac = _Clipper.ScaleUpPaths(offset, 10000000);
-            var Bc = _Clipper.ScaleUpPaths(polygon, 10000000);
-
-            var combined = new List<List<IntPoint>>();
-            var clipper = new ClipperLib.Clipper();
-
-            clipper.AddPath(Ac.ToList(), ClipperLib.PolyType.ptSubject, true);
-            clipper.AddPath(Bc.ToList(), ClipperLib.PolyType.ptSubject, true);
-
-            // the line straightening may have made the offset smaller than the simplified
-            if (clipper.Execute(ClipperLib.ClipType.ctUnion, combined, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero))
+            //if (straightened)
             {
-                double? largestArea = null;
-                for (i = 0; i < combined.Count; i++)
+
+                var Ac = _Clipper.ScaleUpPaths(offset, 10000000);
+                var Bc = _Clipper.ScaleUpPaths(polygon, 10000000);
+
+                var combined = new List<List<IntPoint>>();
+                var clipper = new ClipperLib.Clipper();
+
+                clipper.AddPath(Ac.ToList(), ClipperLib.PolyType.ptSubject, true);
+                clipper.AddPath(Bc.ToList(), ClipperLib.PolyType.ptSubject, true);
+
+                // the line straightening may have made the offset smaller than the simplified
+                if (clipper.Execute(ClipperLib.ClipType.ctUnion, combined, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero))
                 {
-                    var n = Background.toNestCoordinates(combined[i].ToArray(), 10000000);
-                    var sarea = -GeometryUtil.polygonArea(n);
-                    if (largestArea == null || largestArea < sarea)
+                    double? largestArea = null;
+                    for (i = 0; i < combined.Count; i++)
                     {
-                        offset = n;
-                        largestArea = sarea;
+                        var n = Background.toNestCoordinates(combined[i].ToArray(), 10000000);
+                        var sarea = -GeometryUtil.polygonArea(n);
+                        if (largestArea == null || largestArea < sarea)
+                        {
+                            offset = n;
+                            largestArea = sarea;
+                        }
                     }
                 }
             }
-            //}
 
             cleaned = cleanPolygon2(offset);
             if (cleaned != null && cleaned.length > 1)
             {
                 offset = cleaned;
+            }
+
+            if (config.clipByHull)
+            {
+                offset = ClipSubject(offset, hull, config.clipperScale);
             }
 
             // mark any points that are exact (for line merge detection)
@@ -893,51 +925,6 @@ namespace DeepNestLib
         public bool searchEdges;
     }
 
-
-    public class _Clipper
-    {
-        public static ClipperLib.IntPoint[] ScaleUpPaths(NFP p, double scale = 1)
-        {
-            List<ClipperLib.IntPoint> ret = new List<ClipperLib.IntPoint>();
-
-            for (int i = 0; i < p.Points.Count(); i++)
-            {
-                //p.Points[i] = new SvgNestPort.SvgPoint((float)Math.Round(p.Points[i].x * scale), (float)Math.Round(p.Points[i].y * scale));
-                ret.Add(new ClipperLib.IntPoint(
-                    (long)Math.Round((decimal)p.Points[i].x * (decimal)scale),
-                    (long)Math.Round((decimal)p.Points[i].y * (decimal)scale)
-                ));
-
-            }
-            return ret.ToArray();
-        }
-        /*public static IntPoint[] ScaleUpPath(IntPoint[] p, double scale = 1)
-        {
-            for (int i = 0; i < p.Length; i++)
-            {
-
-                //p[i] = new IntPoint(p[i].X * scale, p[i].Y * scale);
-                p[i] = new IntPoint(
-                    (long)Math.Round((decimal)p[i].X * (decimal)scale),
-                    (long)Math.Round((decimal)p[i].Y * (decimal)scale));
-            }
-            return p.ToArray();
-        }
-        public static void ScaleUpPaths(List<List<IntPoint>> p, double scale = 1)
-        {
-            for (int i = 0; i < p.Count; i++)
-            {
-                for (int j = 0; j < p[i].Count; j++)
-                {
-                    p[i][j] = new IntPoint(p[i][j].X * scale, p[i][j].Y * scale);
-
-                }
-            }
-
-
-        }*/
-    }
-
     public class DataInfo
     {
 
@@ -1035,26 +1022,6 @@ namespace DeepNestLib
         }
     }
 
-
-    public class SvgPoint
-    {
-        public bool exact = true;
-        public override string ToString()
-        {
-            return "x: " + x + "; y: " + y;
-        }
-        public int id;
-        public SvgPoint(double _x, double _y)
-        {
-            x = _x;
-            y = _y;
-        }
-        public bool marked;
-        public double x;
-        public double y;
-
-    }
-
     public class PopulationItem
     {
         public object processing = null;
@@ -1133,3 +1100,4 @@ namespace DeepNestLib
         public bool IsSheet;
     }
 }
+

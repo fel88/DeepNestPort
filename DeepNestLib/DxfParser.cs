@@ -17,10 +17,8 @@ namespace DeepNestLib
             DxfFile dxffile = DxfFile.Load(fi.FullName);
             RawDetail s = new RawDetail();
 
-
             s.Name = fi.FullName;
             IEnumerable<DxfEntity> entities = dxffile.Entities.ToArray();
-
 
             LocalContour points = new LocalContour();
             List<LineElement> elems = new List<LineElement>();

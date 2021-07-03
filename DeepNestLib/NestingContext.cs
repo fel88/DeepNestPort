@@ -301,41 +301,16 @@ namespace DeepNestLib
                 }
             }
         }
+        
         public NFP ImportFromRawDetail(RawDetail raw, int src)
         {
-            NFP po = null;
-            List<NFP> nfps = new List<NFP>();
-            foreach (var item in raw.Outers)
-            {
-                var nn = new NFP();
-                nfps.Add(nn);
-                foreach (var pitem in item.Points)
-                {
-                    nn.AddPoint(new SvgPoint(pitem.X, pitem.Y));
-                }
-            }
-
-            if (nfps.Any())
-            {
-                var tt = nfps.OrderByDescending(z => z.Area).First();
-                po = tt;
-                po.Name = raw.Name;
-
-                foreach (var r in nfps)
-                {
-                    if (r == tt) continue;
-                    if (po.children == null)
-                    {
-                        po.children = new List<NFP>();
-                    }
-                    po.children.Add(r);
-                }
-
-                po.source = src;
-                Polygons.Add(po);
-            }
-            return po;
+            var d = raw.ToNfp();
+            if (d == null) return null;
+            d.source = src;
+            Polygons.Add(d);
+            return d;            
         }
+
         public int GetNextSource()
         {
             if (Polygons.Any())
@@ -344,6 +319,7 @@ namespace DeepNestLib
             }
             return 0;
         }
+
         public int GetNextSheetSource()
         {
             if (Sheets.Any())

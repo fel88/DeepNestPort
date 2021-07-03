@@ -19,7 +19,7 @@ namespace DeepNestLib
         {
             Points = new SvgPoint[] { };
         }
-
+        
         public string Name { get; set; }
         public void AddPoint(SvgPoint point)
         {
