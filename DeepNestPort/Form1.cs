@@ -50,7 +50,17 @@ namespace DeepNestPort
             UpdateFilesList(@"dxfs");
             Load += Form1_Load;
 
-            checkBox6.Checked = SvgNest.Config.clipByHull;
+            if (SvgNest.Config.clipByHull)
+            {
+                radioButton4.Checked = true;
+            }
+            if (SvgNest.Config.clipByRects)
+            {
+                radioButton5.Checked = true;
+            }
+            
+            numericUpDown1.Value = SvgNest.Config.populationSize;
+            numericUpDown2.Value = SvgNest.Config.mutationRate;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -808,7 +818,6 @@ namespace DeepNestPort
             {
                 SvgNest.Config.placementType = PlacementTypeEnum.squeeze;
             }
-
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
@@ -1567,9 +1576,24 @@ namespace DeepNestPort
             drawSimplification = checkBox5.Checked;
         }
 
-        private void checkBox6_CheckedChanged(object sender, EventArgs e)
+        
+
+        private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.clipByHull = checkBox6.Checked;
+            SvgNest.Config.clipByHull = radioButton4.Checked;
+            lastSimplified = null;
+        }
+
+        private void radioButton5_CheckedChanged(object sender, EventArgs e)
+        {            
+            SvgNest.Config.clipByRects = radioButton5.Checked;
+            lastSimplified = null;
+        }
+
+        private void radioButton6_CheckedChanged(object sender, EventArgs e)
+        {
+            SvgNest.Config.clipByHull = false;
+            SvgNest.Config.clipByRects = false;
             lastSimplified = null;
         }
     }

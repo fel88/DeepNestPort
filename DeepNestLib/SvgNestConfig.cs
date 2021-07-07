@@ -19,6 +19,7 @@
 
         #region port features (don't exist in the original DeepNest project)
         public bool clipByHull = false;
+        public bool clipByRects = true; //clip by AABB + MinRect
         #endregion
     }
 }

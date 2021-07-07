@@ -159,12 +159,11 @@ namespace DeepNestPort
             return new PointF(((float)(x) + sx) * zoom, (InvertY ? (-1) : 1) * ((float)(y) + sy) * zoom);
         }
 
-
         private void Pb_SizeChanged(object sender, EventArgs e)
         {
+            if (box.Width <= 0 || box.Height <= 0) return;
             bmp = new Bitmap(box.Width, box.Height);
             gr = Graphics.FromImage(bmp);
-
             box.Image = bmp;
         }
 

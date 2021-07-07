@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 
 namespace DeepNestLib
 {
     public class GeneticAlgorithm
-    {        
+    {
         SvgNestConfig Config;
         public List<PopulationItem> population;
 
@@ -25,10 +23,9 @@ namespace DeepNestLib
 90
 
         };
-
+                
         public GeneticAlgorithm(NFP[] adam, SvgNestConfig config)
         {
-
             List<float> ang2 = new List<float>();
             for (int i = 0; i < adam.Length; i++)
             {
@@ -36,7 +33,7 @@ namespace DeepNestLib
             }
             defaultAngles = ang2.ToArray();
             Config = config;
-            
+
 
             List<float> angles = new List<float>();
             for (int i = 0; i < adam.Length; i++)
@@ -53,16 +50,17 @@ namespace DeepNestLib
 
                 //angles.Add(randomAngle(adam[i]));
             }
+
+
             population = new List<PopulationItem>();
-            population.Add(new PopulationItem() { placements = adam.ToList(), Rotation = angles.ToArray() });
+            population.Add(new PopulationItem() { placements = adam.ToList(), Rotation = angles.ToArray() });            
             while (population.Count() < config.populationSize)
             {
                 var mutant = this.mutate(population[0]);
                 population.Add(mutant);
             }
         }
-       
-       
+
         public PopulationItem mutate(PopulationItem p)
         {
             var clone = new PopulationItem();
@@ -105,7 +103,7 @@ namespace DeepNestLib
             return array;
         }
 
-    
+
         // returns a random individual from the population, weighted to the front of the list (lower fitness value is more likely to be selected)
         public PopulationItem randomWeightedIndividual(PopulationItem exclude = null)
         {
@@ -168,9 +166,6 @@ namespace DeepNestLib
                 }
             }
 
-
-
-
             return new[] {new  PopulationItem() {
                 placements= gene1, Rotation= rot1.ToArray()},
                 new PopulationItem(){ placements= gene2, Rotation= rot2.ToArray()}};
@@ -205,6 +200,4 @@ namespace DeepNestLib
             this.population = newpopulation;
         }
     }
-
-
 }

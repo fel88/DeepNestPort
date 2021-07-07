@@ -19,6 +19,73 @@ namespace DeepNestLib
             public SvgPoint point;
             public double distance;
         }
+
+        #region experimental features
+        public static SvgPoint RotatePoint(SvgPoint p, double cx, double cy, double angle)
+        {
+            return new SvgPoint(Math.Cos(angle) * (p.x - cx) - Math.Sin(angle) * (p.y - cy) + cx,
+                         Math.Sin(angle) * (p.x - cx) + Math.Cos(angle) * (p.y - cy) + cy);
+        }
+
+        public static NFP GetMinimumBox(NFP vv)
+        {
+            var hull = Background.getHull(new NFP() { Points = vv.Points.Select(z => new SvgPoint(z.x, z.y)).ToArray() });
+            double minArea = double.MaxValue;
+            List<SvgPoint> rect = new List<SvgPoint>();
+            for (int i = 0; i < hull.Length; i++)
+            {
+                var p0 = hull.Points[i];
+                var p1 = hull.Points[(i + 1) % hull.Length];
+                var dx = p1.x - p0.x;
+                var dy = p1.y - p0.y;
+                var atan = Math.Atan2(dy, dx);
+
+                List<SvgPoint> dd = new List<SvgPoint>();
+                for (int j = 0; j < vv.Length; j++)
+                {
+                    var r = RotatePoint(new SvgPoint(vv[j].x, vv[j].y), 0, 0, -atan);
+                    dd.Add(r);
+                }
+                var maxx = dd.Max(z => z.x);
+                var maxy = dd.Max(z => z.y);
+                var minx = dd.Min(z => z.x);
+                var miny = dd.Min(z => z.y);
+
+                var area = (maxx - minx) * (maxy - miny);
+
+                if (area < minArea)
+                {
+                    minArea = area;
+                    rect.Clear();
+
+                    rect.Add(new SvgPoint(minx, miny));
+                    rect.Add(new SvgPoint(maxx, miny));
+                    rect.Add(new SvgPoint(maxx, maxy));
+                    rect.Add(new SvgPoint(minx, maxy));
+                    for (int j = 0; j < rect.Count; j++)
+                    {
+                        rect[j] = RotatePoint(new SvgPoint(rect[j].x, rect[j].y), 0, 0, atan);
+                    }
+                }
+            }
+
+            NFP ret = new NFP();
+            ret.Points = rect.ToArray();
+            return ret;
+        }
+        static NFP boundingBox(NFP offset)
+        {
+            NFP ret = new NFP();
+            var maxx = offset.Points.Max(z => z.x);
+            var maxy = offset.Points.Max(z => z.y);
+            var minx = offset.Points.Min(z => z.x);
+            var miny = offset.Points.Min(z => z.y);
+            ret.AddPoint(new SvgPoint(minx, miny));
+            ret.AddPoint(new SvgPoint(maxx, miny));
+            ret.AddPoint(new SvgPoint(maxx, maxy));
+            ret.AddPoint(new SvgPoint(minx, maxy));
+            return ret;
+        }
         /// <summary>
         /// Clip the subject so it stays inside the clipBounds.
         /// </summary>
@@ -43,6 +110,8 @@ namespace DeepNestLib
 
             return subject;
         }
+        #endregion
+
         public static SvgPoint getTarget(SvgPoint o, NFP simple, double tol)
         {
             List<InrangeItem> inrange = new List<InrangeItem>();
@@ -390,10 +459,19 @@ namespace DeepNestLib
                 offset = cleaned;
             }
 
+            #region experimental
             if (config.clipByHull)
             {
                 offset = ClipSubject(offset, hull, config.clipperScale);
             }
+            else if (config.clipByRects)
+            {
+                NFP rect1 = boundingBox(hull);
+                offset = ClipSubject(offset, rect1, config.clipperScale);
+                var mbox = GetMinimumBox(hull);
+                offset = ClipSubject(offset, mbox, config.clipperScale);
+            }
+            #endregion 
 
             // mark any points that are exact (for line merge detection)
             for (i = 0; i < offset.length; i++)
@@ -755,9 +833,9 @@ namespace DeepNestLib
                 }
             }
         }
+
         public void launchWorkers(NestItem[] parts)
         {
-
             background.ResponseAction = ResponseProcessor;
             if (ga == null)
             {
@@ -767,7 +845,6 @@ namespace DeepNestLib
                 {
                     if (!parts[i].IsSheet)
                     {
-
                         for (int j = 0; j < parts[i].Quanity; j++)
                         {
                             var poly = cloneTree(parts[i].Polygon); // deep copy
@@ -893,32 +970,9 @@ namespace DeepNestLib
                     running++;
                 }
             }
-
-
-
         }
 
-
-
-        public PolygonTreeItem[] tree;
-
-
-        public static IntPoint[] toClipperCoordinates(NFP polygon)
-        {
-            var clone = new List<IntPoint>();
-            for (var i = 0; i < polygon.length; i++)
-            {
-                clone.Add
-                    (new IntPoint(
-                     polygon[i].x,
-                             polygon[i].y
-
-                        ));
-            }
-
-            return clone.ToArray();
-        }
-
+        public PolygonTreeItem[] tree;        
 
 
         public bool useHoles;
@@ -940,8 +994,8 @@ namespace DeepNestLib
         public List<List<NFP>> children;
         //ipcRenderer.send('background-start', { index: i, sheets: sheets, sheetids: sheetids, sheetsources: sheetsources, sheetchildren: sheetchildren, 
         //individual: GA.population[i], config: config, ids: ids, sources: sources, children: children});
-
     }
+
     public class PolygonTreeItem
     {
         public NFP Polygon;
@@ -989,7 +1043,6 @@ namespace DeepNestLib
                 return nfp;
             }
         }
-
         public NonameReturn(NfpKey key, NFP[] nfp)
         {
             this.key = key;
@@ -1001,6 +1054,7 @@ namespace DeepNestLib
     {
         string stringify();
     }
+
     public class NfpKey : IStringify
     {
 
