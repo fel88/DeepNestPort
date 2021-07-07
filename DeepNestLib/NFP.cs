@@ -8,6 +8,7 @@ namespace DeepNestLib
 {
     public class NFP : IStringify
     {
+        public int Z;
         public bool fitted { get { return sheet != null; } }
         public NFP sheet;
         public override string ToString()

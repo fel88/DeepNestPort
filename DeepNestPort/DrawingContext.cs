@@ -12,8 +12,8 @@ namespace DeepNestPort
         public DrawingContext(PictureBox pb)
         {
             box = pb;
-
-            bmp = new Bitmap(pb.Width, pb.Height);
+            
+            bmp = new Bitmap(pb.Width, pb.Height);            
             pb.SizeChanged += Pb_SizeChanged;
             gr = Graphics.FromImage(bmp);
             gr.SmoothingMode = SmoothingMode.AntiAlias;
@@ -27,6 +27,7 @@ namespace DeepNestPort
             pb.MouseWheel += Pb_MouseWheel;
         }
 
+        public bool EnableWheel = true;
         GraphicsPath getGraphicsPath(NFP nfp)
         {
             GraphicsPath gp = new GraphicsPath();
@@ -83,8 +84,9 @@ namespace DeepNestPort
             return gp;
         }
 
-        private void Pb_MouseWheel(object sender, MouseEventArgs e)
+        protected virtual void Pb_MouseWheel(object sender, MouseEventArgs e)
         {
+            if (!EnableWheel) return;
             float zold = zoom;
             if (e.Delta > 0) { zoom *= 1.5f; ; }
             else { zoom *= 0.5f; }
@@ -154,13 +156,17 @@ namespace DeepNestPort
         {
             return new PointF((p1.X + sx) * zoom, (InvertY ? (-1) : 1) * (p1.Y + sy) * zoom);
         }
+        public virtual PointF BackTransform(PointF p1)
+        {
+            return new PointF((p1.X / zoom - sx), (InvertY ? (-1) : 1) * (p1.Y / zoom - sy));
+        }
         public virtual PointF Transform(double x, double y)
         {
             return new PointF(((float)(x) + sx) * zoom, (InvertY ? (-1) : 1) * ((float)(y) + sy) * zoom);
         }
 
         private void Pb_SizeChanged(object sender, EventArgs e)
-        {
+        {            
             if (box.Width <= 0 || box.Height <= 0) return;
             bmp = new Bitmap(box.Width, box.Height);
             gr = Graphics.FromImage(bmp);

@@ -31,8 +31,11 @@ namespace DeepNestPort
             objectListView2.SetObjects(sheetsInfos);
 
             ctx = new DrawingContext(pictureBox1);
+            pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             ctx2 = new DrawingContext(pictureBox2);
             ctx3 = new DrawingContext(pictureBox3);
+
+            ctx.FocusOnMove = false;
             ctx3.FocusOnMove = false;
             ctx2.FocusOnMove = false;
 
@@ -58,10 +61,53 @@ namespace DeepNestPort
             {
                 radioButton5.Checked = true;
             }
-            
+
             numericUpDown1.Value = SvgNest.Config.populationSize;
             numericUpDown2.Value = SvgNest.Config.mutationRate;
+
+            pictureBox1.MouseDown += PictureBox1_MouseDown;
+            pictureBox1.MouseUp += PictureBox1_MouseUp;
         }
+
+        bool enableEdit = false;
+        float rotationStep = 45;
+        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (drag)
+            {
+                dragNfp.rotation += (e.Delta > 0 ? 1 : -1) * rotationStep;
+            }
+        }
+
+        bool drag = false;
+        double startx;
+        double starty;
+        double startCursorX;
+        double startCursorY;
+
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            drag = false;
+            dragNfp = null;
+            ctx.EnableWheel = true;
+        }
+
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            var pos = pictureBox1.PointToClient(Cursor.Position);
+            if (e.Button == MouseButtons.Left && hoveredNfp != null && enableEdit)
+            {
+                dragNfp = hoveredNfp;
+                startx = dragNfp.x;
+                starty = dragNfp.y;
+                drag = true;
+                ctx.EnableWheel = false;
+                var tr = ctx.BackTransform(pos);
+                startCursorX = tr.X;
+                startCursorY = tr.Y;
+            }
+        }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -168,16 +214,69 @@ namespace DeepNestPort
             }
             ctx.Setup();
         }
+        NFP dragNfp = null;
+        NFP hoveredNfp = null;
 
+        void updateHover()
+        {
+            var pos = pictureBox1.PointToClient(Cursor.Position);
+
+            hoveredNfp = null;
+            foreach (var item in polygons.Union(sheets))
+            {
+                if (sheets.Contains(item)) continue;
+                if (!(item is Sheet))
+                {
+                    if (!item.fitted) continue;
+                }
+
+                GraphicsPath path = new GraphicsPath();
+                if (item.Points != null && item.Points.Any())
+                {
+                    var m = new Matrix();
+                    m.Translate((float)item.x, (float)item.y);
+                    m.Rotate(item.rotation);
+
+                    var pnts = item.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                    m.TransformPoints(pnts);
+
+                    path.AddPolygon(pnts.Select(z => ctx.Transform(z)).ToArray());
+                    if (item.children != null)
+                    {
+                        foreach (var citem in item.children)
+                        {
+                            var pnts2 = citem.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                            m.TransformPoints(pnts2);
+                            path.AddPolygon(pnts2.Select(z => ctx.Transform(z)).ToArray());
+
+                        }
+                    }
+
+                    if (!sheets.Contains(item))
+                    {
+                        if (path.IsVisible(pos))
+                        {
+                            hoveredNfp = item;
+                        }
+                    }
+                }
+            }
+        }
         public void Redraw()
         {
             var pos = pictureBox1.PointToClient(Cursor.Position);
+            var tr = ctx.BackTransform(pos);
             var pos1 = ctx.GetPos();
             var posx = pos1.X;
             var posy = pos1.Y;
+
             ctx.Update();
             //ctx2.Update();
-
+            if (drag && dragNfp != null)
+            {
+                dragNfp.x = startx + (-startCursorX + tr.X);
+                dragNfp.y = starty + (-startCursorY + tr.Y);
+            }
 
             #region preview draw
             RedrawPreview(ctx2, Preview);
@@ -228,7 +327,22 @@ namespace DeepNestPort
                     ctx.gr.DrawImage(bb, new RectangleF(pp.X, pp.Y, bb.Width * ctx.zoom, bb.Height * ctx.zoom), new Rectangle(0, 0, bb.Width, bb.Height), GraphicsUnit.Pixel);
                 }
             }
-            foreach (var item in polygons.Union(sheets))
+
+            #region hovered update
+            if (enableEdit)
+            {
+                updateHover();                
+            }
+            #endregion
+            foreach (var item in polygons)
+            {
+                item.Z = 0;
+            }
+            if (dragNfp != null)
+            {
+                dragNfp.Z = 1;
+            }
+            foreach (var item in polygons.Union(sheets).OrderBy(z => z.Z))
             {
                 if (!checkBox1.Checked)
                 {
@@ -247,8 +361,6 @@ namespace DeepNestPort
                     m.Translate((float)item.x, (float)item.y);
                     m.Rotate(item.rotation);
 
-
-
                     var pnts = item.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
                     m.TransformPoints(pnts);
 
@@ -263,6 +375,7 @@ namespace DeepNestPort
 
                         }
                     }
+
                     ctx.gr.ResetTransform();
 
                     /*if (selected == item)
@@ -275,7 +388,17 @@ namespace DeepNestPort
                     {
                         if (!sheets.Contains(item))
                         {
-                            ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
+                            bool hovered = item == hoveredNfp;
+
+                            if (hovered || dragNfp == item)
+                            {
+                                ctx.gr.FillPath(new SolidBrush(Color.Blue), path);
+                            }
+                            else
+                            {
+                                ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
+                            }
+
                         }
                         ctx.gr.DrawPath(Pens.Black, path);
                     }
@@ -1576,7 +1699,7 @@ namespace DeepNestPort
             drawSimplification = checkBox5.Checked;
         }
 
-        
+
 
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
@@ -1585,7 +1708,7 @@ namespace DeepNestPort
         }
 
         private void radioButton5_CheckedChanged(object sender, EventArgs e)
-        {            
+        {
             SvgNest.Config.clipByRects = radioButton5.Checked;
             lastSimplified = null;
         }
@@ -1595,6 +1718,27 @@ namespace DeepNestPort
             SvgNest.Config.clipByHull = false;
             SvgNest.Config.clipByRects = false;
             lastSimplified = null;
+        }
+
+        private void textBox7_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                rotationStep = float.Parse(textBox7.Text.Replace(",", "."), CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            enableEdit = !enableEdit;
+
+            button9.BackColor = enableEdit ? Color.Green : SystemColors.Control;
+            button9.ForeColor = enableEdit ? Color.White : Color.Black;
+
         }
     }
 }
