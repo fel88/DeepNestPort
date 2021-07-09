@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -111,6 +113,20 @@ namespace DeepNestLib
         public int? source = null;
         public float Rotation;
 
+        public SvgPoint Center()
+        {
+            var m = new Matrix();
+            m.Translate((float)x, (float)y);
+            m.Rotate(rotation);
+
+            var pnts = Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+            m.TransformPoints(pnts);
+            var maxx = pnts.Max(z => z.X);
+            var minx = pnts.Min(z => z.X);
+            var maxy = pnts.Max(z => z.Y);
+            var miny = pnts.Min(z => z.Y);
+            return new SvgPoint((maxx + minx) / 2, (maxy + miny) / 2);
+        }
 
         public float rotation
         {

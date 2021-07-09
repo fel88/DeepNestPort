@@ -69,21 +69,28 @@ namespace DeepNestPort
             pictureBox1.MouseUp += PictureBox1_MouseUp;
         }
 
+
         bool enableEdit = false;
         float rotationStep = 45;
-        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (drag)
-            {
-                dragNfp.rotation += (e.Delta > 0 ? 1 : -1) * rotationStep;
-            }
-        }
-
         bool drag = false;
         double startx;
         double starty;
         double startCursorX;
         double startCursorY;
+
+        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (!drag) return;
+
+            var p0 = dragNfp.Center();
+            dragNfp.rotation += (e.Delta > 0 ? 1 : -1) * rotationStep;
+            var p1 = dragNfp.Center();
+
+            var dx = p1.x - p0.x;
+            var dy = p1.y - p0.y;
+            startx -= dx;
+            starty -= dy;
+        }
 
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
@@ -98,6 +105,7 @@ namespace DeepNestPort
             if (e.Button == MouseButtons.Left && hoveredNfp != null && enableEdit)
             {
                 dragNfp = hoveredNfp;
+                propertyGrid1.SelectedObject = dragNfp;
                 startx = dragNfp.x;
                 starty = dragNfp.y;
                 drag = true;
@@ -331,7 +339,7 @@ namespace DeepNestPort
             #region hovered update
             if (enableEdit)
             {
-                updateHover();                
+                updateHover();
             }
             #endregion
             foreach (var item in polygons)
@@ -1724,11 +1732,12 @@ namespace DeepNestPort
         {
             try
             {
-                rotationStep = float.Parse(textBox7.Text.Replace(",", "."), CultureInfo.InvariantCulture);
+                rotationStep = float.Parse(textBox7.Text.Replace(",", "."), CultureInfo.InvariantCulture) % 360f;
+                textBox7.BackColor = Color.White;
             }
-            catch (Exception ex)
+            catch
             {
-
+                textBox7.BackColor = Color.Pink;
             }
         }
 
