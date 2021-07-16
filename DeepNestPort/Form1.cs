@@ -21,7 +21,8 @@ namespace DeepNestPort
             InitializeComponent();
 
             LoadSettings();
-            sheetsInfos.Add(new SheetLoadInfo() { Width = 3000, Height = 1500, Quantity = 10 });
+
+            sheetsInfos.Add(new SheetLoadInfo() { Nfp = NewSheet(), Width = 3000, Height = 1500, Quantity = 10 });
 
             //hack
             toolStripButton9.BackgroundImageLayout = ImageLayout.None;
@@ -105,7 +106,6 @@ namespace DeepNestPort
             if (e.Button == MouseButtons.Left && hoveredNfp != null && enableEdit)
             {
                 dragNfp = hoveredNfp;
-                propertyGrid1.SelectedObject = dragNfp;
                 startx = dragNfp.x;
                 starty = dragNfp.y;
                 drag = true;
@@ -215,6 +215,7 @@ namespace DeepNestPort
                 {
                     var g = ctx.Draw(nfp, Pens.Black, Brushes.LightBlue);
                     bnd = g.GetBounds();
+                    bnd = new RectangleF(0, 0, bnd.Value.Width / ctx.zoom, bnd.Value.Height / ctx.zoom);
                 }
 
                 var cap = $"{bnd.Value.Width:N2} x {bnd.Value.Height:N2}";
@@ -346,20 +347,15 @@ namespace DeepNestPort
             {
                 item.Z = 0;
             }
-            if (dragNfp != null)
-            {
-                dragNfp.Z = 1;
-            }
+            if (dragNfp != null) dragNfp.Z = 1;
+
             foreach (var item in polygons.Union(sheets).OrderBy(z => z.Z))
             {
                 if (!checkBox1.Checked)
-                {
                     continue;
-                }
+
                 if (!(item is Sheet))
-                {
                     if (!item.fitted) continue;
-                }
 
                 GraphicsPath path = new GraphicsPath();
                 if (item.Points != null && item.Points.Any())
@@ -385,31 +381,15 @@ namespace DeepNestPort
                     }
 
                     ctx.gr.ResetTransform();
-
-                    /*if (selected == item)
+                    if (!sheets.Contains(item))
                     {
-                        ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.Orange)), path);
-                        ctx.gr.DrawPath(Pens.DarkBlue, path);
-
+                        bool hovered = item == hoveredNfp;
+                        if (hovered || dragNfp == item)
+                            ctx.gr.FillPath(new SolidBrush(Color.Blue), path);
+                        else
+                            ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
                     }
-                    else*/
-                    {
-                        if (!sheets.Contains(item))
-                        {
-                            bool hovered = item == hoveredNfp;
-
-                            if (hovered || dragNfp == item)
-                            {
-                                ctx.gr.FillPath(new SolidBrush(Color.Blue), path);
-                            }
-                            else
-                            {
-                                ctx.gr.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
-                            }
-
-                        }
-                        ctx.gr.DrawPath(Pens.Black, path);
-                    }
+                    ctx.gr.DrawPath(Pens.Black, path);
 
                     if (item is Sheet)
                     {
@@ -421,7 +401,6 @@ namespace DeepNestPort
                             bool was = false;
                             foreach (var zitem in fr.placements.First())
                             {
-
                                 var sheetid = zitem.sheetId;
                                 if (sheetid != item.id) continue;
                                 var sheet = sheets.FirstOrDefault(z => z.id == sheetid);
@@ -547,7 +526,6 @@ namespace DeepNestPort
             }
         }
 
-
         Thread th;
 
         internal void displayProgress(float progress)
@@ -565,13 +543,7 @@ namespace DeepNestPort
                 Preview = selected;
             }
         }
-
-        private void pictureBox1_MouseEnter(object sender, EventArgs e)
-        {
-            //pictureBox1.Focus();
-        }
-
-
+                
         public void UpdateFilesList(string path)
         {
             var di = new DirectoryInfo(path);
@@ -628,11 +600,7 @@ namespace DeepNestPort
 
             tt.Height = w;
             tt.Width = w;
-            tt.Points = new SvgPoint[] { };
-            int x = 0;
-            int y = 0;
-
-
+            tt.Points = new SvgPoint[] { };            
 
             for (int i = 0; i < 360; i += 5)
             {
@@ -640,8 +608,6 @@ namespace DeepNestPort
                 var yy = w / 2 * Math.Sin(i * Math.PI / 180.0f);
                 tt.AddPoint(new SvgPoint(xx + w / 2, yy + w / 2));
             }
-
-
 
             return tt;
         }
@@ -651,7 +617,6 @@ namespace DeepNestPort
             polygons.Clear();
             UpdateList();
         }
-
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count > 0)
@@ -663,8 +628,6 @@ namespace DeepNestPort
                 UpdateList();
             }
         }
-
-
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -750,13 +713,11 @@ namespace DeepNestPort
             }
         }
 
-
         private void clearAllToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             sheets.Clear();
             UpdateList();
         }
-
 
         private void moveToPolygonsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1520,9 +1481,14 @@ namespace DeepNestPort
                 src = context.GetNextSheetSource();
                 for (int i = 0; i < item.Quantity; i++)
                 {
-                    var ns = NewSheet(item.Width, item.Height);
-                    sheets.Add(ns);
-                    ns.source = src;
+                    var ns = Background.clone(item.Nfp);
+                    Sheet sheet = new Sheet();
+                    sheet.Points = ns.Points;
+                    sheet.children = ns.children;
+                    sheets.Add(sheet);
+                    sheet.Width = sheet.WidthCalculated;
+                    sheet.Height = sheet.HeightCalculated;
+                    sheet.source = src;
                 }
             }
 
@@ -1586,7 +1552,7 @@ namespace DeepNestPort
 
         List<SheetLoadInfo> sheetsInfos = new List<SheetLoadInfo>();
 
-        private void deleteToolStripMenuItem2_Click(object sender, EventArgs e)
+        void deleteParts()
         {
             if (objectListView1.SelectedObjects.Count == 0) return;
             if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No) return;
@@ -1596,6 +1562,10 @@ namespace DeepNestPort
                 Infos.Remove(item as DetailLoadInfo);
             }
             objectListView1.SetObjects(Infos);
+        }
+        private void deleteToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            deleteParts();
         }
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -1620,14 +1590,21 @@ namespace DeepNestPort
         void fitAll()
         {
             if (Preview == null) return;
-            if (!(Preview is RawDetail raw)) return;
-
-            GraphicsPath gp = new GraphicsPath();
-            foreach (var item in raw.Outers)
+            if (Preview is RawDetail raw)
             {
-                gp.AddPolygon(item.Points.ToArray());
+                GraphicsPath gp = new GraphicsPath();
+                foreach (var item in raw.Outers)
+                {
+                    gp.AddPolygon(item.Points.ToArray());
+                }
+                ctx3.FitToPoints(gp.PathPoints, 5);
             }
-            ctx3.FitToPoints(gp.PathPoints, 5);
+            if (Preview is NFP nfp)
+            {
+                GraphicsPath gp = new GraphicsPath();
+                gp.AddPolygon(nfp.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray());
+                ctx3.FitToPoints(gp.PathPoints, 5);
+            }
         }
 
         bool autoFit = true;
@@ -1707,8 +1684,6 @@ namespace DeepNestPort
             drawSimplification = checkBox5.Checked;
         }
 
-
-
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
             SvgNest.Config.clipByHull = radioButton4.Checked;
@@ -1747,7 +1722,109 @@ namespace DeepNestPort
 
             button9.BackColor = enableEdit ? Color.Green : SystemColors.Control;
             button9.ForeColor = enableEdit ? Color.White : Color.Black;
+        }
 
+        private void objectListView2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (objectListView2.SelectedObject == null) return;
+            Preview = (objectListView2.SelectedObject as SheetLoadInfo).Nfp;
+            if (autoFit) fitAll();
+        }
+
+        private void dxfToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            ofd.FilterIndex = lastOpenFilterIndex;
+            ofd.Multiselect = true;
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            for (int i = 0; i < ofd.FileNames.Length; i++)
+            {
+                lastOpenFilterIndex = ofd.FilterIndex;
+                try
+                {
+                    RawDetail det = null;
+                    if (ofd.FileNames[i].ToLower().EndsWith("dxf"))
+                        det = DxfParser.LoadDxf(ofd.FileNames[i]);
+
+                    if (ofd.FileNames[i].ToLower().EndsWith("svg"))
+                        det = SvgParser.LoadSvg(ofd.FileNames[i]);
+
+                    var fr = sheetsInfos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
+                    if (fr != null)
+                        fr.Quantity++;
+                    else
+                    {
+
+                        var nfp = det.ToNfp();
+                        var bbox = det.BoundingBox();
+                        sheetsInfos.Add(new SheetLoadInfo()
+                        {
+                            Quantity = 1,
+                            Nfp = nfp,
+                            Width = bbox.Width,
+                            Height = bbox.Height,
+                            Info = new FileInfo(ofd.FileNames[i]).Name,
+                            Path = ofd.FileNames[i]
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ofd.FileNames[i]}: {ex.Message}", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            updateSheetInfos();
+        }
+
+        void updateSheetInfos()
+        {
+            objectListView2.SetObjects(sheetsInfos);
+        }
+
+        void deleteSheet()
+        {
+            if (objectListView2.SelectedObjects.Count == 0) return;
+            if (ShowQuestion($"Are you to sure to delete {objectListView2.SelectedObjects.Count} sheets?") == DialogResult.No) return;
+            foreach (var item in objectListView2.SelectedObjects)
+            {
+                sheetsInfos.Remove(item as SheetLoadInfo);
+            }
+            updateSheetInfos();
+        }
+        private void objectListView2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteSheet();
+            }
+        }
+
+        private void rectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddSheetDialog a = new AddSheetDialog();
+            if (a.ShowDialog() != DialogResult.OK) return;
+            sheetsInfos.Add(new SheetLoadInfo()
+            {
+                Height = a.SheetHeight,
+                Width = a.SheetWidth,
+                Nfp = NewSheet(a.SheetWidth, a.SheetHeight),
+                Quantity = 1
+            });
+            updateSheetInfos();
+        }
+
+        private void deleteToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            deleteSheet();
+        }
+
+        private void objectListView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteParts();
+            }
         }
     }
 }

@@ -196,24 +196,23 @@ namespace DeepNestLib
 
         public static NFP[] cloneNfp(NFP[] nfp, bool inner = false)
         {
-
             if (!inner)
             {
                 return new[] { clone(nfp.First()) };
             }
-            throw new NotImplementedException();
+
             // inner nfp is actually an array of nfps
             List<NFP> newnfp = new List<NFP>();
             for (var i = 0; i < nfp.Count(); i++)
             {
-                //  newnfp.push(clone(nfp[i]));
+                newnfp.Add(clone(nfp[i]));
             }
 
-            //return newnfp;
+            return newnfp.ToArray();
         }
+
         public static NFP clone(NFP nfp)
         {
-
             NFP newnfp = new NFP();
             newnfp.source = nfp.source;
             for (var i = 0; i < nfp.length; i++)

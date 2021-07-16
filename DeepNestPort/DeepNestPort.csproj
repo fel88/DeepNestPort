@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddSheetDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddSheetDialog.Designer.cs">
+      <DependentUpon>AddSheetDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ControlExtensions.cs" />
     <Compile Include="DetailLoadInfo.cs" />
     <Compile Include="DrawingContext.cs" />
@@ -70,6 +76,9 @@
       <DependentUpon>QntDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SheetLoadInfo.cs" />
+    <EmbeddedResource Include="AddSheetDialog.resx">
+      <DependentUpon>AddSheetDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

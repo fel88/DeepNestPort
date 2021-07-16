@@ -43,6 +43,12 @@
             this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.contextMenuStrip5 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.addSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dxfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.panel4 = new System.Windows.Forms.Panel();
             this.objectListView1 = new BrightIdeasSoftware.ObjectListView();
             this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
@@ -163,7 +169,6 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -172,6 +177,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.toolStrip3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView2)).BeginInit();
+            this.contextMenuStrip5.SuspendLayout();
             this.panel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).BeginInit();
             this.contextMenuStrip4.SuspendLayout();
@@ -217,7 +223,6 @@
             this.pictureBox1.Size = new System.Drawing.Size(832, 463);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.MouseEnter += new System.EventHandler(this.pictureBox1_MouseEnter);
             // 
             // tabControl1
             // 
@@ -323,12 +328,15 @@
             this.objectListView2.AllColumns.Add(this.olvColumn3);
             this.objectListView2.AllColumns.Add(this.olvColumn4);
             this.objectListView2.AllColumns.Add(this.olvColumn5);
+            this.objectListView2.AllColumns.Add(this.olvColumn6);
             this.objectListView2.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
             this.objectListView2.CellEditUseWholeCell = false;
             this.objectListView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn3,
             this.olvColumn4,
-            this.olvColumn5});
+            this.olvColumn5,
+            this.olvColumn6});
+            this.objectListView2.ContextMenuStrip = this.contextMenuStrip5;
             this.objectListView2.Cursor = System.Windows.Forms.Cursors.Default;
             this.objectListView2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectListView2.FullRowSelect = true;
@@ -341,21 +349,69 @@
             this.objectListView2.TabIndex = 3;
             this.objectListView2.UseCompatibleStateImageBehavior = false;
             this.objectListView2.View = System.Windows.Forms.View.Details;
+            this.objectListView2.SelectedIndexChanged += new System.EventHandler(this.objectListView2_SelectedIndexChanged);
+            this.objectListView2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.objectListView2_KeyDown);
             // 
             // olvColumn3
             // 
             this.olvColumn3.AspectName = "Width";
+            this.olvColumn3.IsEditable = false;
             this.olvColumn3.Text = "Width";
             // 
             // olvColumn4
             // 
             this.olvColumn4.AspectName = "Height";
+            this.olvColumn4.IsEditable = false;
             this.olvColumn4.Text = "Height";
             // 
             // olvColumn5
             // 
             this.olvColumn5.AspectName = "Quantity";
             this.olvColumn5.Text = "Quantity";
+            // 
+            // olvColumn6
+            // 
+            this.olvColumn6.AspectName = "Info";
+            this.olvColumn6.Text = "Info";
+            this.olvColumn6.Width = 180;
+            // 
+            // contextMenuStrip5
+            // 
+            this.contextMenuStrip5.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addSheetToolStripMenuItem,
+            this.deleteToolStripMenuItem3});
+            this.contextMenuStrip5.Name = "contextMenuStrip5";
+            this.contextMenuStrip5.Size = new System.Drawing.Size(126, 48);
+            // 
+            // addSheetToolStripMenuItem
+            // 
+            this.addSheetToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rectToolStripMenuItem,
+            this.dxfToolStripMenuItem});
+            this.addSheetToolStripMenuItem.Name = "addSheetToolStripMenuItem";
+            this.addSheetToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.addSheetToolStripMenuItem.Text = "add sheet";
+            // 
+            // rectToolStripMenuItem
+            // 
+            this.rectToolStripMenuItem.Name = "rectToolStripMenuItem";
+            this.rectToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
+            this.rectToolStripMenuItem.Text = "rect";
+            this.rectToolStripMenuItem.Click += new System.EventHandler(this.rectToolStripMenuItem_Click);
+            // 
+            // dxfToolStripMenuItem
+            // 
+            this.dxfToolStripMenuItem.Name = "dxfToolStripMenuItem";
+            this.dxfToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
+            this.dxfToolStripMenuItem.Text = "dxf";
+            this.dxfToolStripMenuItem.Click += new System.EventHandler(this.dxfToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem3
+            // 
+            this.deleteToolStripMenuItem3.Name = "deleteToolStripMenuItem3";
+            this.deleteToolStripMenuItem3.Size = new System.Drawing.Size(125, 22);
+            this.deleteToolStripMenuItem3.Text = "delete";
+            this.deleteToolStripMenuItem3.Click += new System.EventHandler(this.deleteToolStripMenuItem3_Click);
             // 
             // panel4
             // 
@@ -390,6 +446,7 @@
             this.objectListView1.UseCompatibleStateImageBehavior = false;
             this.objectListView1.View = System.Windows.Forms.View.Details;
             this.objectListView1.SelectedIndexChanged += new System.EventHandler(this.objectListView1_SelectedIndexChanged);
+            this.objectListView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.objectListView1_KeyDown);
             // 
             // olvColumn1
             // 
@@ -490,7 +547,6 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.propertyGrid1);
             this.tabPage2.Controls.Add(this.groupBox9);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.textBox6);
@@ -1683,13 +1739,6 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(13, 17);
             this.toolStripStatusLabel1.Text = "..";
             // 
-            // propertyGrid1
-            // 
-            this.propertyGrid1.Location = new System.Drawing.Point(399, 56);
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(265, 326);
-            this.propertyGrid1.TabIndex = 33;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1710,6 +1759,7 @@
             this.toolStrip3.ResumeLayout(false);
             this.toolStrip3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView2)).EndInit();
+            this.contextMenuStrip5.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).EndInit();
@@ -1897,7 +1947,12 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.Button button9;
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip5;
+        private System.Windows.Forms.ToolStripMenuItem addSheetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dxfToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem3;
+        private BrightIdeasSoftware.OLVColumn olvColumn6;
     }
 }
 

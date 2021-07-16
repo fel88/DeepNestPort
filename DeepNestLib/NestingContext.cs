@@ -12,7 +12,7 @@ namespace DeepNestLib
     {
         public List<NFP> Polygons { get; private set; } = new List<NFP>();
         public List<NFP> Sheets { get; private set; } = new List<NFP>();
-
+        
 
         public double MaterialUtilization { get; private set; } = 0;
         public int PlacedPartsCount { get; private set; } = 0;
