@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Text;
 
 namespace DeepNestLib
 {
@@ -20,7 +21,7 @@ namespace DeepNestLib
         {
             Points = new SvgPoint[] { };
         }
-        
+
         public string Name { get; set; }
         public void AddPoint(SvgPoint point)
         {
@@ -38,6 +39,32 @@ namespace DeepNestLib
             Points = Points.Reverse().ToArray();
         }
 
+        public StringBuilder GetXml()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("<?xml version=\"1.0\"?>");
+            sb.AppendLine("<root>");
+            sb.AppendLine("<region>");
+            foreach (var item in Points)
+            {
+                sb.AppendLine($"<point x=\"{item.x}\" y=\"{item.y}\"/>");
+            }
+            sb.AppendLine("</region>");
+            if (children != null)
+                foreach (var item in children)
+                {
+                    sb.AppendLine("<region>");
+                    foreach (var citem in item.Points)
+                    {
+                        sb.AppendLine($"<point x=\"{citem.x}\" y=\"{citem.y}\"/>");
+                    }
+                    sb.AppendLine("</region>");
+                }
+
+            sb.AppendLine("</root>");
+
+            return sb;
+        }
         public double x { get; set; }
         public double y { get; set; }
 
@@ -105,7 +132,7 @@ namespace DeepNestLib
                 Id = value;
             }
         }
-        
+
         public double? offsetx;
         public double? offsety;
         public int? source = null;

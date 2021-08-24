@@ -54,8 +54,9 @@
             this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addDetailToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quantityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.multiplyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,6 +66,7 @@
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.radioButton6 = new System.Windows.Forms.RadioButton();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
@@ -216,11 +218,11 @@
             // pictureBox1
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox1.Location = new System.Drawing.Point(133, 51);
+            this.pictureBox1.Location = new System.Drawing.Point(133, 38);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox1.Name = "pictureBox1";
             this.tableLayoutPanel1.SetRowSpan(this.pictureBox1, 2);
-            this.pictureBox1.Size = new System.Drawing.Size(832, 463);
+            this.pictureBox1.Size = new System.Drawing.Size(832, 476);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -463,25 +465,33 @@
             // contextMenuStrip4
             // 
             this.contextMenuStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
+            this.addDetailToolStripMenuItem,
             this.deleteToolStripMenuItem2,
+            this.clearToolStripMenuItem,
             this.quantityToolStripMenuItem});
             this.contextMenuStrip4.Name = "contextMenuStrip4";
-            this.contextMenuStrip4.Size = new System.Drawing.Size(119, 70);
+            this.contextMenuStrip4.Size = new System.Drawing.Size(127, 92);
             // 
-            // clearToolStripMenuItem
+            // addDetailToolStripMenuItem
             // 
-            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
-            this.clearToolStripMenuItem.Text = "clear";
-            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            this.addDetailToolStripMenuItem.Name = "addDetailToolStripMenuItem";
+            this.addDetailToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.addDetailToolStripMenuItem.Text = "add detail";
+            this.addDetailToolStripMenuItem.Click += new System.EventHandler(this.addDetailToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem2
             // 
             this.deleteToolStripMenuItem2.Name = "deleteToolStripMenuItem2";
-            this.deleteToolStripMenuItem2.Size = new System.Drawing.Size(118, 22);
+            this.deleteToolStripMenuItem2.Size = new System.Drawing.Size(126, 22);
             this.deleteToolStripMenuItem2.Text = "delete";
             this.deleteToolStripMenuItem2.Click += new System.EventHandler(this.deleteToolStripMenuItem2_Click);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.clearToolStripMenuItem.Text = "clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
             // quantityToolStripMenuItem
             // 
@@ -490,7 +500,7 @@
             this.multiplyToolStripMenuItem,
             this.divideToolStripMenuItem});
             this.quantityToolStripMenuItem.Name = "quantityToolStripMenuItem";
-            this.quantityToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.quantityToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.quantityToolStripMenuItem.Text = "quantity";
             // 
             // setToToolStripMenuItem
@@ -577,14 +587,28 @@
             // 
             // groupBox9
             // 
+            this.groupBox9.Controls.Add(this.checkBox6);
             this.groupBox9.Controls.Add(this.groupBox10);
             this.groupBox9.Controls.Add(this.checkBox5);
             this.groupBox9.Location = new System.Drawing.Point(10, 228);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(215, 158);
+            this.groupBox9.Size = new System.Drawing.Size(215, 178);
             this.groupBox9.TabIndex = 32;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Experimental features";
+            // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Checked = true;
+            this.checkBox6.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox6.Location = new System.Drawing.Point(12, 148);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(106, 17);
+            this.checkBox6.TabIndex = 36;
+            this.checkBox6.Text = "use external DLL";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            this.checkBox6.CheckedChanged += new System.EventHandler(this.checkBox6_CheckedChanged);
             // 
             // groupBox10
             // 
@@ -943,7 +967,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 13F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(965, 514);
@@ -957,11 +981,11 @@
             this.listView4.FullRowSelect = true;
             this.listView4.GridLines = true;
             this.listView4.HideSelection = false;
-            this.listView4.Location = new System.Drawing.Point(2, 27);
-            this.listView4.Margin = new System.Windows.Forms.Padding(2);
+            this.listView4.Location = new System.Drawing.Point(0, 25);
+            this.listView4.Margin = new System.Windows.Forms.Padding(0);
             this.listView4.Name = "listView4";
             this.tableLayoutPanel1.SetRowSpan(this.listView4, 2);
-            this.listView4.Size = new System.Drawing.Size(129, 385);
+            this.listView4.Size = new System.Drawing.Size(133, 389);
             this.listView4.TabIndex = 5;
             this.listView4.UseCompatibleStateImageBehavior = false;
             this.listView4.View = System.Windows.Forms.View.Details;
@@ -1022,8 +1046,8 @@
             this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
             this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(91, 22);
-            this.toolStripButton3.Text = "show/hide info";
+            this.toolStripButton3.Size = new System.Drawing.Size(63, 22);
+            this.toolStripButton3.Text = "show info";
             this.toolStripButton3.Click += new System.EventHandler(this.toolStripButton3_Click);
             // 
             // panel1
@@ -1032,7 +1056,7 @@
             this.panel1.Location = new System.Drawing.Point(133, 25);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(832, 26);
+            this.panel1.Size = new System.Drawing.Size(832, 13);
             this.panel1.TabIndex = 1;
             // 
             // groupBox11
@@ -1953,6 +1977,8 @@
         private System.Windows.Forms.ToolStripMenuItem dxfToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem3;
         private BrightIdeasSoftware.OLVColumn olvColumn6;
+        private System.Windows.Forms.ToolStripMenuItem addDetailToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBox6;
     }
 }
 

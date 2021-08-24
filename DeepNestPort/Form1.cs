@@ -21,6 +21,7 @@ namespace DeepNestPort
             InitializeComponent();
 
             LoadSettings();
+            checkBox6.Checked = Background.UseExternalDll;
 
             sheetsInfos.Add(new SheetLoadInfo() { Nfp = NewSheet(), Width = 3000, Height = 1500, Quantity = 10 });
 
@@ -141,6 +142,11 @@ namespace DeepNestPort
                     case "removeThreshold":
                         {
                             DxfParser.RemoveThreshold = double.Parse(item.Attribute("value").Value.Replace(",", "."), CultureInfo.InvariantCulture);
+                        }
+                        break;
+                    case "internalMode":
+                        {
+                            Background.UseExternalDll = !bool.Parse(item.Attribute("value").Value);
                         }
                         break;
                 }
@@ -519,7 +525,7 @@ namespace DeepNestPort
                     listView4.Items.Clear();
                     foreach (var item in nest.nests)
                     {
-                        listView4.Items.Add(new ListViewItem(new string[] { item.fitness + "" }) { Tag = item });
+                        listView4.Items.Add(new ListViewItem(new string[] { item.fitness == null ? "(null)" : item.fitness.Value.ToString("N5") }) { Tag = item });
                     }
                     listView4.EndUpdate();
                 }));
@@ -543,7 +549,7 @@ namespace DeepNestPort
                 Preview = selected;
             }
         }
-                
+
         public void UpdateFilesList(string path)
         {
             var di = new DirectoryInfo(path);
@@ -600,7 +606,7 @@ namespace DeepNestPort
 
             tt.Height = w;
             tt.Width = w;
-            tt.Points = new SvgPoint[] { };            
+            tt.Points = new SvgPoint[] { };
 
             for (int i = 0; i < 360; i += 5)
             {
@@ -1299,6 +1305,7 @@ namespace DeepNestPort
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             isInfoShow = !isInfoShow;
+            toolStripButton3.Text = !isInfoShow ? "show info" : "hide info";
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -1430,7 +1437,7 @@ namespace DeepNestPort
 
         int lastOpenFilterIndex = 1;
 
-        private void toolStripButton4_Click(object sender, EventArgs e)
+        void addDetail()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
@@ -1463,6 +1470,10 @@ namespace DeepNestPort
 
             }
             UpdateInfos();
+        }
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            addDetail();
         }
 
         public void UpdateInfos()
@@ -1825,6 +1836,16 @@ namespace DeepNestPort
             {
                 deleteParts();
             }
+        }
+
+        private void addDetailToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            addDetail();
+        }
+
+        private void checkBox6_CheckedChanged(object sender, EventArgs e)
+        {
+            Background.UseExternalDll = checkBox6.Checked;
         }
     }
 }

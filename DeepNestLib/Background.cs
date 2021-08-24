@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DeepNestLib
@@ -351,9 +352,13 @@ namespace DeepNestLib
             {
                 ret.AddPoint(new SvgPoint(item.X, item.Y));
             }
+
+
             foreach (var item in holesout)
             {
-                ret.children = new List<NFP>();
+                if (ret.children == null)
+                    ret.children = new List<NFP>();
+
                 ret.children.Add(new NFP());
                 ret.children.Last().Points = new SvgPoint[] { };
                 foreach (var hitem in item)
@@ -711,7 +716,7 @@ namespace DeepNestLib
                             }
                         }
 
-                        var clipperNfp = nfpToClipperCoordinates(nfp, config);
+                        var clipperNfp = nfpToClipperCoordinates(nfp, config.clipperScale);
 
                         clipper.AddPaths(clipperNfp.Select(z => z.ToList()).ToList(), ClipperLib.PolyType.ptSubject, true);
                     }
@@ -1417,7 +1422,7 @@ namespace DeepNestLib
 
 
         // returns clipper nfp. Remember that clipper nfp are a list of polygons, not a tree!
-        public static IntPoint[][] nfpToClipperCoordinates(NFP nfp, SvgNestConfig config)
+        public static IntPoint[][] nfpToClipperCoordinates(NFP nfp, double clipperScale = 10000000)
         {
 
             List<IntPoint[]> clipperNfp = new List<IntPoint[]>();
@@ -1432,7 +1437,7 @@ namespace DeepNestLib
                         nfp.children[j].reverse();
                     }
                     //var childNfp = SvgNest.toClipperCoordinates(nfp.children[j]);
-                    var childNfp = _Clipper.ScaleUpPaths(nfp.children[j], config.clipperScale);
+                    var childNfp = _Clipper.ScaleUpPaths(nfp.children[j], clipperScale);
                     clipperNfp.Add(childNfp);
                 }
             }
@@ -1447,7 +1452,7 @@ namespace DeepNestLib
 
             // clipper js defines holes based on orientation
 
-            var outerNfp = _Clipper.ScaleUpPaths(nfp, config.clipperScale);
+            var outerNfp = _Clipper.ScaleUpPaths(nfp, clipperScale);
 
             //var cleaned = ClipperLib.Clipper.CleanPolygon(outerNfp, 0.00001*config.clipperScale);
 
@@ -1462,7 +1467,7 @@ namespace DeepNestLib
             List<IntPoint[]> clipperNfp = new List<IntPoint[]>();
             for (var i = 0; i < nfp.Count(); i++)
             {
-                var clip = nfpToClipperCoordinates(nfp[i], config);
+                var clip = nfpToClipperCoordinates(nfp[i], config.clipperScale);
                 clipperNfp.AddRange(clip);
                 //clipperNfp = clipperNfp.Concat(new[] { clip }).ToList();
             }
@@ -1471,6 +1476,107 @@ namespace DeepNestLib
         }
 
         static object lockobj = new object();
+
+        public static NFP[] NewMinkowskiSum(NFP pattern, NFP path, int type, bool useChilds = false, bool takeOnlyBiggestArea = true)
+        {
+            var key = pattern.source + ";" + path.source + ";" + pattern.rotation + ";" + path.rotation;
+            bool cacheAllow = type != 1;
+            if (cacheProcess.ContainsKey(key) && cacheAllow)
+            {
+                return cacheProcess[key];
+            }
+
+            var ac = _Clipper.ScaleUpPaths(pattern, 10000000);
+            List<List<IntPoint>> solution = null;
+            if (useChilds)
+            {
+                var bc = Background.nfpToClipperCoordinates(path, 10000000);
+                for (var i = 0; i < bc.Length; i++)
+                {
+                    for (int j = 0; j < bc[i].Length; j++)
+                    {
+                        bc[i][j].X *= -1;
+                        bc[i][j].Y *= -1;
+                    }
+                }
+
+                solution = ClipperLib.Clipper.MinkowskiSum(new List<IntPoint>(ac), new List<List<IntPoint>>(bc.Select(z => z.ToList())), true);
+            }
+            else
+            {
+                var bc = _Clipper.ScaleUpPaths(path, 10000000);
+                for (var i = 0; i < bc.Length; i++)
+                {
+                    bc[i].X *= -1;
+                    bc[i].Y *= -1;
+                }
+                solution = Clipper.MinkowskiSum(new List<IntPoint>(ac), new List<IntPoint>(bc), true);
+            }
+            NFP clipperNfp = null;
+
+            double? largestArea = null;
+            int largestIndex = -1;
+
+            for (int i = 0; i < solution.Count(); i++)
+            {
+                var n = toNestCoordinates(solution[i].ToArray(), 10000000);
+                var sarea = Math.Abs(GeometryUtil.polygonArea(n));
+                if (largestArea == null || largestArea < sarea)
+                {
+                    clipperNfp = n;
+                    largestArea = sarea;
+                    largestIndex = i;
+                }
+            }
+            if (!takeOnlyBiggestArea)
+            {
+                for (int j = 0; j < solution.Count; j++)
+                {
+                    if (j == largestIndex) continue;
+                    var n = toNestCoordinates(solution[j].ToArray(), 10000000);
+                    if (clipperNfp.children == null)
+                        clipperNfp.children = new List<NFP>();
+                    clipperNfp.children.Add(n);
+                }
+            }
+            for (var i = 0; i < clipperNfp.Length; i++)
+            {
+
+                clipperNfp[i].x *= -1;
+                clipperNfp[i].y *= -1;
+                clipperNfp[i].x += pattern[0].x;
+                clipperNfp[i].y += pattern[0].y;
+
+            }
+            if (clipperNfp.children != null)
+                foreach (var nFP in clipperNfp.children)
+                {
+                    for (int j = 0; j < nFP.Length; j++)
+                    {
+
+                        nFP.Points[j].x *= -1;
+                        nFP.Points[j].y *= -1;
+                        nFP.Points[j].x += pattern[0].x;
+                        nFP.Points[j].y += pattern[0].y;
+                    }
+                }
+            var res = new[] { clipperNfp };
+            if (cacheAllow)
+            {
+                cacheProcess.Add(key, res);
+            }
+            return res;
+        }
+        public static void ExecuteSTA(Action act)
+        {
+            if (!Debugger.IsAttached) return;
+            Thread thread = new Thread(() => { act(); });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+        }
+
+        public static bool UseExternalDll = true;
         public static NFP getOuterNfp(NFP A, NFP B, int type, bool inside = false)//todo:?inside def?
         {
             NFP[] nfp = null;
@@ -1507,7 +1613,15 @@ namespace DeepNestLib
             {
                 lock (lockobj)
                 {
-                    nfp = Process2(A, B, type);
+                    if (UseExternalDll)
+                    {
+                        nfp = Process2(A, B, type);
+
+                    }
+                    else
+                    {             
+                        nfp = NewMinkowskiSum(B, A, type, true, takeOnlyBiggestArea: false);                        
+                    }
                 }
             }
             else
