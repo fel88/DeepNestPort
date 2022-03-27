@@ -3,13 +3,13 @@ DeepNest C# Port (https://github.com/Jack000/Deepnest)
 
 DXF Import/Export: https://github.com/IxMilia/Dxf
 
-**Project status: WIP**
+Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
 
 <img src="imgs/2.png"/>
 <img src="imgs/3.png"/>
 
 
-## Compiling minkowski.dll
+## Compiling minkowski.dll (optional)
 1. Replace <boost_1.62_path> with your real BOOST (1.62) path in compile.bat
 
 Example:
