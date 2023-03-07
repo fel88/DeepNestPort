@@ -1576,7 +1576,7 @@ namespace DeepNestLib
             thread.Join();
         }
 
-        public static bool UseExternalDll = true;
+        public static bool UseExternalDll = false;
         public static NFP getOuterNfp(NFP A, NFP B, int type, bool inside = false)//todo:?inside def?
         {
             NFP[] nfp = null;
