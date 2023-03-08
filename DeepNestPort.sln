@@ -13,16 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clipper_library", "clipper_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepNestConsole", "DeepNestConsole\DeepNestConsole.csproj", "{C02ABAED-5922-4BBF-A78C-44FCDD96D118}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{36D2693B-3F3E-499E-9538-7961F5F15EE0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepNestPort.Core", "DeepNestPort.Core\DeepNestPort.Core.csproj", "{9250C673-3A2A-4F3B-8943-C5A44DC39978}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepNestLib.Core", "DeepNestLib.Core\DeepNestLib.Core.csproj", "{7F135F23-2483-44E7-AFBC-6E734F9AF5EC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipper.Core", "Clipper.Core\Clipper.Core.csproj", "{97171E6A-FA6B-4E37-9323-3AF73FA26980}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinkowskiWrapper.Core", "MinkowskiWrapper.Core\MinkowskiWrapper.Core.csproj", "{1F863B7A-5C76-4CF5-9960-97DFC726BC61}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,31 +39,9 @@ Global
 		{C02ABAED-5922-4BBF-A78C-44FCDD96D118}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C02ABAED-5922-4BBF-A78C-44FCDD96D118}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C02ABAED-5922-4BBF-A78C-44FCDD96D118}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9250C673-3A2A-4F3B-8943-C5A44DC39978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9250C673-3A2A-4F3B-8943-C5A44DC39978}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9250C673-3A2A-4F3B-8943-C5A44DC39978}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9250C673-3A2A-4F3B-8943-C5A44DC39978}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F135F23-2483-44E7-AFBC-6E734F9AF5EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F135F23-2483-44E7-AFBC-6E734F9AF5EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F135F23-2483-44E7-AFBC-6E734F9AF5EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F135F23-2483-44E7-AFBC-6E734F9AF5EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{97171E6A-FA6B-4E37-9323-3AF73FA26980}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97171E6A-FA6B-4E37-9323-3AF73FA26980}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97171E6A-FA6B-4E37-9323-3AF73FA26980}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97171E6A-FA6B-4E37-9323-3AF73FA26980}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F863B7A-5C76-4CF5-9960-97DFC726BC61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F863B7A-5C76-4CF5-9960-97DFC726BC61}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F863B7A-5C76-4CF5-9960-97DFC726BC61}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F863B7A-5C76-4CF5-9960-97DFC726BC61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{9250C673-3A2A-4F3B-8943-C5A44DC39978} = {36D2693B-3F3E-499E-9538-7961F5F15EE0}
-		{7F135F23-2483-44E7-AFBC-6E734F9AF5EC} = {36D2693B-3F3E-499E-9538-7961F5F15EE0}
-		{97171E6A-FA6B-4E37-9323-3AF73FA26980} = {36D2693B-3F3E-499E-9538-7961F5F15EE0}
-		{1F863B7A-5C76-4CF5-9960-97DFC726BC61} = {36D2693B-3F3E-499E-9538-7961F5F15EE0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3D2489DF-C52C-433B-9484-F94CE60173DC}
