@@ -552,6 +552,9 @@ namespace DeepNestPort
 
         public void UpdateFilesList(string path)
         {
+            if (!Directory.Exists(path)) 
+                return;
+
             var di = new DirectoryInfo(path);
             groupBox3.Text = "Files: " + di.FullName;
             listView3.Items.Clear();
