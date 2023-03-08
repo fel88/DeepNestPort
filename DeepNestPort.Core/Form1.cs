@@ -15,7 +15,7 @@ namespace DeepNestPort.Core
         public Form1()
         {
             InitializeComponent();
-            sheetsInfos.Add(new SheetLoadInfo() { Nfp = NewSheet(), Width = 3000, Height = 1500, Quantity = 10 });
+            sheetsInfos.Add(new SheetLoadInfo() { Nfp = NewSheet(), Width = 3000, Height = 1500, Quantity = 1 });
 
             Load += Form1_Load;
             Form = this;
@@ -43,20 +43,38 @@ namespace DeepNestPort.Core
             objectListView1.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Name", Width = 250, AspectName = "Name" });
             objectListView1.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Quantity", IsEditable = true, Width = 100, AspectName = "Quantity" });
             menu = new RibbonMenu();
+            menu.TabChanged += Menu_TabIndexChanged;
+
 
             tableLayoutPanel1.Controls.Add(menu, 0, 0);
             menu.AutoSize = true;
             menu.Dock = DockStyle.Top;
 
             ctx = new SkiaGLDrawingContext();
+
+
+
             ctx.PaintAction = () => { Render(); };
             RenderControl = ctx.GenerateRenderControl();
             RenderControl.Visible = false;
             //tableLayoutPanel1. Controls.Add(RenderControl,0,1);
             RenderControl.Dock = DockStyle.Fill;
             ctx.Init(RenderControl);
+            /*ctx.FitToPoints(new PointF[] {
+                ctx.Transform( new PointF(0, 0)),
+                ctx.Transform( new PointF(0, 1500)),
+                ctx.Transform( new PointF(3000, 1500)),
+                ctx.Transform( new PointF(3000, 0) ) });*/
 
+            (ctx as SkiaGLDrawingContext).sx = 650;
+            (ctx as SkiaGLDrawingContext).sy = -1570;
+            (ctx as SkiaGLDrawingContext).zoom = 0.28f;
         }
+
+        NFP dragNfp = null;
+        NFP hoveredNfp = null;
+
+
         void Render()
         {
             var sw = Stopwatch.StartNew();
@@ -92,7 +110,8 @@ namespace DeepNestPort.Core
                 //  continue;
 
                 if (!(item is Sheet))
-                    if (!item.fitted) continue;
+                    if (!item.fitted)
+                        continue;
 
                 SKPath path = new SKPath();
                 if (item.Points != null && item.Points.Any())
@@ -104,7 +123,7 @@ namespace DeepNestPort.Core
 
                     var pnts = item.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
                     m.TransformPoints(pnts);
-                    
+
                     path.AddPoly(pnts.Select(z => ctx.TransformSK(z)).ToArray());
                     if (item.children != null)
                     {
@@ -120,10 +139,10 @@ namespace DeepNestPort.Core
                     ctx.ResetMatrix();
                     if (!sheets.Contains(item))
                     {
-                        //bool hovered = item == hoveredNfp;
-                       // if (hovered || dragNfp == item)
-                        //    ctx.FillPath(new SolidBrush(Color.Blue), path);
-                       // else
+                        bool hovered = item == hoveredNfp;
+                        if (hovered || dragNfp == item)
+                            ctx.FillPath(new SolidBrush(Color.Blue), path);
+                        else
                             ctx.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
                     }
                     ctx.DrawPath(Pens.Black, path);
@@ -304,13 +323,35 @@ namespace DeepNestPort.Core
                 }
                 src++;
             }
-            menu.TabIndex = 1;
-            RenderControl.Visible = true;
+
+
+            menu.SetTab(menu.NestTab);
+            /*RenderControl.Visible = true;
             tableLayoutPanel1.Controls.Remove(tableLayoutPanel2);
             tableLayoutPanel1.Controls.Add(RenderControl, 0, 1);
-            tableLayoutPanel2.Visible = false;
+            tableLayoutPanel2.Visible = false;*/
             run();
         }
+
+        private void Menu_TabIndexChanged()
+        {
+            if (menu.GeneralTab.IsSelected && RenderControl.Visible)
+            {
+                RenderControl.Visible = false;
+                tableLayoutPanel1.Controls.Remove(RenderControl);
+                tableLayoutPanel1.Controls.Add(panel1, 0, 1);
+                panel1.Visible = true;
+            }
+            else
+            if (menu.NestTab.IsSelected && !RenderControl.Visible)
+            {
+                RenderControl.Visible = true;
+                tableLayoutPanel1.Controls.Remove(panel1);
+                tableLayoutPanel1.Controls.Add(RenderControl, 0, 1);
+                panel1.Visible = false;
+            }
+        }
+
         void run()
         {
             if (sheets.Count == 0 || polygons.Count == 0)
@@ -404,225 +445,6 @@ namespace DeepNestPort.Core
 
         }
         public DrawingContext ctx3;
-        public class DrawingContext
-        {
-            public DrawingContext(PictureBox pb)
-            {
-                box = pb;
-
-                bmp = new Bitmap(pb.Width, pb.Height);
-                pb.SizeChanged += Pb_SizeChanged;
-                gr = Graphics.FromImage(bmp);
-                gr.SmoothingMode = SmoothingMode.AntiAlias;
-                box.Image = bmp;
-
-                pb.MouseDown += PictureBox1_MouseDown;
-                pb.MouseUp += PictureBox1_MouseUp;
-                pb.MouseMove += Pb_MouseMove;
-                sx = box.Width / 2;
-                sy = -box.Height / 2;
-                pb.MouseWheel += Pb_MouseWheel;
-            }
-
-            public bool EnableWheel = true;
-            GraphicsPath getGraphicsPath(NFP nfp)
-            {
-                GraphicsPath gp = new GraphicsPath();
-                gp.AddPolygon(nfp.Points.Select(z => Transform(z.x, z.y)).ToArray());
-                if (nfp.children != null)
-                {
-                    foreach (var item in nfp.children)
-                    {
-                        gp.AddPolygon(item.Points.Select(z => Transform(z.x, z.y)).ToArray());
-                    }
-                }
-                return gp;
-            }
-            GraphicsPath getGraphicsPath(RawDetail det)
-            {
-                GraphicsPath gp = new GraphicsPath();
-                foreach (var item in det.Outers)
-                {
-                    gp.AddPolygon(item.Points.Select(z => Transform(z)).ToArray());
-                }
-                return gp;
-            }
-
-            public float GetLabelHeight()
-            {
-                return SystemFonts.DefaultFont.GetHeight();
-            }
-            public GraphicsPath Draw(RawDetail det, Pen pen = null, Brush brush = null)
-            {
-                var gp = getGraphicsPath(det);
-                if (brush != null)
-                    gr.FillPath(brush, gp);
-                if (pen != null)
-                    gr.DrawPath(pen, gp);
-                return gp;
-            }
-            public GraphicsPath Draw(NFP nfp, Pen pen = null, Brush brush = null)
-            {
-                var gp = getGraphicsPath(nfp);
-                if (brush != null)
-                    gr.FillPath(brush, gp);
-                if (pen != null)
-                    gr.DrawPath(pen, gp);
-                return gp;
-            }
-
-            public SizeF DrawLabel(string text, Brush fontBrush, Color backColor, int x, int y, int opacity = 128)
-            {
-                var ms = gr.MeasureString(text, SystemFonts.DefaultFont);
-                gr.FillRectangle(new SolidBrush(Color.FromArgb(opacity, backColor)), x, y, ms.Width, ms.Height);
-                gr.DrawString(text, SystemFonts.DefaultFont, fontBrush, x, y);
-                return ms;
-            }
-
-            protected virtual void Pb_MouseWheel(object sender, MouseEventArgs e)
-            {
-                if (!EnableWheel) return;
-                float zold = zoom;
-                if (e.Delta > 0) { zoom *= 1.5f; ; }
-                else { zoom *= 0.5f; }
-                if (zoom < 0.08) { zoom = 0.08f; }
-                if (zoom > 1000) { zoom = 1000f; }
-
-                var pos = box.PointToClient(Cursor.Position);
-
-                sx = -(pos.X / zold - sx - pos.X / zoom);
-                sy = (pos.Y / zold + sy - pos.Y / zoom);
-            }
-
-            public bool FocusOnMove = true;
-            private void Pb_MouseMove(object sender, MouseEventArgs e)
-            {
-                if (!FocusOnMove) return;
-                box.Focus();
-            }
-
-            private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
-            {
-                isDrag = false;
-
-                var p = box.PointToClient(Cursor.Position);
-                var pos = box.PointToClient(Cursor.Position);
-                var posx = (pos.X / zoom - sx);
-                var posy = (-pos.Y / zoom - sy);
-            }
-
-            private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
-            {
-                var pos = box.PointToClient(Cursor.Position);
-                var p = Transform(pos);
-
-                if (e.Button == MouseButtons.Right)
-                {
-                    isDrag = true;
-                    startx = pos.X;
-                    starty = pos.Y;
-                    origsx = sx;
-                    origsy = sy;
-                }
-            }
-
-            internal void Clear(System.Drawing.Color color)
-            {
-                gr.Clear(color);
-            }
-
-            float startx, starty;
-
-            internal void Reset()
-            {
-                gr.ResetTransform();
-            }
-
-            float origsx, origsy;
-            bool isDrag = false;
-
-            PictureBox box;
-            public float sx, sy;
-            public float zoom = 1;
-            public Graphics gr;
-            public Bitmap bmp;
-            public bool InvertY = true;
-            public virtual PointF Transform(PointF p1)
-            {
-                return new PointF((p1.X + sx) * zoom, (InvertY ? (-1) : 1) * (p1.Y + sy) * zoom);
-            }
-            public virtual PointF BackTransform(PointF p1)
-            {
-                return new PointF((p1.X / zoom - sx), (InvertY ? (-1) : 1) * (p1.Y / zoom - sy));
-            }
-            public virtual PointF Transform(double x, double y)
-            {
-                return new PointF(((float)(x) + sx) * zoom, (InvertY ? (-1) : 1) * ((float)(y) + sy) * zoom);
-            }
-
-            private void Pb_SizeChanged(object sender, EventArgs e)
-            {
-                if (box.Width <= 0 || box.Height <= 0) return;
-                bmp = new Bitmap(box.Width, box.Height);
-                gr = Graphics.FromImage(bmp);
-                box.Image = bmp;
-            }
-
-            public PointF GetPos()
-            {
-                var pos = box.PointToClient(Cursor.Position);
-                var posx = (pos.X / zoom - sx);
-                var posy = (-pos.Y / zoom - sy);
-
-                return new PointF(posx, posy);
-            }
-            public void Update()
-            {
-                if (isDrag)
-                {
-                    var p = box.PointToClient(Cursor.Position);
-
-                    sx = origsx + ((p.X - startx) / zoom);
-                    sy = origsy + (-(p.Y - starty) / zoom);
-                }
-            }
-
-            public void Setup()
-            {
-                box.Invalidate();
-            }
-
-            public void FitToPoints(PointF[] points, int gap = 0)
-            {
-                var maxx = points.Max(z => z.X) + gap;
-                var minx = points.Min(z => z.X) - gap;
-                var maxy = points.Max(z => z.Y) + gap;
-                var miny = points.Min(z => z.Y) - gap;
-
-                var w = box.Width;
-                var h = box.Height;
-
-                var dx = maxx - minx;
-                var kx = w / dx;
-                var dy = maxy - miny;
-                var ky = h / dy;
-
-                var oz = zoom;
-                var sz1 = new Size((int)(dx * kx), (int)(dy * kx));
-                var sz2 = new Size((int)(dx * ky), (int)(dy * ky));
-                zoom = kx;
-                if (sz1.Width > w || sz1.Height > h) zoom = ky;
-
-                var x = dx / 2 + minx;
-                var y = dy / 2 + miny;
-
-                sx = ((w / 2f) / zoom - x);
-                sy = -((h / 2f) / zoom + y);
-
-                var test = Transform(new PointF(x, y));
-
-            }
-        }
         void fitAll()
         {
             if (Preview == null) return;
@@ -646,6 +468,50 @@ namespace DeepNestPort.Core
         internal void StopNesting()
         {
             stop = true;
+        }
+
+        internal void Export()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            //sfd.FilterIndex = lastSaveFilterIndex;
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                // lastSaveFilterIndex = sfd.FilterIndex;
+                if (sfd.FilterIndex == 1)
+                    DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+
+                if (sfd.FilterIndex == 2)
+                    SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+            }
+        }
+        public DialogResult ShowQuestion(string text)
+        {
+            return MessageBox.Show(text, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        }
+        void deleteParts()
+        {
+            if (objectListView1.SelectedObjects.Count == 0) return;
+            if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No) return;
+            foreach (var item in objectListView1.SelectedObjects)
+            {
+                if (Preview != null && (item as DetailLoadInfo).Path == (Preview as RawDetail).Name) Preview = null;
+                Infos.Remove(item as DetailLoadInfo);
+            }
+            objectListView1.SetObjects(Infos);
+        }
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            deleteParts();
+
+        }
+
+        private void objectListView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteParts();
+            }
         }
     }
 }

@@ -37,12 +37,15 @@
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.statusStrip1.SuspendLayout();
+            this.contextMenuStrip4.SuspendLayout();
             this.SuspendLayout();
             // 
             // timer1
@@ -55,6 +58,7 @@
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
@@ -62,15 +66,16 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(890, 607);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1282, 703);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // panel1
             // 
             this.panel1.Controls.Add(this.tableLayoutPanel2);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(884, 601);
+            this.panel1.Size = new System.Drawing.Size(1276, 697);
             this.panel1.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -86,30 +91,32 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(884, 601);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1276, 697);
             this.tableLayoutPanel2.TabIndex = 3;
             // 
             // objectListView1
             // 
+            this.objectListView1.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
             this.objectListView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectListView1.FullRowSelect = true;
             this.objectListView1.GridLines = true;
             this.objectListView1.Location = new System.Drawing.Point(3, 3);
             this.objectListView1.Name = "objectListView1";
             this.objectListView1.ShowGroups = false;
-            this.objectListView1.Size = new System.Drawing.Size(436, 294);
+            this.objectListView1.Size = new System.Drawing.Size(632, 342);
             this.objectListView1.TabIndex = 1;
             this.objectListView1.View = System.Windows.Forms.View.Details;
             this.objectListView1.SelectedIndexChanged += new System.EventHandler(this.objectListView1_SelectedIndexChanged);
+            this.objectListView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.objectListView1_KeyDown);
             // 
             // pictureBox3
             // 
             this.pictureBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox3.Location = new System.Drawing.Point(445, 3);
+            this.pictureBox3.Location = new System.Drawing.Point(641, 3);
             this.pictureBox3.Name = "pictureBox3";
             this.tableLayoutPanel2.SetRowSpan(this.pictureBox3, 2);
-            this.pictureBox3.Size = new System.Drawing.Size(436, 595);
+            this.pictureBox3.Size = new System.Drawing.Size(632, 691);
             this.pictureBox3.TabIndex = 2;
             this.pictureBox3.TabStop = false;
             // 
@@ -118,9 +125,9 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 581);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 677);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(890, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1282, 26);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -130,11 +137,26 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(17, 20);
             this.toolStripStatusLabel1.Text = "li";
             // 
+            // contextMenuStrip4
+            // 
+            this.contextMenuStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.deleteToolStripMenuItem});
+            this.contextMenuStrip4.Name = "contextMenuStrip4";
+            this.contextMenuStrip4.Size = new System.Drawing.Size(121, 28);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(120, 24);
+            this.deleteToolStripMenuItem.Text = "delete";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(890, 607);
+            this.ClientSize = new System.Drawing.Size(1282, 703);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "Form1";
@@ -147,6 +169,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.contextMenuStrip4.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -162,5 +185,7 @@
         private BrightIdeasSoftware.ObjectListView objectListView1;
         private PictureBox pictureBox3;
         private TableLayoutPanel tableLayoutPanel2;
+        private ContextMenuStrip contextMenuStrip4;
+        private ToolStripMenuItem deleteToolStripMenuItem;
     }
 }

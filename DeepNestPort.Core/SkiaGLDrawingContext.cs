@@ -331,9 +331,9 @@ namespace DeepNestPort.Core
             {
                 var clr = (pen ).Color;
                 paint.Color = new SKColor(clr.R, clr.G, clr.B);
-                paint.IsAntialias = false;
+                paint.IsAntialias = true;
                 paint.StrokeWidth = pen.Width;
-                paint.Style = SKPaintStyle.Fill;
+                paint.Style = SKPaintStyle.Stroke;
                 canvas.DrawPath(path, paint);
             }
         }

@@ -11,7 +11,7 @@
         <RowDefinition Height="Auto"/>
         <RowDefinition/>
     </Grid.RowDefinitions>
-    <Ribbon x:Name="RibbonWin"  SelectedIndex="0">
+    <Ribbon x:Name="RibbonWin" SelectedIndex="0">
         <Ribbon.HelpPaneContent>
             <RibbonButton x:Name="HelpButton" />
         </Ribbon.HelpPaneContent>
@@ -45,12 +45,12 @@
             </RibbonGroup>
            
         </RibbonTab>
-            <RibbonTab x:Name="nestTag" Header="Nesting" KeyTip="H" >
+            <RibbonTab x:Name="nestTab" Header="Nesting" KeyTip="H" >
                 <!-- Home  group-->
                 <RibbonGroup x:Name="nest" Header="General">
                     <RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />
                     <RibbonButton  Label="Fit all"  KeyTip="F" />
-                    <RibbonButton  Label="Export"  KeyTip="F" />
+                    <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" KeyTip="F" />
 
                 </RibbonGroup>
 
