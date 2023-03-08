@@ -33,19 +33,27 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.objectListView2 = new BrightIdeasSoftware.ObjectListView();
             this.objectListView1 = new BrightIdeasSoftware.ObjectListView();
+            this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.detailToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quantityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.objectListView2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).BeginInit();
+            this.contextMenuStrip4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.statusStrip1.SuspendLayout();
-            this.contextMenuStrip4.SuspendLayout();
             this.SuspendLayout();
             // 
             // timer1
@@ -83,6 +91,7 @@
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Controls.Add(this.objectListView2, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.objectListView1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.pictureBox3, 1, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -94,9 +103,23 @@
             this.tableLayoutPanel2.Size = new System.Drawing.Size(1276, 697);
             this.tableLayoutPanel2.TabIndex = 3;
             // 
+            // objectListView2
+            // 
+            this.objectListView2.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
+            this.objectListView2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.objectListView2.FullRowSelect = true;
+            this.objectListView2.GridLines = true;
+            this.objectListView2.Location = new System.Drawing.Point(3, 351);
+            this.objectListView2.Name = "objectListView2";
+            this.objectListView2.ShowGroups = false;
+            this.objectListView2.Size = new System.Drawing.Size(632, 343);
+            this.objectListView2.TabIndex = 3;
+            this.objectListView2.View = System.Windows.Forms.View.Details;
+            // 
             // objectListView1
             // 
             this.objectListView1.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
+            this.objectListView1.ContextMenuStrip = this.contextMenuStrip4;
             this.objectListView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectListView1.FullRowSelect = true;
             this.objectListView1.GridLines = true;
@@ -108,6 +131,53 @@
             this.objectListView1.View = System.Windows.Forms.View.Details;
             this.objectListView1.SelectedIndexChanged += new System.EventHandler(this.objectListView1_SelectedIndexChanged);
             this.objectListView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.objectListView1_KeyDown);
+            // 
+            // contextMenuStrip4
+            // 
+            this.contextMenuStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.detailToolStripMenuItem,
+            this.clearToolStripMenuItem,
+            this.deleteToolStripMenuItem,
+            this.quantityToolStripMenuItem});
+            this.contextMenuStrip4.Name = "contextMenuStrip4";
+            this.contextMenuStrip4.Size = new System.Drawing.Size(147, 100);
+            // 
+            // detailToolStripMenuItem
+            // 
+            this.detailToolStripMenuItem.Name = "detailToolStripMenuItem";
+            this.detailToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.detailToolStripMenuItem.Text = "add detail";
+            this.detailToolStripMenuItem.Click += new System.EventHandler(this.detailToolStripMenuItem_Click);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.clearToolStripMenuItem.Text = "clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.deleteToolStripMenuItem.Text = "delete";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            // 
+            // quantityToolStripMenuItem
+            // 
+            this.quantityToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.setToToolStripMenuItem});
+            this.quantityToolStripMenuItem.Name = "quantityToolStripMenuItem";
+            this.quantityToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.quantityToolStripMenuItem.Text = "quantity";
+            // 
+            // setToToolStripMenuItem
+            // 
+            this.setToToolStripMenuItem.Name = "setToToolStripMenuItem";
+            this.setToToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.setToToolStripMenuItem.Text = "set to";
+            this.setToToolStripMenuItem.Click += new System.EventHandler(this.setToToolStripMenuItem_Click);
             // 
             // pictureBox3
             // 
@@ -124,7 +194,9 @@
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
+            this.toolStripStatusLabel1,
+            this.toolStripStatusLabel2,
+            this.toolStripProgressBar1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 677);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1282, 26);
@@ -134,23 +206,19 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(17, 20);
-            this.toolStripStatusLabel1.Text = "li";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(15, 20);
+            this.toolStripStatusLabel1.Text = "..";
             // 
-            // contextMenuStrip4
+            // toolStripStatusLabel2
             // 
-            this.contextMenuStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.deleteToolStripMenuItem});
-            this.contextMenuStrip4.Name = "contextMenuStrip4";
-            this.contextMenuStrip4.Size = new System.Drawing.Size(121, 28);
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(1150, 20);
+            this.toolStripStatusLabel2.Spring = true;
             // 
-            // deleteToolStripMenuItem
+            // toolStripProgressBar1
             // 
-            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(120, 24);
-            this.deleteToolStripMenuItem.Text = "delete";
-            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 18);
             // 
             // Form1
             // 
@@ -165,11 +233,12 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.objectListView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).EndInit();
+            this.contextMenuStrip4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.contextMenuStrip4.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -187,5 +256,12 @@
         private TableLayoutPanel tableLayoutPanel2;
         private ContextMenuStrip contextMenuStrip4;
         private ToolStripMenuItem deleteToolStripMenuItem;
+        private ToolStripStatusLabel toolStripStatusLabel2;
+        private ToolStripProgressBar toolStripProgressBar1;
+        private BrightIdeasSoftware.ObjectListView objectListView2;
+        private ToolStripMenuItem detailToolStripMenuItem;
+        private ToolStripMenuItem clearToolStripMenuItem;
+        private ToolStripMenuItem quantityToolStripMenuItem;
+        private ToolStripMenuItem setToToolStripMenuItem;
     }
 }

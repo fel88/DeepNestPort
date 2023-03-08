@@ -20,4 +20,10 @@
     <ProjectReference Include="..\DeepNestLib.Core\DeepNestLib.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="QntDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

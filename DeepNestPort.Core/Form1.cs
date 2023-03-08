@@ -42,6 +42,11 @@ namespace DeepNestPort.Core
 
             objectListView1.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Name", Width = 250, AspectName = "Name" });
             objectListView1.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Quantity", IsEditable = true, Width = 100, AspectName = "Quantity" });
+
+            objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Width", IsEditable = true, Width = 100, AspectName = "Width" });
+            objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Height", IsEditable = true, Width = 100, AspectName = "Height" });
+            objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Quantity", IsEditable = true, Width = 100, AspectName = "Quantity" });
+            objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Info", IsEditable = true, Width = 100, AspectName = "Info" });
             menu = new RibbonMenu();
             menu.TabChanged += Menu_TabIndexChanged;
 
@@ -53,7 +58,7 @@ namespace DeepNestPort.Core
             ctx = new SkiaGLDrawingContext();
 
 
-
+            updateSheetInfos();
             ctx.PaintAction = () => { Render(); };
             RenderControl = ctx.GenerateRenderControl();
             RenderControl.Visible = false;
@@ -73,7 +78,10 @@ namespace DeepNestPort.Core
 
         NFP dragNfp = null;
         NFP hoveredNfp = null;
-
+        void updateSheetInfos()
+        {
+            objectListView2.SetObjects(sheetsInfos);
+        }
 
         void Render()
         {
@@ -131,8 +139,7 @@ namespace DeepNestPort.Core
                         {
                             var pnts2 = citem.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
                             m.TransformPoints(pnts2);
-                            path.AddPoly(pnts2.Select(z => ctx.TransformSK(z)).ToArray());
-
+                            path.AddPoly(pnts2.Select(z => ctx.TransformSK(z)).Reverse().ToArray());                            
                         }
                     }
 
@@ -270,6 +277,8 @@ namespace DeepNestPort.Core
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
+            toolStripProgressBar1.Value = (int)Math.Round(progressVal * 100f);
+
             RedrawPreview(ctx3, Preview);
             if (!RenderControl.Visible)
                 return;
@@ -366,18 +375,19 @@ namespace DeepNestPort.Core
             RunDeepnest();
         }
         Thread th;
+
         internal void displayProgress(float progress)
         {
             progressVal = progress;
-
-
         }
+
         public void UpdateInfos()
         {
             objectListView1.SetObjects(Infos);
         }
         public float progressVal = 0;
         bool stop = false;
+        public int MaxNestSeconds = 5;
         public void RunDeepnest()
         {
             if (th != null) return;
@@ -387,9 +397,13 @@ namespace DeepNestPort.Core
                 context.StartNest();
                 UpdateNestsList();
                 Background.displayProgress = displayProgress;
-
+                Stopwatch sww = new Stopwatch();
                 while (true)
                 {
+                    /*if (sww.Elapsed.TotalSeconds > MaxNestSeconds)
+                    {
+                        break;
+                    }*/
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
 
@@ -398,7 +412,9 @@ namespace DeepNestPort.Core
                     displayProgress(1.0f);
                     sw.Stop();
                     toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
-                    if (stop) break;
+                    //if (stop)
+                        break;
+
                 }
                 th = null;
             });
@@ -512,6 +528,38 @@ namespace DeepNestPort.Core
             {
                 deleteParts();
             }
+        }
+        public void ShowMessage(string text, MessageBoxIcon type)
+        {
+            MessageBox.Show(text, Text, MessageBoxButtons.OK, type);
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (Infos.Count == 0) { ShowMessage("There are no parts.", MessageBoxIcon.Warning); return; }
+            if (ShowQuestion("Are you to sure to delete all items?") == DialogResult.No) return;
+            Infos.Clear();
+            objectListView1.SetObjects(Infos);
+            Preview = null; 
+        }
+
+        private void detailToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddDetail();
+        }
+
+        private void setToToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (objectListView1.SelectedObjects.Count == 0) return;
+            QntDialog q = new QntDialog();
+            q.ShowDialog();
+
+            foreach (var item in objectListView1.SelectedObjects)
+            {
+                (item as DetailLoadInfo).Quantity = q.Qnt;
+            }
+            objectListView1.RefreshObjects(objectListView1.SelectedObjects);
         }
     }
 }

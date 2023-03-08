@@ -28,7 +28,7 @@
         <RibbonTab x:Name="projectTab" Header="General" KeyTip="H" >
             <!-- Home  group-->
             <RibbonGroup x:Name="General" Header="General">
-                    <RibbonButton  Label="Clear"  KeyTip="F" />
+                    <!--<RibbonButton  Label="Clear"  KeyTip="F" />-->
 
                     <RibbonButton  Label="Load DXF" Click="RibbonButton_Click"  />
 
@@ -48,7 +48,7 @@
             <RibbonTab x:Name="nestTab" Header="Nesting" KeyTip="H" >
                 <!-- Home  group-->
                 <RibbonGroup x:Name="nest" Header="General">
-                    <RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />
+                    <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
                     <RibbonButton  Label="Fit all"  KeyTip="F" />
                     <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" KeyTip="F" />
 
