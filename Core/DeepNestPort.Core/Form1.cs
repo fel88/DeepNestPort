@@ -7,6 +7,7 @@ using System.Text;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Drawing.Drawing2D;
 using SkiaSharp;
+using BrightIdeasSoftware;
 
 namespace DeepNestPort.Core
 {
@@ -46,7 +47,25 @@ namespace DeepNestPort.Core
             objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Width", IsEditable = true, Width = 100, AspectName = "Width" });
             objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Height", IsEditable = true, Width = 100, AspectName = "Height" });
             objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Quantity", IsEditable = true, Width = 100, AspectName = "Quantity" });
-            objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Info", IsEditable = true, Width = 100, AspectName = "Info" });
+            //objectListView2.Columns.Add(new BrightIdeasSoftware.OLVColumn() { Text = "Info", IsEditable = true, Width = 100, AspectName = "Info" });
+
+            ((OLVColumn)objectListView2.Columns[0]).AspectPutter = (e, x) =>
+            {
+                var w = (float)(double)x;
+                if (w < 10)
+                    return;
+
+                ((SheetLoadInfo)e).Width = w;
+            };
+
+            ((OLVColumn)objectListView2.Columns[1]).AspectPutter = (e, x) =>
+            {
+                var h = (float)(double)x;
+                if (h < 10)
+                    return;
+
+                ((SheetLoadInfo)e).Height = h;
+            };
             menu = new RibbonMenu();
             menu.TabChanged += Menu_TabIndexChanged;
 
@@ -83,8 +102,26 @@ namespace DeepNestPort.Core
             objectListView2.SetObjects(sheetsInfos);
         }
 
+        const int zoomSpeed = 40;
         void Render()
         {
+            var pos = RenderControl.PointToClient(Cursor.Position);
+
+            if (ClientRectangle.Contains(pos))
+            {
+                if (pos.X >= 0 && pos.X < 15)
+                    ctx.PanX(zoomSpeed);
+
+                if (pos.X <= RenderControl.Width && pos.X > (RenderControl.Width - 15))
+                    ctx.PanX(-zoomSpeed);
+
+                if (pos.Y >= 0 && pos.Y < 15)
+                    ctx.PanY(-zoomSpeed);
+
+                if (pos.Y <= RenderControl.Height && pos.Y > (RenderControl.Height - 15))
+                    ctx.PanY(zoomSpeed);
+            }
+            
             var sw = Stopwatch.StartNew();
 
             ctx.Clear(System.Drawing.Color.White); //same thing but also erases anything else on the canvas first
@@ -139,7 +176,7 @@ namespace DeepNestPort.Core
                         {
                             var pnts2 = citem.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
                             m.TransformPoints(pnts2);
-                            path.AddPoly(pnts2.Select(z => ctx.TransformSK(z)).Reverse().ToArray());                            
+                            path.AddPoly(pnts2.Select(z => ctx.TransformSK(z)).Reverse().ToArray());
                         }
                     }
 
@@ -194,16 +231,18 @@ namespace DeepNestPort.Core
             }
             //ctx.Setup();
         }
+
+        int lastOpenFilterIndex = 1;
         public void AddDetail()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
-            //ofd.FilterIndex = lastOpenFilterIndex;
+            ofd.FilterIndex = lastOpenFilterIndex;
             ofd.Multiselect = true;
             if (ofd.ShowDialog() != DialogResult.OK) return;
             for (int i = 0; i < ofd.FileNames.Length; i++)
             {
-                // lastOpenFilterIndex = ofd.FilterIndex;
+                lastOpenFilterIndex = ofd.FilterIndex;
                 try
                 {
                     //try to load
@@ -291,6 +330,7 @@ namespace DeepNestPort.Core
         List<NFP> sheets { get { return context.Sheets; } }
 
         List<NFP> polygons { get { return context.Polygons; } }
+
         internal void RunNest()
         {
             context = new NestingContext();
@@ -333,12 +373,13 @@ namespace DeepNestPort.Core
                 src++;
             }
 
+            if (sheets.Count == 0 || polygons.Count == 0)
+            {
+                MessageBox.Show("There are no sheets or parts", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             menu.SetTab(menu.NestTab);
-            /*RenderControl.Visible = true;
-            tableLayoutPanel1.Controls.Remove(tableLayoutPanel2);
-            tableLayoutPanel1.Controls.Add(RenderControl, 0, 1);
-            tableLayoutPanel2.Visible = false;*/
             run();
         }
 
@@ -363,11 +404,6 @@ namespace DeepNestPort.Core
 
         void run()
         {
-            if (sheets.Count == 0 || polygons.Count == 0)
-            {
-                MessageBox.Show("There are no sheets or parts", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
             stop = false;
             // progressBar1.Value = 0;
             //tabControl1.SelectedTab = tabPage4;
@@ -413,7 +449,7 @@ namespace DeepNestPort.Core
                     sw.Stop();
                     toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
                     //if (stop)
-                        break;
+                    break;
 
                 }
                 th = null;
@@ -541,7 +577,7 @@ namespace DeepNestPort.Core
             if (ShowQuestion("Are you to sure to delete all items?") == DialogResult.No) return;
             Infos.Clear();
             objectListView1.SetObjects(Infos);
-            Preview = null; 
+            Preview = null;
         }
 
         private void detailToolStripMenuItem_Click(object sender, EventArgs e)
@@ -560,6 +596,92 @@ namespace DeepNestPort.Core
                 (item as DetailLoadInfo).Quantity = q.Qnt;
             }
             objectListView1.RefreshObjects(objectListView1.SelectedObjects);
+        }
+        void deleteSheet()
+        {
+            if (objectListView2.SelectedObjects.Count == 0)
+                return;
+
+            if (ShowQuestion($"Are you to sure to delete {objectListView2.SelectedObjects.Count} sheets?") == DialogResult.No) return;
+            foreach (var item in objectListView2.SelectedObjects)
+            {
+                sheetsInfos.Remove(item as SheetLoadInfo);
+            }
+            updateSheetInfos();
+        }
+        private void deleteToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            deleteSheet();
+        }
+
+        private void rectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddSheetDialog a = new AddSheetDialog();
+            if (a.ShowDialog() != DialogResult.OK) return;
+            sheetsInfos.Add(new SheetLoadInfo()
+            {
+                Height = a.SheetHeight,
+                Width = a.SheetWidth,
+                Nfp = NewSheet(a.SheetWidth, a.SheetHeight),
+                Quantity = 1
+            });
+            updateSheetInfos();
+        }
+
+        private void dxfToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            ofd.FilterIndex = lastOpenFilterIndex;
+            ofd.Multiselect = true;
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            for (int i = 0; i < ofd.FileNames.Length; i++)
+            {
+                lastOpenFilterIndex = ofd.FilterIndex;
+                try
+                {
+                    RawDetail det = null;
+                    if (ofd.FileNames[i].ToLower().EndsWith("dxf"))
+                        det = DxfParser.LoadDxf(ofd.FileNames[i]);
+
+                    if (ofd.FileNames[i].ToLower().EndsWith("svg"))
+                        det = SvgParser.LoadSvg(ofd.FileNames[i]);
+
+                    var fr = sheetsInfos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
+                    if (fr != null)
+                        fr.Quantity++;
+                    else
+                    {
+
+                        var nfp = det.ToNfp();
+                        var bbox = det.BoundingBox();
+                        sheetsInfos.Add(new SheetLoadInfo()
+                        {
+                            Quantity = 1,
+                            Nfp = nfp,
+                            Width = bbox.Width,
+                            Height = bbox.Height,
+                            Info = new FileInfo(ofd.FileNames[i]).Name,
+                            Path = ofd.FileNames[i]
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ofd.FileNames[i]}: {ex.Message}", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            updateSheetInfos();
+        }
+
+        internal void ZoomOut()
+        {
+            ctx.ZoomOut();
+        }
+
+        internal void ZoomIn()
+        {
+            ctx.ZoomIn();
         }
     }
 }

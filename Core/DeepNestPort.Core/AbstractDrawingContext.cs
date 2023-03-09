@@ -66,8 +66,6 @@ namespace DeepNestPort.Core
 
         public float zoom { get; set; } = 1;
 
-        //public abstract void FillCircle(Brush brush, float v1, float v2, int rad);
-
         public PointF GetCursor()
         {
             var p = PictureBox.PointToClient(Cursor.Position);
@@ -98,7 +96,7 @@ namespace DeepNestPort.Core
         {
             return new PointF((float)((x + sx) * zoom), (float)(-(y + sy) * zoom));
         }
-        
+
 
         public virtual PointF BackTransform(PointF p1)
         {
@@ -170,16 +168,8 @@ namespace DeepNestPort.Core
             pb.MouseDownAction = PictureBox1_MouseDown;
 
             pb.SizeChangedAction = Pb_SizeChanged;
-
-            //pb.SizeChanged += Pb_SizeChanged;
-            //pb.MouseWheel += PictureBox1_MouseWheel;
-            //pb.MouseUp += PictureBox1_MouseUp;
-            //pb.MouseDown += PictureBox1_MouseDown;
-            //pb.MouseMove += PictureBox1_MouseMove;
-
-            //Bmp = new Bitmap(pb.Control.Width, pb.Control.Height);
-            //  gr = Graphics.FromImage(Bmp);
         }
+
         public virtual void Pb_SizeChanged(object sender, EventArgs e)
         {
             InitGraphics();
@@ -210,43 +200,17 @@ namespace DeepNestPort.Core
         }
         public abstract void InitGraphics();
 
-          public abstract void DrawPath(System.Drawing.Pen p, SKPath path);
-          public abstract void FillPath(System.Drawing.Brush p, SKPath path);
-        //  public abstract void DrawPolygon(Pen p, PointF[] pointFs);
-
-
-        //public abstract void DrawCircle(Pen pen, float v1, float v2, float rad);
+        public abstract void DrawPath(System.Drawing.Pen p, SKPath path);
+        public abstract void FillPath(System.Drawing.Brush p, SKPath path);
 
         public abstract SizeF MeasureString(string text, Font font);
-
-
-        //public abstract void DrawString(string text, Font font, Brush brush, PointF position);
-
-
-       // public abstract void DrawString(string text, Font font, Brush brush, float x, float y);
-
 
         public abstract void DrawLine(float x0, float y0, float x1, float y1);
 
 
         public abstract void DrawLine(PointF pp, PointF pp2);
 
-
-      //  public abstract void FillRoundRectangle(Brush blue, SKRoundRect rr);
-
-
-       // public abstract void DrawArrowedLine(Pen p, PointF tr0, PointF tr1, int v);
-//
-
-        //public abstract void DrawRoundRectangle(Pen pen, SKRoundRect rect);
-
-
         public abstract void DrawRectangle(float rxm, float rym, float rdx, float rdy);
-
-
-
-
-     //   public abstract void FillRectangle(Brush blue, float v1, float v2, float v3, float v4);
 
         public abstract void Clear(System.Drawing.Color white);
 
@@ -271,96 +235,29 @@ namespace DeepNestPort.Core
 
         }
 
-        /*public void DrawCircle(Pen pen, float v1, float v2, float rad, int angles, float startAngle)
+        public void ZoomOut()
         {
-            var step = 360f / angles;
-            List<Vector2d> pp = new List<Vector2d>();
-            for (int i = 0; i < angles; i++)
-            {
-                var ang = step * i;
-                var radd = ang * Math.PI / 180f;
-                var xx = v1 + rad * Math.Cos(radd);
-                var yy = v2 + rad * Math.Sin(radd);
-                pp.Add(new Vector2d(xx, yy));
-            }
-            for (int i = 1; i <= pp.Count; i++)
-            {
-                var p0 = pp[i - 1].ToPointF();
-                var p1 = pp[i % pp.Count].ToPointF();
-                DrawLine(p0, p1);
-            }
-        }*/
+            zoom /= ZoomFactor;
 
-    }
-    public class EventWrapperPictureBox
-    {
-        public Control Control;
-        public EventWrapperPictureBox(Control control)
-        {
-            Control = control;
-            control.MouseUp += WrapGlControl_MouseUp;
-            control.MouseDown += Control_MouseDown;
-            control.KeyDown += Control_KeyDown;
-            control.MouseMove += WrapGlControl_MouseMove;
-            control.MouseWheel += Control_MouseWheel;
-            control.KeyUp += Control_KeyUp;
-            control.SizeChanged += Control_SizeChanged;
+            if (zoom < 0.0008) { zoom = 0.0008f; }
+            if (zoom > 10000) { zoom = 10000f; }
         }
 
-        private void Control_SizeChanged(object sender, EventArgs e)
+        public void ZoomIn()
         {
-            SizeChangedAction?.Invoke(sender, e);
+            zoom *= ZoomFactor;
+
+            if (zoom < 0.0008) { zoom = 0.0008f; }
+            if (zoom > 10000) { zoom = 10000f; }
         }
 
-        private void Control_KeyUp(object sender, KeyEventArgs e)
+        public void PanX(int v)
         {
-            KeyUpUpAction?.Invoke(sender, e);
+            sx += v;
         }
-
-        private void Control_MouseWheel(object sender, MouseEventArgs e)
+        public void PanY(int v)
         {
-            MouseWheelAction?.Invoke(sender, e);
-
-        }
-
-        private void Control_KeyDown(object sender, KeyEventArgs e)
-        {
-            KeyDownAction?.Invoke(sender, e);
-        }
-
-        private void Control_MouseDown(object sender, MouseEventArgs e)
-        {
-            MouseDownAction?.Invoke(sender, e);
-        }
-
-        private void WrapGlControl_MouseUp(object sender, MouseEventArgs e)
-        {
-            MouseUpAction?.Invoke(sender, e);
-
-        }
-
-        private void WrapGlControl_MouseMove(object sender, MouseEventArgs e)
-        {
-            MouseMoveAction?.Invoke(sender, e);
-
-        }
-        public Action<object, EventArgs> SizeChangedAction;
-        public Action<object, MouseEventArgs> MouseMoveAction;
-        public Action<object, MouseEventArgs> MouseUpAction;
-        public Action<object, MouseEventArgs> MouseDownAction;
-        public Action<object, MouseEventArgs> MouseWheelAction;
-        public Action<object, KeyEventArgs> KeyUpUpAction;
-        public Action<object, KeyEventArgs> KeyDownAction;
-
-        /*public Bitmap Image
-        {
-            get { return (Bitmap)Control.Image; }
-            set { Control.Image = value; }
-        }*/
-
-        public Point PointToClient(Point position)
-        {
-            return Control.PointToClient(position);
+            sy += v;
         }
     }
 }

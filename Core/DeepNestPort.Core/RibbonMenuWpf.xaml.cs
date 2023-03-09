@@ -81,5 +81,15 @@ namespace DeepNestPort.Core
         {
             Form1.Form.Export();
         }
+
+        private void RibbonButton_Click_3(object sender, RoutedEventArgs e)
+        {
+            Form1.Form.ZoomIn();
+        }
+
+        private void RibbonButton_Click_4(object sender, RoutedEventArgs e)
+        {
+            Form1.Form.ZoomOut();
+        }
     }
 }

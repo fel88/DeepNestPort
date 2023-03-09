@@ -51,7 +51,8 @@
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
                     <RibbonButton  Label="Fit all"  KeyTip="F" />
                     <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" KeyTip="F" />
-
+                    <RibbonButton  Label="Zoom in" Click="RibbonButton_Click_3"  />
+                    <RibbonButton  Label="Zoom out"  Click="RibbonButton_Click_4"  />
                 </RibbonGroup>
 
             </RibbonTab>
