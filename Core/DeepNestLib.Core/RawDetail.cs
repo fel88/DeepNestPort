@@ -45,7 +45,9 @@ namespace DeepNestLib
 
                 foreach (var r in nfps)
                 {
-                    if (r == tt) continue;
+                    if (r == tt) 
+                        continue;
+
                     if (po.children == null)
                     {
                         po.children = new List<NFP>();

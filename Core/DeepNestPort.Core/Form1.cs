@@ -121,7 +121,7 @@ namespace DeepNestPort.Core
                 if (pos.Y <= RenderControl.Height && pos.Y > (RenderControl.Height - 15))
                     ctx.PanY(zoomSpeed);
             }
-            
+
             var sw = Stopwatch.StartNew();
 
             ctx.Clear(System.Drawing.Color.White); //same thing but also erases anything else on the canvas first
@@ -531,16 +531,18 @@ namespace DeepNestPort.Core
             {
                 // lastSaveFilterIndex = sfd.FilterIndex;
                 if (sfd.FilterIndex == 1)
-                    DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+                    DxfParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
 
                 if (sfd.FilterIndex == 2)
-                    SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+                    SvgParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
             }
         }
+
         public DialogResult ShowQuestion(string text)
         {
             return MessageBox.Show(text, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         }
+
         void deleteParts()
         {
             if (objectListView1.SelectedObjects.Count == 0) return;
@@ -552,12 +554,11 @@ namespace DeepNestPort.Core
             }
             objectListView1.SetObjects(Infos);
         }
+
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             deleteParts();
-
         }
-
         private void objectListView1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
@@ -682,6 +683,52 @@ namespace DeepNestPort.Core
         internal void ZoomIn()
         {
             ctx.ZoomIn();
+        }
+
+        internal void FitAll(NFP[] nfps = null)
+        {
+            List<PointF> points = new List<PointF>();
+            if (nfps == null)
+            {
+                nfps = sheets.ToArray();
+            }
+            foreach (var item in nfps)
+            {
+                points.AddRange(item.Points.Select(z => new PointF((float)(z.x + item.x), (float)(z.y + item.y))));
+            }
+
+            if (points.Any())
+                ctx.FitToPoints(points.ToArray(), 20);
+        }
+
+        int currentSheet = 0;
+        internal void FitNextSheet()
+        {
+            if (sheets.Count == 0)
+                return;
+
+            currentSheet++;
+            if (currentSheet >= sheets.Count)
+            {
+                currentSheet = 0;
+            }
+            FitAll(new[] { sheets[currentSheet] });
+        }
+
+        internal void ExportAll()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            //sfd.FilterIndex = lastSaveFilterIndex;
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                // lastSaveFilterIndex = sfd.FilterIndex;
+                if (sfd.FilterIndex == 1)
+                    DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+
+                if (sfd.FilterIndex == 2)
+                    SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+            }
         }
     }
 }

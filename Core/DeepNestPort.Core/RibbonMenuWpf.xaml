@@ -49,10 +49,23 @@
                 <!-- Home  group-->
                 <RibbonGroup x:Name="nest" Header="General">
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
-                    <RibbonButton  Label="Fit all"  KeyTip="F" />
+                    
                     <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" KeyTip="F" />
+                    <RibbonButton  Label="Export All"  Click="RibbonButton_Click_7" KeyTip="F" />
+                    
+                    
+                </RibbonGroup>
+                <RibbonGroup x:Name="view" Header="View">
+                    <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
+                    <RibbonButton  Label="Fit all"  Click="RibbonButton_Click_5" KeyTip="F" />
+                    
                     <RibbonButton  Label="Zoom in" Click="RibbonButton_Click_3"  />
                     <RibbonButton  Label="Zoom out"  Click="RibbonButton_Click_4"  />
+
+                </RibbonGroup>
+                <RibbonGroup x:Name="navigate" Header="Navigate">
+                    
+                    <RibbonButton  Label="Next sheet" Click="RibbonButton_Click_6"  />
                 </RibbonGroup>
 
             </RibbonTab>

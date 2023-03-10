@@ -305,7 +305,9 @@ namespace DeepNestLib
         public NFP ImportFromRawDetail(RawDetail raw, int src)
         {
             var d = raw.ToNfp();
-            if (d == null) return null;
+            if (d == null) 
+                return null;
+
             d.source = src;
             Polygons.Add(d);
             return d;            

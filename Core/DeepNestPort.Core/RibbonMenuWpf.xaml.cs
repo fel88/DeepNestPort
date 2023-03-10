@@ -91,5 +91,22 @@ namespace DeepNestPort.Core
         {
             Form1.Form.ZoomOut();
         }
+
+        private void RibbonButton_Click_5(object sender, RoutedEventArgs e)
+        {
+            Form1.Form.FitAll();
+
+        }
+
+        
+        private void RibbonButton_Click_6(object sender, RoutedEventArgs e)
+        {
+            Form1.Form.FitNextSheet();
+        }
+
+        private void RibbonButton_Click_7(object sender, RoutedEventArgs e)
+        {
+            Form1.Form.ExportAll();
+        }
     }
 }
