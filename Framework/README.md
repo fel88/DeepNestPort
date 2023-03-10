@@ -5,8 +5,8 @@ DXF Import/Export: https://github.com/IxMilia/Dxf
 
 Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
 
-<img src="imgs/2.png"/>
-<img src="imgs/3.png"/>
+<img src="../imgs/2.png"/>
+<img src="../imgs/3.png"/>
 
 
 ## Steps to build and run
