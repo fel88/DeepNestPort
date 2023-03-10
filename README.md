@@ -1,19 +1,29 @@
 # DeepNestPort
 DeepNest C# Port (https://github.com/Jack000/Deepnest)
 
+Net6.0 <br/>
+WinForm / WPF Ribbon panel
+
+:pencil2: **2D drawer:** Skia (https://github.com/mono/SkiaSharp) <br/>
+:warning:**Project status:** WIP  :construction::construction_worker: 
+
+
 DXF Import/Export: https://github.com/IxMilia/Dxf
 
 Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
 
-<img src="imgs/2.png"/>
-<img src="imgs/3.png"/>
+![image](https://user-images.githubusercontent.com/15663687/224371364-c534ce08-36fd-4bd4-9264-18a80f57b3db.png)
+
+
+![image](https://user-images.githubusercontent.com/15663687/224371540-ea784a91-ca26-4ed0-9a9d-ec8acc11f575.png)
+
 
 
 ## Steps to build and run
 ```
-1. Open DeepNestPort.sln using Visual Studio
+1. Open DeepNestPort.Core.sln using Visual Studio
 2. In visual studio press Build->Build solution, and wait until building 
-3. Run DeepNestPort.exe (can be found here 'DeepNestPort-master\DeepNestPort\bin\Debug\')
+3. Run DeepNestPort.Core.exe (can be found here 'DeepNestPort-master\Core\DeepNestPort.Core\bin\Debug\')
 ```
 
 ## (Optional) Running this software using external dll
