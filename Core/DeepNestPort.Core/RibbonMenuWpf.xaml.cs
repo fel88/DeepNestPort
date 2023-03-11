@@ -98,5 +98,15 @@ namespace DeepNestPort.Core
         {
             Form.SwitchSettingsPanel();
         }
+
+        private void RibbonToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            Form.ColorsView(true);
+        }
+
+        private void colorsToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Form.ColorsView(false);
+        }
     }
 }

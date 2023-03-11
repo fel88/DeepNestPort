@@ -63,6 +63,8 @@
                     <RibbonButton  Label="Zoom in" Click="RibbonButton_Click_3"  />
                     <RibbonButton  Label="Zoom out"  Click="RibbonButton_Click_4"  />
 
+                    <RibbonToggleButton x:Name="colorsToggle" Label="Colors" Unchecked="colorsToggle_Unchecked"  Checked="RibbonToggleButton_Checked" />
+
                 </RibbonGroup>
                 <RibbonGroup x:Name="navigate" Header="Navigate">
 

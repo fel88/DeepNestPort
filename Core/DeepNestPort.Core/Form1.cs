@@ -8,6 +8,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Drawing.Drawing2D;
 using SkiaSharp;
 using BrightIdeasSoftware;
+using System.Windows.Media;
+using OpenTK;
 
 namespace DeepNestPort.Core
 {
@@ -24,9 +26,36 @@ namespace DeepNestPort.Core
 
             stgControl.Visible = false;
             stgControl.Close += StgControl_Close;
-            panel1.Controls.Add(stgControl);            
+            panel1.Controls.Add(stgControl);
             stgControl.Dock = DockStyle.Fill;
+
+            List<System.Drawing.Color> clrs = new List<System.Drawing.Color>();
+            foreach (var item in Enum.GetValues(typeof(KnownColor)))
+            {
+                var cc = System.Drawing.Color.FromKnownColor((KnownColor)item);
+                if (cc.R < 32 && cc.G < 32 && cc.B < 32) 
+                    continue;
+
+                if (cc.R > 228 && cc.G > 228 && cc.B > 228) 
+                    continue;
+
+                bool good = true;
+                foreach (var color in clrs)
+                {
+                    if (((new Vector3(color.R, color.G, color.B)) - new Vector3(cc.R, cc.G, cc.B)).Length < 32) { good = false; break; }
+                }
+                if (!good) 
+                    continue;
+
+                clrs.Add(cc);
+            }
+
+            Random rrr = new Random(222);
+            clrs = clrs.OrderBy(z => rrr.Next(100000)).ToList();
+            Colors = clrs.ToArray();
         }
+
+        System.Drawing.Color[] Colors;
 
         private void StgControl_Close()
         {
@@ -91,8 +120,8 @@ namespace DeepNestPort.Core
             updateSheetInfos();
             ctx.PaintAction = () => { Render(); };
             RenderControl = ctx.GenerateRenderControl();
-            
-            RenderControl.Visible = false;            
+
+            RenderControl.Visible = false;
             //tableLayoutPanel1. Controls.Add(RenderControl,0,1);
             panel1.Controls.Add(RenderControl);
             RenderControl.Dock = DockStyle.Fill;
@@ -110,6 +139,8 @@ namespace DeepNestPort.Core
 
         NFP dragNfp = null;
         NFP hoveredNfp = null;
+
+        public bool UseColors { get; set; } = false;
         void updateSheetInfos()
         {
             objectListView2.SetObjects(sheetsInfos);
@@ -162,6 +193,16 @@ namespace DeepNestPort.Core
             {
                 item.Z = 0;
             }
+            var nms = polygons.GroupBy(z => z.Name).ToArray();
+
+            Dictionary<string, System.Drawing.Color> colors = new System.Collections.Generic.Dictionary<string, System.Drawing.Color>();
+            if (UseColors)
+            {
+                for (int i = 0; i < nms.Length; i++)
+                {
+                    colors.Add(nms[i].Key, Colors[i]);
+                }
+            }
             foreach (var item in polygons.Union(sheets).OrderBy(z => z.Z))
             {
                 //if (!checkBox1.Checked)
@@ -175,7 +216,7 @@ namespace DeepNestPort.Core
                 if (item.Points != null && item.Points.Any())
                 {
                     //rotate first;
-                    var m = new Matrix();
+                    var m = new System.Drawing.Drawing2D.Matrix();
                     m.Translate((float)item.x, (float)item.y);
                     m.Rotate(item.rotation);
 
@@ -198,9 +239,11 @@ namespace DeepNestPort.Core
                     {
                         bool hovered = item == hoveredNfp;
                         if (hovered || dragNfp == item)
-                            ctx.FillPath(new SolidBrush(Color.Blue), path);
+                            //ctx.FillPath(new SolidBrush(System.Drawing.Color.Blue), path);
+                            ctx.FillPath(new SolidBrush(UseColors ? colors[item.Name] : System.Drawing.Color.Blue), path);
                         else
-                            ctx.FillPath(new SolidBrush(Color.FromArgb(128, Color.LightBlue)), path);
+                            //ctx.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(128, System.Drawing.Color.LightBlue)), path);
+                            ctx.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(128, UseColors ? colors[item.Name] : System.Drawing.Color.LightBlue)), path);
                     }
                     ctx.DrawPath(Pens.Black, path);
 
@@ -298,7 +341,7 @@ namespace DeepNestPort.Core
                 {
                     var _nfp = raw.ToNfp();
 
-                    ctx.Draw(raw, Pens.Black, Brushes.LightBlue);
+                    ctx.Draw(raw, Pens.Black, System.Drawing.Brushes.LightBlue);
                     /*  if (drawSimplification)
                       {
                           NFP s = lastSimplifiedResult;
@@ -323,7 +366,7 @@ namespace DeepNestPort.Core
                 }
 
                 var cap = $"{bnd.Value.Width:N2} x {bnd.Value.Height:N2}";
-                ctx.DrawLabel(cap, Brushes.Black, Color.LightGreen, 5, 5);
+                ctx.DrawLabel(cap, System.Drawing.Brushes.Black, System.Drawing.Color.LightGreen, 5, 5);
             }
             ctx.Setup();
         }
@@ -749,7 +792,12 @@ namespace DeepNestPort.Core
         internal void SwitchSettingsPanel()
         {
             tableLayoutPanel2.Visible = !tableLayoutPanel2.Visible;
-            stgControl.Visible = !stgControl.Visible;            
+            stgControl.Visible = !stgControl.Visible;
+        }
+
+        internal void ColorsView(bool v)
+        {
+            UseColors = v;
         }
     }
 }
