@@ -12,7 +12,7 @@ namespace DeepNestLib
 {
     public class SvgParser
     {
-        public static RawDetail LoadSvg(string path)
+        public static RawDetail[] LoadSvg(string path)
         {
             XDocument doc = XDocument.Load(path);
             var fi = new FileInfo(path);
@@ -86,7 +86,7 @@ namespace DeepNestLib
             }
 
 
-            return s;
+            return new[] { s };
         }
         public static void Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
         {
@@ -352,24 +352,5 @@ namespace DeepNestLib
         public float tolerance = 2f; // max bound for bezier->line segment conversion, in native SVG units
         public float toleranceSvg = 0.005f;// fudge factor for browser inaccuracy in SVG unit handling
 
-    }
-    public class LocalContour
-    {
-        public float Len
-        {
-            get
-            {
-                float len = 0;
-                for (int i = 1; i <= Points.Count; i++)
-                {
-                    var p1 = Points[i - 1];
-                    var p2 = Points[i % Points.Count];
-                    len += (float)Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
-                }
-                return len;
-            }
-        }
-        public List<PointF> Points = new List<PointF>();
-        public bool Enable = true;
     }
 }

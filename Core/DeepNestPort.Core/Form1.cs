@@ -33,10 +33,10 @@ namespace DeepNestPort.Core
             foreach (var item in Enum.GetValues(typeof(KnownColor)))
             {
                 var cc = System.Drawing.Color.FromKnownColor((KnownColor)item);
-                if (cc.R < 32 && cc.G < 32 && cc.B < 32) 
+                if (cc.R < 32 && cc.G < 32 && cc.B < 32)
                     continue;
 
-                if (cc.R > 228 && cc.G > 228 && cc.B > 228) 
+                if (cc.R > 228 && cc.G > 228 && cc.B > 228)
                     continue;
 
                 bool good = true;
@@ -44,13 +44,13 @@ namespace DeepNestPort.Core
                 {
                     if (((new Vector3(color.R, color.G, color.B)) - new Vector3(cc.R, cc.G, cc.B)).Length < 32) { good = false; break; }
                 }
-                if (!good) 
+                if (!good)
                     continue;
 
                 clrs.Add(cc);
             }
 
-            Random rrr = new Random(222);
+            Random rrr = new Random(234);
             clrs = clrs.OrderBy(z => rrr.Next(100000)).ToList();
             Colors = clrs.ToArray();
         }
@@ -193,9 +193,9 @@ namespace DeepNestPort.Core
             {
                 item.Z = 0;
             }
-            var nms = polygons.GroupBy(z => z.Name).ToArray();
+            var nms = polygons.GroupBy(z => z.source.Value).ToArray();
 
-            Dictionary<string, System.Drawing.Color> colors = new System.Collections.Generic.Dictionary<string, System.Drawing.Color>();
+            Dictionary<int, System.Drawing.Color> colors = new System.Collections.Generic.Dictionary<int, System.Drawing.Color>();
             if (UseColors)
             {
                 for (int i = 0; i < nms.Length; i++)
@@ -240,10 +240,10 @@ namespace DeepNestPort.Core
                         bool hovered = item == hoveredNfp;
                         if (hovered || dragNfp == item)
                             //ctx.FillPath(new SolidBrush(System.Drawing.Color.Blue), path);
-                            ctx.FillPath(new SolidBrush(UseColors ? colors[item.Name] : System.Drawing.Color.Blue), path);
+                            ctx.FillPath(new SolidBrush(UseColors ? colors[item.source.Value] : System.Drawing.Color.Blue), path);
                         else
                             //ctx.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(128, System.Drawing.Color.LightBlue)), path);
-                            ctx.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(128, UseColors ? colors[item.Name] : System.Drawing.Color.LightBlue)), path);
+                            ctx.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(128, UseColors ? colors[item.source.Value] : System.Drawing.Color.LightBlue)), path);
                     }
                     ctx.DrawPath(Pens.Black, path);
 
@@ -302,17 +302,31 @@ namespace DeepNestPort.Core
                 try
                 {
                     //try to load
+                    RawDetail[] d = null;
                     if (ofd.FileNames[i].ToLower().EndsWith("dxf"))
-                        DxfParser.LoadDxf(ofd.FileNames[i]);
+                        d = DxfParser.LoadDxf(ofd.FileNames[i], true);
 
                     if (ofd.FileNames[i].ToLower().EndsWith("svg"))
-                        SvgParser.LoadSvg(ofd.FileNames[i]);
+                        d = SvgParser.LoadSvg(ofd.FileNames[i]);
 
                     var fr = Infos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
                     if (fr != null)
                         fr.Quantity++;
                     else
-                        Infos.Add(new DetailLoadInfo() { Quantity = 1, Name = new FileInfo(ofd.FileNames[i]).Name, Path = ofd.FileNames[i] });
+                    {
+                        bool split = d.Length > 1;
+                        if (SplitMode == LoadDetailSplitMode.Ask && split && ShowQuestion($"File {ofd.FileNames[i]} contains {d.Length} separate parts. Do you want to split it to separate parts during nesting?") == DialogResult.No)
+                        {
+                            split = false;
+                        }
+                        Infos.Add(new DetailLoadInfo()
+                        {
+                            Quantity = 1,
+                            SplitOnLoad = split,
+                            Name = new FileInfo(ofd.FileNames[i]).Name,
+                            Path = ofd.FileNames[i]
+                        });
+                    }
 
                 }
                 catch (Exception ex)
@@ -412,21 +426,24 @@ namespace DeepNestPort.Core
             src = 0;
             foreach (var item in Infos)
             {
-                RawDetail det = null;
+                RawDetail[] det = null;
                 if (item.Path.ToLower().EndsWith("dxf"))
                 {
-                    det = DxfParser.LoadDxf(item.Path);
+                    det = DxfParser.LoadDxf(item.Path, item.SplitOnLoad);
                 }
                 else if (item.Path.ToLower().EndsWith("svg"))
                 {
                     det = SvgParser.LoadSvg(item.Path);
                 }
 
-                for (int i = 0; i < item.Quantity; i++)
+                foreach (var r in det)
                 {
-                    context.ImportFromRawDetail(det, src);
+                    for (int i = 0; i < item.Quantity; i++)
+                    {
+                        context.ImportFromRawDetail(r, src);
+                    }
+                    src++;
                 }
-                src++;
             }
 
             if (sheets.Count == 0 || polygons.Count == 0)
@@ -479,6 +496,7 @@ namespace DeepNestPort.Core
         {
             objectListView1.SetObjects(Infos);
         }
+
         public float progressVal = 0;
         bool stop = false;
         public int MaxNestSeconds = 5;
@@ -518,9 +536,10 @@ namespace DeepNestPort.Core
         }
         public SvgNest nest { get { return context.Nest; } }
 
+        public LoadDetailSplitMode SplitMode { get; set; } = LoadDetailSplitMode.Ask;
+
         public void UpdateNestsList()
         {
-
             if (nest != null)
             {
                 /*listView4.Invoke((Action)(() =>
@@ -536,24 +555,26 @@ namespace DeepNestPort.Core
             }
         }
 
-        object Preview;
+        RawDetail Preview;
         bool autoFit = true;
+
         private void objectListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (objectListView1.SelectedObject == null) return;
             var path = (objectListView1.SelectedObject as DetailLoadInfo).Path.ToLower();
             if (path.EndsWith("dxf"))
             {
-                Preview = DxfParser.LoadDxf(path);
+                Preview = DxfParser.LoadDxf(path).FirstOrDefault();
             }
             else if (path.EndsWith("svg"))
             {
-                Preview = SvgParser.LoadSvg(path);
+                Preview = SvgParser.LoadSvg(path).FirstOrDefault();
             }
             if (autoFit)
                 fitAll();
 
         }
+
         public DrawingContext ctx3;
         void fitAll()
         {
@@ -567,12 +588,12 @@ namespace DeepNestPort.Core
                 }
                 ctx3.FitToPoints(gp.PathPoints, 5);
             }
-            if (Preview is NFP nfp)
+            /*if (Preview is NFP nfp)
             {
                 GraphicsPath gp = new GraphicsPath();
                 gp.AddPolygon(nfp.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray());
                 ctx3.FitToPoints(gp.PathPoints, 5);
-            }
+            }*/
         }
 
         internal void StopNesting()
@@ -631,9 +652,15 @@ namespace DeepNestPort.Core
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (Infos.Count == 0)
+            {
+                ShowMessage("There are no parts.", MessageBoxIcon.Warning);
+                return;
+            }
 
-            if (Infos.Count == 0) { ShowMessage("There are no parts.", MessageBoxIcon.Warning); return; }
-            if (ShowQuestion("Are you to sure to delete all items?") == DialogResult.No) return;
+            if (ShowQuestion("Are you to sure to delete all items?") == DialogResult.No)
+                return;
+
             Infos.Clear();
             objectListView1.SetObjects(Infos);
             Preview = null;
@@ -699,7 +726,7 @@ namespace DeepNestPort.Core
                 lastOpenFilterIndex = ofd.FilterIndex;
                 try
                 {
-                    RawDetail det = null;
+                    RawDetail[] det = null;
                     if (ofd.FileNames[i].ToLower().EndsWith("dxf"))
                         det = DxfParser.LoadDxf(ofd.FileNames[i]);
 
@@ -711,18 +738,20 @@ namespace DeepNestPort.Core
                         fr.Quantity++;
                     else
                     {
-
-                        var nfp = det.ToNfp();
-                        var bbox = det.BoundingBox();
-                        sheetsInfos.Add(new SheetLoadInfo()
+                        foreach (var r in det)
                         {
-                            Quantity = 1,
-                            Nfp = nfp,
-                            Width = bbox.Width,
-                            Height = bbox.Height,
-                            Info = new FileInfo(ofd.FileNames[i]).Name,
-                            Path = ofd.FileNames[i]
-                        });
+                            var nfp = r.ToNfp();
+                            var bbox = r.BoundingBox();
+                            sheetsInfos.Add(new SheetLoadInfo()
+                            {
+                                Quantity = 1,
+                                Nfp = nfp,
+                                Width = bbox.Width,
+                                Height = bbox.Height,
+                                Info = new FileInfo(ofd.FileNames[i]).Name,
+                                Path = ofd.FileNames[i]
+                            });
+                        }
                     }
                 }
                 catch (Exception ex)

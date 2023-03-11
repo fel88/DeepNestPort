@@ -24,5 +24,13 @@ namespace DeepNestPort.Core
         {
             SvgNest.Config.sheetSpacing = (double)numericUpDown2.Value;
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedIndex == 0)
+                Form1.Form.SplitMode = LoadDetailSplitMode.Ask;
+            if (comboBox1.SelectedIndex == 1)
+                Form1.Form.SplitMode = LoadDetailSplitMode.Always;
+        }
     }
 }

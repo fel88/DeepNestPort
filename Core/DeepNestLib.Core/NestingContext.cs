@@ -12,7 +12,7 @@ namespace DeepNestLib
     {
         public List<NFP> Polygons { get; private set; } = new List<NFP>();
         public List<NFP> Sheets { get; private set; } = new List<NFP>();
-        
+
 
         public double MaterialUtilization { get; private set; } = 0;
         public int PlacedPartsCount { get; private set; } = 0;
@@ -288,11 +288,15 @@ namespace DeepNestLib
             foreach (var item in dir.GetFiles("*.svg"))
             {
                 try
-                {
-                    var src = GetNextSource();
-                    for (int i = 0; i < count; i++)
+                {                    
+                    var dets = SvgParser.LoadSvg(item.FullName);
+                    foreach (var r in dets)
                     {
-                        ImportFromRawDetail(SvgParser.LoadSvg(item.FullName), src);
+                        var src = GetNextSource();
+                        for (int i = 0; i < count; i++)
+                        {
+                            ImportFromRawDetail(r, src);
+                        }                        
                     }
                 }
                 catch (Exception ex)
@@ -301,16 +305,16 @@ namespace DeepNestLib
                 }
             }
         }
-        
+
         public NFP ImportFromRawDetail(RawDetail raw, int src)
         {
             var d = raw.ToNfp();
-            if (d == null) 
+            if (d == null)
                 return null;
 
             d.source = src;
             Polygons.Add(d);
-            return d;            
+            return d;
         }
 
         public int GetNextSource()
@@ -367,7 +371,7 @@ namespace DeepNestLib
             {
                 var cnt = int.Parse(item.Attribute("count").Value);
                 var path = item.Attribute("path").Value;
-                RawDetail r = null;
+                RawDetail[] r = null;
                 if (path.ToLower().EndsWith("svg"))
                 {
                     r = SvgParser.LoadSvg(path);
@@ -383,9 +387,12 @@ namespace DeepNestLib
 
                 var src = GetNextSource();
 
-                for (int i = 0; i < cnt; i++)
+                foreach (var itemr in r)
                 {
-                    ImportFromRawDetail(r, src);
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        ImportFromRawDetail(itemr, src);
+                    }
                 }
             }
         }

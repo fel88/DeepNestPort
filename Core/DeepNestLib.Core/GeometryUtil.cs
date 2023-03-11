@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 
 namespace DeepNestLib
-{ 
+{
     public class GeometryUtil
     {
         // returns true if points are within the given distance
@@ -1428,22 +1428,21 @@ namespace DeepNestLib
 
             return NFPlist.ToArray();
         }
-
-
-
-    }
-    public class PolygonBounds
-    {
-        public double x;
-        public double y;
-        public double width;
-        public double height;
-        public PolygonBounds(double _x, double _y, double _w, double _h)
+        public static bool pnpoly(PointF[] verts, float testx, float testy)
         {
-            x = _x;
-            y = _y;
-            width = _w;
-            height = _h;
+            int nvert = verts.Length;
+            int i, j;
+            bool c = false;
+            for (i = 0, j = nvert - 1; i < nvert; j = i++)
+            {
+                if (((verts[i].Y > testy) != (verts[j].Y > testy)) &&
+                    (testx < (verts[j].X - verts[i].X) * (testy - verts[i].Y) / (verts[j].Y - verts[i].Y) + verts[i].X))
+                    c = !c;
+            }
+            return c;
         }
+
+
+
     }
 }

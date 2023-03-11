@@ -11,7 +11,7 @@ namespace DeepNestLib
 {
     public class DxfParser
     {
-        public static RawDetail LoadDxf(string path)
+        public static RawDetail[] LoadDxf(string path, bool split = false)
         {
             FileInfo fi = new FileInfo(path);
             DxfFile dxffile = DxfFile.Load(fi.FullName);
@@ -127,17 +127,60 @@ namespace DeepNestLib
                 };
             }
 
+            List<RawDetail> ret = new List<RawDetail>();
 
             elems = elems.Where(z => z.Start.DistTo(z.End) > RemoveThreshold).ToList();
-            var cntrs2 = ConnectElements(elems.ToArray());            
-            s.Outers.AddRange(cntrs2);
-            if (s.Outers.Any(z => z.Points.Count < 3))
+            var cntrs2 = ConnectElements(elems.ToArray());
+            if (split)
             {
-                throw new Exception("few points");
-            }
+                var nfps = cntrs2;
+                for (int i = 0; i < nfps.Length; i++)
+                {
+                    for (int j = 0; j < nfps.Length; j++)
+                    {
+                        if (i != j)
+                        {
+                            var d2 = nfps[i];
+                            var d3 = nfps[j];
+                            var f0 = d3.Points[0];
 
-            return s;
+                            if (GeometryUtil.pnpoly(d2.Points.ToArray(), f0.X, f0.Y))
+                            {
+                                d3.Parent = d2;
+                                if (!d2.Childrens.Contains(d3))
+                                {
+                                    d2.Childrens.Add(d3);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                var tops = nfps.Where(z => z.Parent == null).ToArray();
+                for (int i = 0; i < tops.Length; i++)
+                {
+                    RawDetail det = new RawDetail() { Name = fi.FullName + "_" + i };
+                    if (tops[i].Points.Count < 3)
+                        continue;
+
+                    det.Outers.Add(tops[i]);
+                    ret.Add(det);
+                }
+            }
+            else
+            {
+
+                s.Outers.AddRange(cntrs2);
+                if (s.Outers.Any(z => z.Points.Count < 3))
+                {
+                    throw new Exception("few points");
+                }
+
+                ret.Add(s);
+            }
+            return ret.ToArray();
         }
+
         public static double RemoveThreshold = 10e-5;
         public static double ClosingThreshold = 10e-2;
 
