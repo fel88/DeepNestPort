@@ -22,7 +22,18 @@ namespace DeepNestPort.Core
             Form = this;
             ctx3 = new DrawingContext(pictureBox3);
 
+            stgControl.Visible = false;
+            stgControl.Close += StgControl_Close;
+            panel1.Controls.Add(stgControl);            
+            stgControl.Dock = DockStyle.Fill;
         }
+
+        private void StgControl_Close()
+        {
+            SwitchSettingsPanel();
+        }
+
+        Settings stgControl = new Settings();
         public Sheet NewSheet(int w = 3000, int h = 1500)
         {
             var tt = new RectangleSheet();
@@ -80,8 +91,10 @@ namespace DeepNestPort.Core
             updateSheetInfos();
             ctx.PaintAction = () => { Render(); };
             RenderControl = ctx.GenerateRenderControl();
-            RenderControl.Visible = false;
+            
+            RenderControl.Visible = false;            
             //tableLayoutPanel1. Controls.Add(RenderControl,0,1);
+            panel1.Controls.Add(RenderControl);
             RenderControl.Dock = DockStyle.Fill;
             ctx.Init(RenderControl);
             /*ctx.FitToPoints(new PointF[] {
@@ -115,7 +128,7 @@ namespace DeepNestPort.Core
                 if (pos.X <= RenderControl.Width && pos.X > (RenderControl.Width - 15))
                     ctx.PanX(-zoomSpeed);
 
-                if (pos.Y >= 0 && pos.Y < 15)
+                if (pos.Y >= 0 && pos.Y < 5)
                     ctx.PanY(-zoomSpeed);
 
                 if (pos.Y <= RenderControl.Height && pos.Y > (RenderControl.Height - 15))
@@ -388,17 +401,19 @@ namespace DeepNestPort.Core
             if (menu.GeneralTab.IsSelected && RenderControl.Visible)
             {
                 RenderControl.Visible = false;
-                tableLayoutPanel1.Controls.Remove(RenderControl);
-                tableLayoutPanel1.Controls.Add(panel1, 0, 1);
-                panel1.Visible = true;
+                //tableLayoutPanel1.Controls.Remove(RenderControl);
+                //tableLayoutPanel1.Controls.Add(panel1, 0, 1);
+                tableLayoutPanel2.Visible = true;
+                stgControl.Visible = false;
             }
             else
             if (menu.NestTab.IsSelected && !RenderControl.Visible)
             {
                 RenderControl.Visible = true;
-                tableLayoutPanel1.Controls.Remove(panel1);
-                tableLayoutPanel1.Controls.Add(RenderControl, 0, 1);
-                panel1.Visible = false;
+                //tableLayoutPanel1.Controls.Remove(panel1);
+                //tableLayoutPanel1.Controls.Add(RenderControl, 0, 1);
+                tableLayoutPanel2.Visible = false;
+                stgControl.Visible = false;
             }
         }
 
@@ -729,6 +744,12 @@ namespace DeepNestPort.Core
                 if (sfd.FilterIndex == 2)
                     SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
             }
+        }
+
+        internal void SwitchSettingsPanel()
+        {
+            tableLayoutPanel2.Visible = !tableLayoutPanel2.Visible;
+            stgControl.Visible = !stgControl.Visible;            
         }
     }
 }

@@ -1,22 +1,7 @@
-﻿using DeepNestLib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Ribbon;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DeepNestPort.Core
 {
@@ -57,6 +42,7 @@ namespace DeepNestPort.Core
             }
         }
 
+        static Form1 Form => Form1.Form;
         public event Action TabChanged;
         private void RibbonWin_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -65,48 +51,52 @@ namespace DeepNestPort.Core
 
         private void RibbonButton_Click(object sender, RoutedEventArgs e)
         {
-            Form1.Form.AddDetail();
+            Form.AddDetail();
         }
         private void Run_Click(object sender, RoutedEventArgs e)
         {
-            Form1.Form.RunNest();
+            Form.RunNest();
         }
 
         private void RibbonButton_Click_1(object sender, RoutedEventArgs e)
         {
-            Form1.Form.StopNesting();
+            Form.StopNesting();
         }
 
         private void RibbonButton_Click_2(object sender, RoutedEventArgs e)
         {
-            Form1.Form.Export();
+            Form.Export();
         }
 
         private void RibbonButton_Click_3(object sender, RoutedEventArgs e)
         {
-            Form1.Form.ZoomIn();
+            Form.ZoomIn();
         }
 
         private void RibbonButton_Click_4(object sender, RoutedEventArgs e)
         {
-            Form1.Form.ZoomOut();
+            Form.ZoomOut();
         }
 
         private void RibbonButton_Click_5(object sender, RoutedEventArgs e)
         {
-            Form1.Form.FitAll();
-
+            Form.FitAll();
         }
 
         
         private void RibbonButton_Click_6(object sender, RoutedEventArgs e)
         {
-            Form1.Form.FitNextSheet();
+            Form.FitNextSheet();
         }
 
         private void RibbonButton_Click_7(object sender, RoutedEventArgs e)
         {
-            Form1.Form.ExportAll();
+            Form.ExportAll();
+        }
+
+        private void RibbonButton_Click_8(object sender, RoutedEventArgs e)
+        {
+            Form.SwitchSettingsPanel();
         }
     }
 }

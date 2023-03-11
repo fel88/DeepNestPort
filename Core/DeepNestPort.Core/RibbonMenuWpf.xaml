@@ -8,31 +8,32 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition/>
-    </Grid.RowDefinitions>
-    <Ribbon x:Name="RibbonWin" SelectedIndex="0">
-        <Ribbon.HelpPaneContent>
-            <RibbonButton x:Name="HelpButton" />
-        </Ribbon.HelpPaneContent>
-        <Ribbon.ApplicationMenu>
-            <RibbonApplicationMenu Visibility="Collapsed">
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Ribbon x:Name="RibbonWin" SelectedIndex="0">
+            <Ribbon.HelpPaneContent>
+                <RibbonButton x:Name="HelpButton" />
+            </Ribbon.HelpPaneContent>
+            <Ribbon.ApplicationMenu>
+                <RibbonApplicationMenu Visibility="Collapsed">
 
-            </RibbonApplicationMenu>
-        </Ribbon.ApplicationMenu>
-        <Ribbon.QuickAccessToolBar>
-            <RibbonQuickAccessToolBar Visibility="Collapsed">
+                </RibbonApplicationMenu>
+            </Ribbon.ApplicationMenu>
+            <Ribbon.QuickAccessToolBar>
+                <RibbonQuickAccessToolBar Visibility="Collapsed">
 
-            </RibbonQuickAccessToolBar>
-        </Ribbon.QuickAccessToolBar>
-        <RibbonTab x:Name="projectTab" Header="General" KeyTip="H" >
-            <!-- Home  group-->
-            <RibbonGroup x:Name="General" Header="General">
+                </RibbonQuickAccessToolBar>
+            </Ribbon.QuickAccessToolBar>
+            <RibbonTab x:Name="projectTab" Header="General" KeyTip="H" >
+                <!-- Home  group-->
+                <RibbonGroup x:Name="General" Header="General">
                     <!--<RibbonButton  Label="Clear"  KeyTip="F" />-->
 
                     <RibbonButton  Label="Load DXF" Click="RibbonButton_Click"  />
 
                     <RibbonButton  Label="Run nesting"  Click="Run_Click"/>
+                    <RibbonButton  Label="Settings"  Click="RibbonButton_Click_8"/>
 
 
 
@@ -42,36 +43,32 @@
                     </RibbonMenuButton>
                     <RibbonButton  Label="Save" KeyTip="X" />
                     <RibbonButton  Label="Add" KeyTip="C" />-->
-            </RibbonGroup>
-           
-        </RibbonTab>
+                </RibbonGroup>
+
+            </RibbonTab>
             <RibbonTab x:Name="nestTab" Header="Nesting" KeyTip="H" >
                 <!-- Home  group-->
                 <RibbonGroup x:Name="nest" Header="General">
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
-                    
+
                     <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" KeyTip="F" />
                     <RibbonButton  Label="Export All"  Click="RibbonButton_Click_7" KeyTip="F" />
-                    
-                    
+
+
                 </RibbonGroup>
                 <RibbonGroup x:Name="view" Header="View">
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
                     <RibbonButton  Label="Fit all"  Click="RibbonButton_Click_5" KeyTip="F" />
-                    
+
                     <RibbonButton  Label="Zoom in" Click="RibbonButton_Click_3"  />
                     <RibbonButton  Label="Zoom out"  Click="RibbonButton_Click_4"  />
 
                 </RibbonGroup>
                 <RibbonGroup x:Name="navigate" Header="Navigate">
-                    
+
                     <RibbonButton  Label="Next sheet" Click="RibbonButton_Click_6"  />
                 </RibbonGroup>
-
-            </RibbonTab>
-
-
-
+            </RibbonTab>          
         </Ribbon>
     </Grid>
 </UserControl>
