@@ -10,6 +10,7 @@ using SkiaSharp;
 using BrightIdeasSoftware;
 using System.Windows.Media;
 using OpenTK;
+using IxMilia.Dxf.Entities;
 
 namespace DeepNestPort.Core
 {
@@ -437,6 +438,16 @@ namespace DeepNestPort.Core
                 if (item.Path.ToLower().EndsWith("dxf"))
                 {
                     det = DxfParser.LoadDxf(item.Path, item.SplitOnLoad);
+                    foreach (var ditem in det)
+                    {
+                        var t1 = ditem.Outers.Where(z => z.Tag is DxfEntity[]).Select(z => z.Tag as DxfEntity[]).SelectMany(z => z).ToArray();
+                        foreach (var outter in ditem.Outers)
+                        {
+                            t1 = t1.Union(outter.Childrens.Where(z => z.Tag is DxfEntity[]).Select(z => z.Tag as DxfEntity[]).SelectMany(z => z).ToArray()).ToArray();
+                        }
+                        dxfCache.Add(ditem.Name, t1);
+                    }
+
                 }
                 else if (item.Path.ToLower().EndsWith("svg"))
                 {
@@ -608,20 +619,29 @@ namespace DeepNestPort.Core
             stop = true;
         }
 
+        public static Dictionary<string, DxfEntity[]> dxfCache = new Dictionary<string, DxfEntity[]>();
+
         internal void Export()
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
             //sfd.FilterIndex = lastSaveFilterIndex;
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                // lastSaveFilterIndex = sfd.FilterIndex;
-                if (sfd.FilterIndex == 1)
-                    DxfParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
 
-                if (sfd.FilterIndex == 2)
-                    SvgParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
+
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
+
+            foreach (var item in polygons)
+            {
+                item.Tag = dxfCache[item.Name];
             }
+
+            // lastSaveFilterIndex = sfd.FilterIndex;
+            if (sfd.FilterIndex == 1)
+                DxfParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
+
+            if (sfd.FilterIndex == 2)
+                SvgParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
         }
 
         public DialogResult ShowQuestion(string text)
@@ -631,12 +651,18 @@ namespace DeepNestPort.Core
 
         void deleteParts()
         {
-            if (objectListView1.SelectedObjects.Count == 0) return;
-            if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No) return;
+            if (objectListView1.SelectedObjects.Count == 0) 
+                return;
+
+            if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No) 
+                return;
+
             foreach (var item in objectListView1.SelectedObjects)
             {
                 if (Preview != null && (item as DetailLoadInfo).Path == (Preview as RawDetail).Name) Preview = null;
-                Infos.Remove(item as DetailLoadInfo);
+                var di = item as DetailLoadInfo;
+                dxfCache.Remove(di.Name);                
+                Infos.Remove(di);
             }
             objectListView1.SetObjects(Infos);
         }
@@ -670,6 +696,7 @@ namespace DeepNestPort.Core
 
             Infos.Clear();
             objectListView1.SetObjects(Infos);
+            dxfCache.Clear();
             Preview = null;
         }
 
@@ -814,15 +841,20 @@ namespace DeepNestPort.Core
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
             //sfd.FilterIndex = lastSaveFilterIndex;
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                // lastSaveFilterIndex = sfd.FilterIndex;
-                if (sfd.FilterIndex == 1)
-                    DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
 
-                if (sfd.FilterIndex == 2)
-                    SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+            foreach (var item in polygons)
+            {
+                item.Tag = dxfCache[item.Name];
             }
+            // lastSaveFilterIndex = sfd.FilterIndex;
+            if (sfd.FilterIndex == 1)
+                DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+
+            if (sfd.FilterIndex == 2)
+                SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+
         }
 
         internal void SwitchSettingsPanel()

@@ -20,7 +20,7 @@ namespace DeepNestLib
             s.Name = fi.FullName;
             IEnumerable<DxfEntity> entities = dxffile.Entities.ToArray();
 
-            List<LineElement> elems = new List<LineElement>();
+            List<DraftElement> elems = new List<DraftElement>();
 
             foreach (DxfEntity ent in entities)
             {
@@ -38,12 +38,19 @@ namespace DeepNestLib
                             {
                                 points.Points.Add(new PointF((float)vert.X, (float)vert.Y));
                             }
-                            for (int i = 0; i < points.Points.Count; i++)
+                            points.Points.Add(points.Points[0]);
+                            PolylineElement p = new PolylineElement() { Tag = ent };
+                            elems.Add(p);
+                            p.Start = points.Points[0];
+                            p.End = points.Points[1];
+                            p.Points = points.Points.ToArray();
+
+                            /*for (int i = 0; i < points.Points.Count; i++)
                             {
                                 var p0 = points.Points[i];
                                 var p1 = points.Points[(i + 1) % points.Points.Count];
                                 elems.Add(new LineElement() { Start = p0, End = p1 });
-                            }
+                            }*/
                         }
                         break;
                     case DxfEntityType.Arc:
@@ -63,12 +70,18 @@ namespace DeepNestLib
                             }
                             var t = arc.GetPointFromAngle(arc.EndAngle);
                             pp.Add(new PointF((float)t.X, (float)t.Y));
-                            for (int j = 1; j < pp.Count; j++)
+                            PolylineElement p = new PolylineElement() { Tag = ent };
+                            elems.Add(p);
+
+                            p.Start = pp[0];
+                            p.End = pp[pp.Count - 1];
+                            p.Points = pp.ToArray();
+                            /*for (int j = 1; j < pp.Count; j++)
                             {
                                 var p1 = pp[j - 1];
                                 var p2 = pp[j];
                                 elems.Add(new LineElement() { Start = new PointF((float)p1.X, (float)p1.Y), End = new PointF((float)p2.X, (float)p2.Y) });
-                            }
+                            }*/
                         }
                         break;
                     case DxfEntityType.Circle:
@@ -83,24 +96,33 @@ namespace DeepNestLib
                                 var yy = cr.Center.Y + cr.Radius * Math.Sin(ang);
                                 cc.Points.Add(new PointF((float)xx, (float)yy));
                             }
-                            for (int i = 1; i < cc.Points.Count; i++)
+                            PolylineElement p = new PolylineElement() { Tag = ent };
+                            elems.Add(p);
+                            p.Start = cc.Points[0];
+                            p.End = cc.Points[cc.Points.Count - 1];
+                            p.Points = cc.Points.ToArray();
+                            /*for (int i = 1; i < cc.Points.Count; i++)
                             {
                                 var p1 = cc.Points[i - 1];
                                 var p2 = cc.Points[i];
                                 elems.Add(new LineElement() { Start = p1, End = p2 });
-                            }
+                            }*/
                         }
                         break;
                     case DxfEntityType.Line:
                         {
                             DxfLine poly = (DxfLine)ent;
-                            elems.Add(new LineElement() { Start = new PointF((float)poly.P1.X, (float)poly.P1.Y), End = new PointF((float)poly.P2.X, (float)poly.P2.Y) });
+                            elems.Add(new LineElement()
+                            {
+                                Tag = ent,
+                                Start = new PointF((float)poly.P1.X, (float)poly.P1.Y),
+                                End = new PointF((float)poly.P2.X, (float)poly.P2.Y)
+                            });
                             break;
                         }
 
                     case DxfEntityType.Polyline:
                         {
-
                             DxfPolyline poly = (DxfPolyline)ent;
                             if (poly.Vertices.Count() < 2)
                             {
@@ -113,12 +135,18 @@ namespace DeepNestLib
                                 points.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
 
                             }
-                            for (int i = 0; i < points.Points.Count; i++)
+                            PolylineElement p = new PolylineElement() { Tag = ent };
+                            elems.Add(p);
+                            p.Start = points.Points[0];
+                            p.End = points.Points[points.Points.Count - 1];
+                            p.Points = points.Points.ToArray();
+
+                            /*for (int i = 0; i < points.Points.Count; i++)
                             {
                                 var p0 = points.Points[i];
                                 var p1 = points.Points[(i + 1) % points.Points.Count];
                                 elems.Add(new LineElement() { Start = p0, End = p1 });
-                            }
+                            }*/
                             break;
                         }
                     default:
@@ -129,7 +157,7 @@ namespace DeepNestLib
 
             List<RawDetail> ret = new List<RawDetail>();
 
-            elems = elems.Where(z => z.Start.DistTo(z.End) > RemoveThreshold).ToList();
+            elems = elems.Where(z => z.Length > RemoveThreshold).ToList();
             var cntrs2 = ConnectElements(elems.ToArray());
             if (split)
             {
@@ -159,7 +187,10 @@ namespace DeepNestLib
                 var tops = nfps.Where(z => z.Parent == null).ToArray();
                 for (int i = 0; i < tops.Length; i++)
                 {
-                    RawDetail det = new RawDetail() { Name = fi.FullName + "_" + i };
+                    RawDetail det = new RawDetail()
+                    {
+                        Name = fi.FullName + "_" + i
+                    };
                     if (tops[i].Points.Count < 3)
                         continue;
 
@@ -169,7 +200,6 @@ namespace DeepNestLib
             }
             else
             {
-
                 s.Outers.AddRange(cntrs2);
                 if (s.Outers.Any(z => z.Points.Count < 3))
                 {
@@ -184,20 +214,20 @@ namespace DeepNestLib
         public static double RemoveThreshold = 10e-5;
         public static double ClosingThreshold = 10e-2;
 
-        public static LocalContour[] ConnectElements(LineElement[] elems)
+        public static LocalContour[] ConnectElements(DraftElement[] elems)
         {
             List<LocalContour> ret = new List<LocalContour>();
 
             List<PointF> pp = new List<PointF>();
-            List<LineElement> last = new List<LineElement>();
+            List<DraftElement> last = new List<DraftElement>();
             last.AddRange(elems);
-
+            List<DxfEntity> accum = new List<DxfEntity>();
             while (last.Any())
             {
                 if (pp.Count == 0)
                 {
-                    pp.Add(last.First().Start);
-                    pp.Add(last.First().End);
+                    pp.AddRange(last.First().GetPoints());
+                    accum.Add(last.First().Tag as DxfEntity);
                     last.RemoveAt(0);
                 }
                 else
@@ -208,24 +238,29 @@ namespace DeepNestLib
                     var dist = Math.Min(f1.Start.DistTo(ll), f1.End.DistTo(ll));
                     if (dist > ClosingThreshold)
                     {
-                        ret.Add(new LocalContour() { Points = pp.ToList() });
+                        ret.Add(new LocalContour() { Points = pp.ToList(), Tag = accum.ToArray() });
                         pp.Clear();
+                        accum.Clear();
                         continue;
                     }
+                    accum.Add(f1.Tag as DxfEntity);
                     last.Remove(f1);
                     if (f1.Start.DistTo(ll) < f1.End.DistTo(ll))
                     {
-                        pp.Add(f1.End);
+                        pp.AddRange(f1.GetPoints().Skip(1));
+                        //pp.Add(f1.End);
                     }
                     else
                     {
-                        pp.Add(f1.Start);
+                        f1.Reverse();
+                        pp.AddRange(f1.GetPoints().Skip(1));
+                        //pp.Add(f1.Start);
                     }
                 }
             }
             if (pp.Any())
             {
-                ret.Add(new LocalContour() { Points = pp.ToList() });
+                ret.Add(new LocalContour() { Points = pp.ToList(), Tag = accum.ToArray() });
             }
             return ret.ToArray();
         }
@@ -251,13 +286,13 @@ namespace DeepNestLib
                     }
                     else
                     {
-                        fl = DxfFile.Load(nFP.Name);
+                        //fl = DxfFile.Load(nFP.Name);
                     }
-
+                    var fle = nFP.Tag as DxfEntity[];
                     double sheetXoffset = -sheetwidth * i;
 
                     DxfPoint offsetdistance = new DxfPoint(nFP.x + sheetXoffset, nFP.y, 0D);
-                    List<DxfEntity> newlist = OffsetToNest(fl.Entities, new DxfPoint(pivot.x, pivot.y, 0), offsetdistance, nFP.Rotation);
+                    List<DxfEntity> newlist = OffsetToNest(fle, new DxfPoint(pivot.x, pivot.y, 0), offsetdistance, nFP.Rotation);
 
                     foreach (DxfEntity ent in newlist)
                     {
@@ -323,7 +358,8 @@ namespace DeepNestLib
                 switch (entity.EntityType)
                 {
                     case DxfEntityType.Arc:
-                        DxfArc dxfArc = (DxfArc)entity;
+                        DxfArc _dxfArc = (DxfArc)entity;
+                        var dxfArc = new DxfArc(_dxfArc.Center, _dxfArc.Radius, _dxfArc.StartAngle, _dxfArc.EndAngle);
                         dxfArc.Center = RotateLocation(rotationAngle, dxfArc.Center);
                         dxfArc.Center += offset;
                         dxfArc.StartAngle += rotationAngle;
@@ -393,7 +429,8 @@ namespace DeepNestLib
                         break;
 
                     case DxfEntityType.Line:
-                        DxfLine dxfLine = (DxfLine)entity;
+                        DxfLine _dxfLine = (DxfLine)entity;
+                        DxfLine dxfLine = new DxfLine(_dxfLine.P1, _dxfLine.P2);
                         dxfLine.P1 = RotateLocation(rotationAngle, dxfLine.P1);
                         dxfLine.P2 = RotateLocation(rotationAngle, dxfLine.P2);
                         dxfLine.P1 += offset;

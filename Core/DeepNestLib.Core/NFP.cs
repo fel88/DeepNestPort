@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IxMilia.Dxf.Entities;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -12,8 +13,9 @@ namespace DeepNestLib
         public int Z;
         public bool fitted { get { return sheet != null; } }
         public NFP sheet;
+        public object Tag;
         public override string ToString()
-        {
+        {            
             var str1 = (Points != null) ? Points.Count() + "" : "null";
             return $"nfp: id: {id}; source: {source}; rotation: {rotation}; points: {str1}";
         }

@@ -22,5 +22,6 @@ namespace DeepNestLib
         public bool Enable = true;
         public List<LocalContour> Childrens = new List<LocalContour>();
         public LocalContour Parent;
+        public object Tag;
     }
 }

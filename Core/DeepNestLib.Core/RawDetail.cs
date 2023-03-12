@@ -9,7 +9,7 @@ namespace DeepNestLib
     {
         public List<LocalContour> Outers = new List<LocalContour>();
         public List<LocalContour> Holes = new List<LocalContour>();
-
+        public object Tag;
         public RectangleF BoundingBox()
         {
             GraphicsPath gp = new GraphicsPath();
