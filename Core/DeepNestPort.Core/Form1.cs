@@ -221,6 +221,7 @@ namespace DeepNestPort.Core
                     m.Rotate(item.rotation);
 
                     var pnts = item.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
+                    var sign1 = Math.Sign(GeometryUtil.polygonArea(item));
                     m.TransformPoints(pnts);
 
                     path.AddPoly(pnts.Select(z => ctx.TransformSK(z)).ToArray());
@@ -230,7 +231,13 @@ namespace DeepNestPort.Core
                         {
                             var pnts2 = citem.Points.Select(z => new PointF((float)z.x, (float)z.y)).ToArray();
                             m.TransformPoints(pnts2);
-                            path.AddPoly(pnts2.Select(z => ctx.TransformSK(z)).Reverse().ToArray());
+                            var sign = Math.Sign(GeometryUtil.polygonArea(citem));
+                            var pp = pnts2.Select(z => ctx.TransformSK(z));
+                            if (sign == sign1)
+                            {
+                                pp = pp.Reverse();
+                            }
+                            path.AddPoly(pp.ToArray());
                         }
                     }
 

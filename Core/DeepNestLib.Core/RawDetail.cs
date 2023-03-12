@@ -35,6 +35,15 @@ namespace DeepNestLib
                 {
                     nn.AddPoint(new SvgPoint(pitem.X, pitem.Y));
                 }
+                foreach (var ch in item.Childrens)
+                {
+                    nn = new NFP();
+                    nfps.Add(nn);
+                    foreach (var pitem in ch.Points)
+                    {
+                        nn.AddPoint(new SvgPoint(pitem.X, pitem.Y));
+                    }
+                }
             }
 
             if (nfps.Any())
