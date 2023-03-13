@@ -12,12 +12,9 @@ DXF Import/Export: https://github.com/IxMilia/Dxf
 
 Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
 
-![image](https://user-images.githubusercontent.com/15663687/224371364-c534ce08-36fd-4bd4-9264-18a80f57b3db.png)
+![image](https://user-images.githubusercontent.com/15663687/224829121-71dbf96a-948d-4be1-b772-5de3098d999c.png)
 
-
-![image](https://user-images.githubusercontent.com/15663687/224371540-ea784a91-ca26-4ed0-9a9d-ec8acc11f575.png)
-
-
+![image](https://user-images.githubusercontent.com/15663687/224830897-2009c0a2-e8b3-4aae-b673-2392d32b849f.png)
 
 ## Steps to build and run
 ```
