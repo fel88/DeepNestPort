@@ -431,6 +431,8 @@ namespace DeepNestPort.Core
 
             context.ReorderSheets();
 
+            dxfCache.Clear();
+
             src = 0;
             foreach (var item in Infos)
             {
@@ -530,22 +532,24 @@ namespace DeepNestPort.Core
                 Stopwatch sww = Stopwatch.StartNew();
                 while (true)
                 {
-                    if (sww.Elapsed.TotalSeconds > MaxNestSeconds)
-                    {
-                        break;
-                    }
-                    Stopwatch sw = new Stopwatch();
+                    Stopwatch sw = Stopwatch.StartNew();
                     sw.Start();
 
                     context.NestIterate();
                     UpdateNestsList();
                     displayProgress(1.0f);
                     sw.Stop();
-                    toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
+                    //toolStripStatusLabel1.Text = $"Total nesting time: {Math.Round(sww.Elapsed.TotalSeconds, 2),6} / {MaxNestSeconds}s    Last nesting time: {sw.ElapsedMilliseconds} ms";
+                    toolStripStatusLabel1.Text = $"Total nesting time: {Math.Round(sww.Elapsed.TotalSeconds, 2),6} / {MaxNestSeconds}s   ";
                     if (stop)
                         break;
 
+                    if (sww.Elapsed.TotalSeconds > MaxNestSeconds)                    
+                        break;
+                    
                 }
+                toolStripStatusLabel1.Text = $"Nesting complete. Total nests: {nest.nests.Count}";
+
                 th = null;
             });
             th.IsBackground = true;

@@ -312,8 +312,15 @@ namespace DeepNestLib
                 if (dxf.Entities.Count != 1)
                 {
                     sheetcount += 1;
-                    FileInfo fi = new FileInfo(path);
-                    dxf.Save($"{fi.FullName.Substring(0, fi.FullName.Length - 4)}{id}.dxf", true);
+                    if (sheets.Count() == 1)
+                    {
+                        dxf.Save(path, true);
+                    }
+                    else
+                    {
+                        FileInfo fi = new FileInfo(path);
+                        dxf.Save($"{fi.FullName.Substring(0, fi.FullName.Length - 4)}{id}.dxf", true);
+                    }
                 }
             }
 
@@ -391,17 +398,23 @@ namespace DeepNestLib
                         break;
 
                     case DxfEntityType.Circle:
-                        DxfCircle dxfCircle = (DxfCircle)entity;
-                        dxfCircle.Center = RotateLocation(rotationAngle, dxfCircle.Center);
-                        dxfCircle.Center += offset;
-                        dxfreturn.Add(dxfCircle);
+                        {
+                            DxfCircle _dxfCircle = (DxfCircle)entity;
+                            DxfCircle dxfCircle = new DxfCircle(_dxfCircle.Center, _dxfCircle.Radius);
+                            dxfCircle.Center = RotateLocation(rotationAngle, dxfCircle.Center);
+                            dxfCircle.Center += offset;
+                            dxfreturn.Add(dxfCircle);
+                        }
                         break;
 
                     case DxfEntityType.Ellipse:
-                        DxfEllipse dxfEllipse = (DxfEllipse)entity;
-                        dxfEllipse.Center = RotateLocation(rotationAngle, dxfEllipse.Center);
-                        dxfEllipse.Center += offset;
-                        dxfreturn.Add(dxfEllipse);
+                        {
+                            DxfEllipse _dxfEllipse = (DxfEllipse)entity;
+                            DxfEllipse dxfEllipse = new DxfEllipse(_dxfEllipse.Center, _dxfEllipse.MajorAxis, _dxfEllipse.MinorAxisRatio);
+                            dxfEllipse.Center = RotateLocation(rotationAngle, dxfEllipse.Center);
+                            dxfEllipse.Center += offset;
+                            dxfreturn.Add(dxfEllipse);
+                        }
                         break;
 
                     case DxfEntityType.Image:
@@ -439,14 +452,23 @@ namespace DeepNestLib
                         break;
 
                     case DxfEntityType.LwPolyline:
-                        DxfPolyline dxfPoly = (DxfPolyline)entity;
-                        foreach (DxfVertex vrt in dxfPoly.Vertices)
                         {
-                            vrt.Location = RotateLocation(rotationAngle, vrt.Location);
-                            vrt.Location += offset;
-                        }
+                            DxfLwPolyline _dxfPoly = (DxfLwPolyline)entity;
 
-                        dxfreturn.Add(dxfPoly);
+                            List<DxfLwPolylineVertex> verts = new List<DxfLwPolylineVertex>();
+                            foreach (var _vrt in _dxfPoly.Vertices)
+                            {
+                                var vrt = new DxfVertex();
+                                vrt.Location = new DxfPoint(_vrt.X, _vrt.Y, 0);
+
+                                vrt.Location = RotateLocation(rotationAngle, vrt.Location);
+                                vrt.Location += offset;
+                                verts.Add(new DxfLwPolylineVertex() { X = vrt.Location.X, Y = vrt.Location.Y });
+                            }
+                            DxfLwPolyline dxfPoly = new DxfLwPolyline(verts.ToArray());
+
+                            dxfreturn.Add(dxfPoly);
+                        }
                         break;
 
                     case DxfEntityType.MLine:
@@ -469,23 +491,24 @@ namespace DeepNestLib
                         break;
 
                     case DxfEntityType.Polyline:
-                        DxfPolyline polyline = (DxfPolyline)entity;
-
-                        List<DxfVertex> verts = new List<DxfVertex>();
-                        foreach (DxfVertex vrt in polyline.Vertices)
                         {
-                            var tmppnt = vrt;
-                            tmppnt.Location = RotateLocation(rotationAngle, tmppnt.Location);
-                            tmppnt.Location += offset;
-                            verts.Add(tmppnt);
+                            DxfPolyline polyline = (DxfPolyline)entity;
+
+                            List<DxfVertex> verts = new List<DxfVertex>();
+                            foreach (DxfVertex vrt in polyline.Vertices)
+                            {
+                                var tmppnt = vrt;
+                                tmppnt.Location = RotateLocation(rotationAngle, tmppnt.Location);
+                                tmppnt.Location += offset;
+                                verts.Add(tmppnt);
+                            }
+
+                            DxfPolyline polyout = new DxfPolyline(verts);
+                            polyout.Location = polyline.Location + offset;
+                            polyout.IsClosed = polyline.IsClosed;
+                            polyout.Layer = polyline.Layer;
+                            dxfreturn.Add(polyout);
                         }
-
-                        DxfPolyline polyout = new DxfPolyline(verts);
-                        polyout.Location = polyline.Location + offset;
-                        polyout.IsClosed = polyline.IsClosed;
-                        polyout.Layer = polyline.Layer;
-                        dxfreturn.Add(polyout);
-
                         break;
 
                     case DxfEntityType.Body:

@@ -32,5 +32,10 @@ namespace DeepNestPort.Core
             if (comboBox1.SelectedIndex == 1)
                 Form1.Form.SplitMode = LoadDetailSplitMode.Always;
         }
+
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            Form1.Form.MaxNestSeconds = (int)numericUpDown3.Value;
+        }
     }
 }
