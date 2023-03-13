@@ -10,6 +10,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Icons\arrow.png" />
+    <None Remove="Icons\color.png" />
+    <None Remove="Icons\control-double.png" />
+    <None Remove="Icons\disk.png" />
+    <None Remove="Icons\disks.png" />
+    <None Remove="Icons\gear.png" />
+    <None Remove="Icons\magnifier--minus.png" />
+    <None Remove="Icons\magnifier--plus.png" />
+    <None Remove="Icons\magnifier.png" />
+    <None Remove="Icons\plus.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\arrow.png" />
+    <Resource Include="Icons\color.png" />
+    <Resource Include="Icons\control-double.png" />
+    <Resource Include="Icons\disk.png" />
+    <Resource Include="Icons\disks.png" />
+    <Resource Include="Icons\gear.png" />
+    <Resource Include="Icons\magnifier--minus.png" />
+    <Resource Include="Icons\magnifier--plus.png" />
+    <Resource Include="Icons\magnifier.png" />
+    <Resource Include="Icons\plus.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ObjectListView" Version="2.7.1.5" />
     <PackageReference Include="SkiaSharp" Version="2.88.3" />
     <PackageReference Include="SkiaSharp.Views" Version="2.88.3" />

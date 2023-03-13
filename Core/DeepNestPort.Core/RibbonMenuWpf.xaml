@@ -30,10 +30,10 @@
                 <RibbonGroup x:Name="General" Header="General">
                     <!--<RibbonButton  Label="Clear"  KeyTip="F" />-->
 
-                    <RibbonButton  Label="Load DXF" Click="RibbonButton_Click"  />
+                    <RibbonButton  Label="Load DXF" Click="RibbonButton_Click" LargeImageSource="Icons/plus.png"  />
 
-                    <RibbonButton  Label="Run nesting"  Click="Run_Click"/>
-                    <RibbonButton  Label="Settings"  Click="RibbonButton_Click_8"/>
+                    <RibbonButton  Label="Run nesting"  Click="Run_Click" LargeImageSource="Icons/control-double.png"  />
+                    <RibbonButton  Label="Settings"  Click="RibbonButton_Click_8" LargeImageSource="Icons/gear.png"  />
 
 
 
@@ -51,24 +51,24 @@
                 <RibbonGroup x:Name="nest" Header="General">
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
 
-                    <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" KeyTip="F" />
-                    <RibbonButton  Label="Export All"  Click="RibbonButton_Click_7" KeyTip="F" />
+                    <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" SmallImageSource="Icons/disk.png"  KeyTip="F" />
+                    <RibbonButton  Label="Export All"  Click="RibbonButton_Click_7" SmallImageSource="Icons/disks.png"  KeyTip="F" />
 
 
                 </RibbonGroup>
                 <RibbonGroup x:Name="view" Header="View">
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
-                    <RibbonButton  Label="Fit all"  Click="RibbonButton_Click_5" KeyTip="F" />
+                    <RibbonButton  Label="Fit all"  Click="RibbonButton_Click_5" SmallImageSource="Icons/magnifier.png"  KeyTip="F" />
 
-                    <RibbonButton  Label="Zoom in" Click="RibbonButton_Click_3"  />
-                    <RibbonButton  Label="Zoom out"  Click="RibbonButton_Click_4"  />
+                    <RibbonButton  Label="Zoom in" Click="RibbonButton_Click_3"   SmallImageSource="Icons/magnifier--plus.png"  />
+                    <RibbonButton  Label="Zoom out"  Click="RibbonButton_Click_4"  SmallImageSource="Icons/magnifier--minus.png"  />
 
-                    <RibbonToggleButton x:Name="colorsToggle" Label="Colors" Unchecked="colorsToggle_Unchecked"  Checked="RibbonToggleButton_Checked" />
+                    <RibbonToggleButton x:Name="colorsToggle" Label="Colors" Unchecked="colorsToggle_Unchecked"  Checked="RibbonToggleButton_Checked"  SmallImageSource="Icons/color.png"  />
 
                 </RibbonGroup>
                 <RibbonGroup x:Name="navigate" Header="Navigate">
 
-                    <RibbonButton  Label="Next sheet" Click="RibbonButton_Click_6"  />
+                    <RibbonButton  Label="Next sheet" Click="RibbonButton_Click_6"   SmallImageSource="Icons\arrow.png" />
                 </RibbonGroup>
             </RibbonTab>          
         </Ribbon>

@@ -517,7 +517,7 @@ namespace DeepNestPort.Core
 
         public float progressVal = 0;
         bool stop = false;
-        public int MaxNestSeconds = 5;
+        public int MaxNestSeconds = 10;
         public void RunDeepnest()
         {
             if (th != null) return;
@@ -527,13 +527,13 @@ namespace DeepNestPort.Core
                 context.StartNest();
                 UpdateNestsList();
                 Background.displayProgress = displayProgress;
-                Stopwatch sww = new Stopwatch();
+                Stopwatch sww = Stopwatch.StartNew();
                 while (true)
                 {
-                    /*if (sww.Elapsed.TotalSeconds > MaxNestSeconds)
+                    if (sww.Elapsed.TotalSeconds > MaxNestSeconds)
                     {
                         break;
-                    }*/
+                    }
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
 
@@ -542,8 +542,8 @@ namespace DeepNestPort.Core
                     displayProgress(1.0f);
                     sw.Stop();
                     toolStripStatusLabel1.Text = "Nesting time: " + sw.ElapsedMilliseconds + "ms";
-                    //if (stop)
-                    break;
+                    if (stop)
+                        break;
 
                 }
                 th = null;
@@ -651,17 +651,17 @@ namespace DeepNestPort.Core
 
         void deleteParts()
         {
-            if (objectListView1.SelectedObjects.Count == 0) 
+            if (objectListView1.SelectedObjects.Count == 0)
                 return;
 
-            if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No) 
+            if (ShowQuestion($"Are you to sure to delete {objectListView1.SelectedObjects.Count} items?") == DialogResult.No)
                 return;
 
             foreach (var item in objectListView1.SelectedObjects)
             {
                 if (Preview != null && (item as DetailLoadInfo).Path == (Preview as RawDetail).Name) Preview = null;
                 var di = item as DetailLoadInfo;
-                dxfCache.Remove(di.Name);                
+                dxfCache.Remove(di.Name);
                 Infos.Remove(di);
             }
             objectListView1.SetObjects(Infos);
