@@ -49,10 +49,18 @@
             <RibbonTab x:Name="nestTab" Header="Nesting" KeyTip="H" >
                 <!-- Home  group-->
                 <RibbonGroup x:Name="nest" Header="General">
+                    <RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  SmallImageSource="Icons/cross-button.png"  KeyTip="S" />
+
+                    
+
+
+                </RibbonGroup>
+                <RibbonGroup x:Name="export" Header="Export">
                     <!--<RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  KeyTip="F" />-->
 
                     <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" SmallImageSource="Icons/disk.png"  KeyTip="F" />
                     <RibbonButton  Label="Export All"  Click="RibbonButton_Click_7" SmallImageSource="Icons/disks.png"  KeyTip="F" />
+                    
 
 
                 </RibbonGroup>

@@ -13,6 +13,7 @@
     <None Remove="Icons\arrow.png" />
     <None Remove="Icons\color.png" />
     <None Remove="Icons\control-double.png" />
+    <None Remove="Icons\cross-button.png" />
     <None Remove="Icons\disk.png" />
     <None Remove="Icons\disks.png" />
     <None Remove="Icons\gear.png" />
@@ -26,6 +27,7 @@
     <Resource Include="Icons\arrow.png" />
     <Resource Include="Icons\color.png" />
     <Resource Include="Icons\control-double.png" />
+    <Resource Include="Icons\cross-button.png" />
     <Resource Include="Icons\disk.png" />
     <Resource Include="Icons\disks.png" />
     <Resource Include="Icons\gear.png" />
