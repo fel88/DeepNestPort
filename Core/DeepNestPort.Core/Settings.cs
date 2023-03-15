@@ -6,7 +6,14 @@ namespace DeepNestPort.Core
     {
         public Settings()
         {
-            InitializeComponent();
+            InitializeComponent();            
+        }
+
+        public void InitValues()
+        {
+            numericUpDown1.Value = (decimal)SvgNest.Config.spacing;
+            numericUpDown2.Value = (decimal)SvgNest.Config.sheetSpacing;
+            numericUpDown3.Value = Form1.Form.MaxNestSeconds;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)

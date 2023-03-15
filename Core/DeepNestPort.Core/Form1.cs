@@ -11,6 +11,7 @@ using BrightIdeasSoftware;
 using System.Windows.Media;
 using OpenTK;
 using IxMilia.Dxf.Entities;
+using System.Xml.Linq;
 
 namespace DeepNestPort.Core
 {
@@ -24,7 +25,8 @@ namespace DeepNestPort.Core
             Load += Form1_Load;
             Form = this;
             ctx3 = new DrawingContext(pictureBox3);
-
+            Shown += Form1_Shown;
+            FormClosing += Form1_FormClosing;
             stgControl.Visible = false;
             stgControl.Close += StgControl_Close;
             panel1.Controls.Add(stgControl);
@@ -54,6 +56,61 @@ namespace DeepNestPort.Core
             Random rrr = new Random(234);
             clrs = clrs.OrderBy(z => rrr.Next(100000)).ToList();
             Colors = clrs.ToArray();
+        }
+
+        private void Form1_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            SaveSettings();
+        }
+
+        public void LoadSettings()
+        {
+            if (!File.Exists("settings.xml"))
+                return;
+
+            var doc = XDocument.Load("settings.xml");
+            foreach (var item in doc.Descendants("setting"))
+            {
+                try
+                {
+                    var nm = item.Attribute("name").Value;
+                    var vl = item.Attribute("value").Value;
+                    switch (nm)
+                    {
+                        case "spacing":
+                            SvgNest.Config.spacing = vl.ToDouble();
+                            break;
+                        case "sheetSpacing":
+                            SvgNest.Config.sheetSpacing = vl.ToDouble();
+                            break;
+                        case "maxNestSeconds":
+                            MaxNestSeconds = int.Parse(vl);
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
+
+        public void SaveSettings()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("<?xml version=\"1.0\"?>");
+            sb.AppendLine("<root>");
+            sb.AppendLine($"<setting name=\"spacing\" value=\"{SvgNest.Config.spacing}\"/>");
+            sb.AppendLine($"<setting name=\"sheetSpacing\" value=\"{SvgNest.Config.sheetSpacing}\"/>");
+            sb.AppendLine($"<setting name=\"maxNestSeconds\" value=\"{MaxNestSeconds}\"/>");
+            sb.AppendLine("</root>");
+            File.WriteAllText("settings.xml", sb.ToString());
+        }
+
+        private void Form1_Shown(object? sender, EventArgs e)
+        {
+            LoadSettings();
+            stgControl.InitValues();
         }
 
         System.Drawing.Color[] Colors;
@@ -544,9 +601,9 @@ namespace DeepNestPort.Core
                     if (stop)
                         break;
 
-                    if (sww.Elapsed.TotalSeconds > MaxNestSeconds)                    
+                    if (sww.Elapsed.TotalSeconds > MaxNestSeconds)
                         break;
-                    
+
                 }
                 toolStripStatusLabel1.Text = $"Nesting complete. Total nests: {nest.nests.Count}";
 
