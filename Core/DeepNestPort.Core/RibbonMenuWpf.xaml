@@ -50,9 +50,7 @@
                 <!-- Home  group-->
                 <RibbonGroup x:Name="nest" Header="General">
                     <RibbonButton  Label="Stop" Click="RibbonButton_Click_1"  SmallImageSource="Icons/cross-button.png"  KeyTip="S" />
-
-                    
-
+                    <RibbonButton  Label="Nests" Click="RibbonButton_Click_9"  KeyTip="E" />
 
                 </RibbonGroup>
                 <RibbonGroup x:Name="export" Header="Export">
@@ -76,7 +74,9 @@
                 </RibbonGroup>
                 <RibbonGroup x:Name="navigate" Header="Navigate">
 
+                    
                     <RibbonButton  Label="Next sheet" Click="RibbonButton_Click_6"   SmallImageSource="Icons\arrow.png" />
+                    <RibbonToggleButton x:Name="borderScroll" Label="Border scroll" Unchecked="borderScroll_Unchecked"  Checked="borderScroll_Checked"    />
                 </RibbonGroup>
             </RibbonTab>          
         </Ribbon>

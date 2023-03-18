@@ -108,5 +108,20 @@ namespace DeepNestPort.Core
         {
             Form.ColorsView(false);
         }
+
+        private void borderScroll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Form.BorderScroll(false);
+        }
+
+        private void borderScroll_Checked(object sender, RoutedEventArgs e)
+        {
+            Form.BorderScroll(true);
+        }
+
+        private void RibbonButton_Click_9(object sender, RoutedEventArgs e)
+        {
+            Form.ShowNestsList();
+        }
     }
 }

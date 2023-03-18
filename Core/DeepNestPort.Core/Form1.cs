@@ -86,6 +86,12 @@ namespace DeepNestPort.Core
                         case "maxNestSeconds":
                             MaxNestSeconds = int.Parse(vl);
                             break;
+                        case "useNestTimeLimit":
+                            UseNestTimeLimit = bool.Parse(vl);
+                            break;
+                        case "borderScroll":
+                            BorderScrollEnabled = bool.Parse(vl);
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -103,6 +109,8 @@ namespace DeepNestPort.Core
             sb.AppendLine($"<setting name=\"spacing\" value=\"{SvgNest.Config.spacing}\"/>");
             sb.AppendLine($"<setting name=\"sheetSpacing\" value=\"{SvgNest.Config.sheetSpacing}\"/>");
             sb.AppendLine($"<setting name=\"maxNestSeconds\" value=\"{MaxNestSeconds}\"/>");
+            sb.AppendLine($"<setting name=\"useNestTimeLimit\" value=\"{UseNestTimeLimit}\"/>");
+            sb.AppendLine($"<setting name=\"borderScroll\" value=\"{BorderScrollEnabled}\"/>");
             sb.AppendLine("</root>");
             File.WriteAllText("settings.xml", sb.ToString());
         }
@@ -111,6 +119,7 @@ namespace DeepNestPort.Core
         {
             LoadSettings();
             stgControl.InitValues();
+            menu.ApplySettings();
         }
 
         System.Drawing.Color[] Colors;
@@ -209,7 +218,7 @@ namespace DeepNestPort.Core
         {
             var pos = RenderControl.PointToClient(Cursor.Position);
 
-            if (ClientRectangle.Contains(pos))
+            if (BorderScrollEnabled && ClientRectangle.Contains(pos))
             {
                 if (pos.X >= 0 && pos.X < 15)
                     ctx.PanX(zoomSpeed);
@@ -577,6 +586,7 @@ namespace DeepNestPort.Core
         public float progressVal = 0;
         bool stop = false;
         public int MaxNestSeconds = 10;
+        public bool UseNestTimeLimit = false;
         public void RunDeepnest()
         {
             if (th != null) return;
@@ -591,19 +601,26 @@ namespace DeepNestPort.Core
                 {
                     Stopwatch sw = Stopwatch.StartNew();
                     sw.Start();
-
+                    displayProgress(0.0f);
                     context.NestIterate();
                     UpdateNestsList();
                     displayProgress(1.0f);
                     sw.Stop();
+                    if (UseNestTimeLimit)
+                    {
+                        toolStripStatusLabel1.Text = $"Total nesting time: {Math.Round(sww.Elapsed.TotalSeconds, 2),6} / {MaxNestSeconds}s   ";
+                    }
+                    else
+                    {
+                        toolStripStatusLabel1.Text = $"Total nesting time: {Math.Round(sww.Elapsed.TotalSeconds, 2),6}s   Total nests: {nest.nests.Count} ";
+                    }
                     //toolStripStatusLabel1.Text = $"Total nesting time: {Math.Round(sww.Elapsed.TotalSeconds, 2),6} / {MaxNestSeconds}s    Last nesting time: {sw.ElapsedMilliseconds} ms";
-                    toolStripStatusLabel1.Text = $"Total nesting time: {Math.Round(sww.Elapsed.TotalSeconds, 2),6} / {MaxNestSeconds}s   ";
+
                     if (stop)
                         break;
 
-                    if (sww.Elapsed.TotalSeconds > MaxNestSeconds)
+                    if (UseNestTimeLimit && sww.Elapsed.TotalSeconds > MaxNestSeconds)
                         break;
-
                 }
                 toolStripStatusLabel1.Text = $"Nesting complete. Total nests: {nest.nests.Count}";
 
@@ -927,6 +944,44 @@ namespace DeepNestPort.Core
         internal void ColorsView(bool v)
         {
             UseColors = v;
+        }
+        public bool BorderScrollEnabled = false;
+        internal void BorderScroll(bool v)
+        {
+            BorderScrollEnabled = v;
+        }
+
+        internal void ShowNestsList()
+        {
+            Form f = new Form();
+            f.Text = "nest selector";
+            f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            ListView l = new ListView();
+            l.View = View.Details;
+            l.Columns.Add(new ColumnHeader() { Text = "Quality", Width = 150 });
+            foreach (var item in nest.nests)
+            {
+                var lvi = new ListViewItem(new string[] { item.fitness.ToString() }) { Tag = item };
+                l.Items.Add(lvi);
+
+            }
+            l.GridLines = true;
+            l.FullRowSelect = true;
+            l.DoubleClick += L_DoubleClick;
+            f.Controls.Add(l);
+            l.Dock = DockStyle.Fill;
+            f.TopMost = true;
+            f.Show();
+        }
+
+        private void L_DoubleClick(object? sender, EventArgs e)
+        {
+            var l = sender as ListView;
+            if (l.SelectedItems.Count == 0)
+                return;
+
+            var sp = (l.SelectedItems[0].Tag as SheetPlacement);
+            context.AssignPlacement(sp);
         }
     }
 }
