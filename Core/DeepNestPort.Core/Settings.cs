@@ -14,6 +14,7 @@ namespace DeepNestPort.Core
             numericUpDown1.Value = (decimal)SvgNest.Config.spacing;
             numericUpDown2.Value = (decimal)SvgNest.Config.sheetSpacing;
             numericUpDown3.Value = Form1.Form.MaxNestSeconds;
+            numericUpDown4.Value = SvgNest.Config.rotations;
             checkBox1.Checked = Form1.Form.UseNestTimeLimit;
             comboBox1.SelectedIndex = 0;
             numericUpDown3.Enabled = Form1.Form.UseNestTimeLimit;
@@ -57,6 +58,11 @@ namespace DeepNestPort.Core
         {
             numericUpDown3.Enabled = checkBox1.Checked;
             Form1.Form.UseNestTimeLimit = checkBox1.Checked;
+        }
+
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        {
+            SvgNest.Config.rotations = (int)numericUpDown4.Value;
         }
     }
 }

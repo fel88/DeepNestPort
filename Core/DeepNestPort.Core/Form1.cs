@@ -92,6 +92,9 @@ namespace DeepNestPort.Core
                         case "borderScroll":
                             BorderScrollEnabled = bool.Parse(vl);
                             break;
+                        case "rotations":
+                            SvgNest.Config.rotations = int.Parse(vl);
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -111,6 +114,7 @@ namespace DeepNestPort.Core
             sb.AppendLine($"<setting name=\"maxNestSeconds\" value=\"{MaxNestSeconds}\"/>");
             sb.AppendLine($"<setting name=\"useNestTimeLimit\" value=\"{UseNestTimeLimit}\"/>");
             sb.AppendLine($"<setting name=\"borderScroll\" value=\"{BorderScrollEnabled}\"/>");
+            sb.AppendLine($"<setting name=\"rotations\" value=\"{SvgNest.Config.rotations}\"/>");
             sb.AppendLine("</root>");
             File.WriteAllText("settings.xml", sb.ToString());
         }
@@ -130,7 +134,7 @@ namespace DeepNestPort.Core
         }
 
         Settings stgControl = new Settings();
-        public Sheet NewSheet(int w = 3000, int h = 1500)
+        public Sheet NewSheet(double w = 3000, double h = 1500)
         {
             var tt = new RectangleSheet();
             tt.Name = "rectSheet" + (sheets.Count + 1);
@@ -481,6 +485,7 @@ namespace DeepNestPort.Core
             int src = 0;
             foreach (var item in sheetsInfos)
             {
+                item.Nfp = NewSheet(item.Width, item.Height);
                 src = context.GetNextSheetSource();
                 for (int i = 0; i < item.Quantity; i++)
                 {
@@ -953,15 +958,27 @@ namespace DeepNestPort.Core
 
         internal void ShowNestsList()
         {
+            if (nest == null || nest.nests == null)
+            {
+                ShowMessage("Nests are empty.", MessageBoxIcon.Error);
+                return;
+            }
             Form f = new Form();
             f.Text = "nest selector";
             f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
             ListView l = new ListView();
             l.View = View.Details;
             l.Columns.Add(new ColumnHeader() { Text = "Quality", Width = 150 });
+            l.Columns.Add(new ColumnHeader() { Text = "Sheets", Width = 50 });
+            l.Columns.Add(new ColumnHeader() { Text = "Parts placed", Width = 80 });
             foreach (var item in nest.nests)
             {
-                var lvi = new ListViewItem(new string[] { item.fitness.ToString() }) { Tag = item };
+                var lvi = new ListViewItem(
+                    new string[] {
+                        item.fitness.ToString(),
+                    item.placements.Sum(z=>z.Count()).ToString(),
+                item.placements.Sum(z=>z.Sum(z=>z.sheetplacements.Count)).ToString()})
+                { Tag = item };
                 l.Items.Add(lvi);
 
             }

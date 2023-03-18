@@ -7,7 +7,14 @@ namespace DeepNestPort.Core
         public NFP Nfp;
         public string Path;
         public string Info { get; set; }
-        public float Width { get; set; }
+        float _width;
+        public float Width
+        {
+            get => _width; set
+            {
+                _width = value;                
+            }
+        }
         public float Height { get; set; }
         public int Quantity { get; set; }
     }
