@@ -8,7 +8,8 @@ WinForm / WPF Ribbon panel
 :warning:**Project status:** WIP  :construction::construction_worker: 
 
 
-DXF Import/Export: https://github.com/IxMilia/Dxf
+DXF Import: https://github.com/haplokuon/netDxf <br/>
+DXF Export: https://github.com/IxMilia/Dxf
 
 Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
 
