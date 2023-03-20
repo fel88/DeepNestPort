@@ -48,5 +48,10 @@ namespace DeepNestLib
 
             return ret.ToArray();
         }
+
+        public static PointF Mult(this PointF p, double m)
+        {
+            return new PointF((float)(p.X * m), (float)(p.Y * m));
+        }
     }
 }

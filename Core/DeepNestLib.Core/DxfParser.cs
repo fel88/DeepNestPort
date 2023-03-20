@@ -1,5 +1,6 @@
-﻿using IxMilia.Dxf;
-using IxMilia.Dxf.Entities;
+﻿using IxMilia.Dxf.Entities;
+using netDxf;
+using netDxf.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,149 +15,100 @@ namespace DeepNestLib
         public static RawDetail[] LoadDxf(string path, bool split = false)
         {
             FileInfo fi = new FileInfo(path);
-            DxfFile dxffile = DxfFile.Load(fi.FullName);
+
             RawDetail s = new RawDetail();
 
             s.Name = fi.FullName;
-            IEnumerable<DxfEntity> entities = dxffile.Entities.ToArray();
+
 
             List<DraftElement> elems = new List<DraftElement>();
 
-            foreach (DxfEntity ent in entities)
+
+            netDxf.DxfDocument doc = netDxf.DxfDocument.Load(path);
+            double mult = 1;
+            if (doc.DrawingVariables.InsUnits == netDxf.Units.DrawingUnits.Inches)
             {
-                switch (ent.EntityType)
+                mult = 25.4;
+            }
+            foreach (var cr in doc.Entities.Circles)
+            {
+
+                LocalContour cc = new LocalContour();
+
+                for (int i = 0; i <= 360; i += 15)
                 {
-                    case DxfEntityType.LwPolyline:
-                        {
-                            DxfLwPolyline poly = (DxfLwPolyline)ent;
-                            if (poly.Vertices.Count() < 2)
-                            {
-                                continue;
-                            }
-                            LocalContour points = new LocalContour();
-                            foreach (DxfLwPolylineVertex vert in poly.Vertices)
-                            {
-                                points.Points.Add(new PointF((float)vert.X, (float)vert.Y));
-                            }
-                            points.Points.Add(points.Points[0]);
-                            PolylineElement p = new PolylineElement() { Tag = ent };
-                            elems.Add(p);
-                            p.Start = points.Points[0];
-                            p.End = points.Points[1];
-                            p.Points = points.Points.ToArray();
+                    var ang = i * Math.PI / 180f;
+                    var xx = cr.Center.X + cr.Radius * Math.Cos(ang);
+                    var yy = cr.Center.Y + cr.Radius * Math.Sin(ang);
+                    cc.Points.Add(new PointF((float)xx, (float)yy));
+                }
+                PolylineElement p = new PolylineElement() { Tag = cr };
+                elems.Add(p);
+                p.Start = cc.Points[0];
+                p.End = cc.Points[cc.Points.Count - 1];
+                p.Points = cc.Points.ToArray();
+            }
+            foreach (var cr in doc.Entities.Arcs)
+            {
+                var sang = cr.StartAngle;
+                var eang = cr.EndAngle;
+                var center = new PointF((float)cr.Center.X, (float)cr.Center.Y);
+                List<PointF> pp = new List<PointF>();
 
-                            /*for (int i = 0; i < points.Points.Count; i++)
-                            {
-                                var p0 = points.Points[i];
-                                var p1 = points.Points[(i + 1) % points.Points.Count];
-                                elems.Add(new LineElement() { Start = p0, End = p1 });
-                            }*/
-                        }
-                        break;
-                    case DxfEntityType.Arc:
-                        {
-                            DxfArc arc = (DxfArc)ent;
-                            List<PointF> pp = new List<PointF>();
+                if (sang > eang)
+                {
+                    sang -= 360;
+                }
 
-                            if (arc.StartAngle > arc.EndAngle)
-                            {
-                                arc.StartAngle -= 360;
-                            }
+                for (double i = sang; i < eang; i += 15)
+                {
+                    var tt = GetPointFromAngle(center, (float)cr.Radius, i);
+                    pp.Add(new PointF((float)tt.X, (float)tt.Y));
+                }
+                var t = GetPointFromAngle(center, (float)cr.Radius, eang);
+                pp.Add(new PointF((float)t.X, (float)t.Y));
+                PolylineElement p = new PolylineElement() { Tag = cr };
+                elems.Add(p);
 
-                            for (double i = arc.StartAngle; i < arc.EndAngle; i += 15)
-                            {
-                                var tt = arc.GetPointFromAngle(i);
-                                pp.Add(new PointF((float)tt.X, (float)tt.Y));
-                            }
-                            var t = arc.GetPointFromAngle(arc.EndAngle);
-                            pp.Add(new PointF((float)t.X, (float)t.Y));
-                            PolylineElement p = new PolylineElement() { Tag = ent };
-                            elems.Add(p);
+                p.Start = pp[0];
+                p.End = pp[pp.Count - 1];
+                p.Points = pp.ToArray();
+            }
+            foreach (var cr in doc.Entities.Splines)
+            {
+                LocalContour cc = new LocalContour();
+                var list = cr.PolygonalVertexes(100);
 
-                            p.Start = pp[0];
-                            p.End = pp[pp.Count - 1];
-                            p.Points = pp.ToArray();
-                            /*for (int j = 1; j < pp.Count; j++)
-                            {
-                                var p1 = pp[j - 1];
-                                var p2 = pp[j];
-                                elems.Add(new LineElement() { Start = new PointF((float)p1.X, (float)p1.Y), End = new PointF((float)p2.X, (float)p2.Y) });
-                            }*/
-                        }
-                        break;
-                    case DxfEntityType.Circle:
-                        {
-                            DxfCircle cr = (DxfCircle)ent;
-                            LocalContour cc = new LocalContour();
-
-                            for (int i = 0; i <= 360; i += 15)
-                            {
-                                var ang = i * Math.PI / 180f;
-                                var xx = cr.Center.X + cr.Radius * Math.Cos(ang);
-                                var yy = cr.Center.Y + cr.Radius * Math.Sin(ang);
-                                cc.Points.Add(new PointF((float)xx, (float)yy));
-                            }
-                            PolylineElement p = new PolylineElement() { Tag = ent };
-                            elems.Add(p);
-                            p.Start = cc.Points[0];
-                            p.End = cc.Points[cc.Points.Count - 1];
-                            p.Points = cc.Points.ToArray();
-                            /*for (int i = 1; i < cc.Points.Count; i++)
-                            {
-                                var p1 = cc.Points[i - 1];
-                                var p2 = cc.Points[i];
-                                elems.Add(new LineElement() { Start = p1, End = p2 });
-                            }*/
-                        }
-                        break;
-                    case DxfEntityType.Line:
-                        {
-                            DxfLine poly = (DxfLine)ent;
-                            elems.Add(new LineElement()
-                            {
-                                Tag = ent,
-                                Start = new PointF((float)poly.P1.X, (float)poly.P1.Y),
-                                End = new PointF((float)poly.P2.X, (float)poly.P2.Y)
-                            });
-                            break;
-                        }
-
-                    case DxfEntityType.Polyline:
-                        {
-                            DxfPolyline poly = (DxfPolyline)ent;
-                            if (poly.Vertices.Count() < 2)
-                            {
-                                continue;
-                            }
-                            LocalContour points = new LocalContour();
-                            for (int i = 0; i < poly.Vertices.Count; i++)
-                            {
-                                DxfVertex vert = poly.Vertices[i];
-                                points.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
-
-                            }
-                            PolylineElement p = new PolylineElement() { Tag = ent };
-                            elems.Add(p);
-                            p.Start = points.Points[0];
-                            p.End = points.Points[points.Points.Count - 1];
-                            p.Points = points.Points.ToArray();
-
-                            /*for (int i = 0; i < points.Points.Count; i++)
-                            {
-                                var p0 = points.Points[i];
-                                var p1 = points.Points[(i + 1) % points.Points.Count];
-                                elems.Add(new LineElement() { Start = p0, End = p1 });
-                            }*/
-                            break;
-                        }
-                    default:
-                        throw new ArgumentException("unsupported entity type: " + ent);
-
+                cc.Points.AddRange(list.Select(z => new PointF((float)(float)z.X, (float)z.Y)));
+                PolylineElement p = new PolylineElement()
+                {
+                    Tag = new PolylineExportInfo()
+                    {
+                        IsClosed = cr.IsClosed,
+                        Points = list.Select(z => new Vector3(z.X * mult, z.Y * mult, 0)).ToArray()
+                    }
                 };
+                elems.Add(p);
+                p.Start = cc.Points[0];
+                p.End = cc.Points[cc.Points.Count - 1];
+                p.Points = cc.Points.ToArray();
+            }
+            foreach (var item in doc.Entities.Lines)
+            {
+                elems.Add(new LineElement()
+                {
+                    Tag = item,
+                    Start = new PointF((float)item.StartPoint.X, (float)item.StartPoint.Y),
+                    End = new PointF((float)item.EndPoint.X, (float)item.EndPoint.Y)
+                });
             }
 
             List<RawDetail> ret = new List<RawDetail>();
 
+            foreach (var item in elems)
+            {
+                item.Mult(mult);
+            }
             elems = elems.Where(z => z.Length > RemoveThreshold).ToList();
             var cntrs2 = ConnectElements(elems.ToArray());
             if (split)
@@ -221,13 +173,13 @@ namespace DeepNestLib
             List<PointF> pp = new List<PointF>();
             List<DraftElement> last = new List<DraftElement>();
             last.AddRange(elems);
-            List<DxfEntity> accum = new List<DxfEntity>();
+            List<object> accum = new List<object>();
             while (last.Any())
             {
                 if (pp.Count == 0)
                 {
                     pp.AddRange(last.First().GetPoints());
-                    accum.Add(last.First().Tag as DxfEntity);
+                    accum.Add(last.First().Tag);
                     last.RemoveAt(0);
                 }
                 else
@@ -243,7 +195,7 @@ namespace DeepNestLib
                         accum.Clear();
                         continue;
                     }
-                    accum.Add(f1.Tag as DxfEntity);
+                    accum.Add(f1.Tag);
                     last.Remove(f1);
                     if (f1.Start.DistTo(ll) < f1.End.DistTo(ll))
                     {
@@ -264,298 +216,14 @@ namespace DeepNestLib
             }
             return ret.ToArray();
         }
-
-
-        public static int Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
+        public static PointF GetPointFromAngle(PointF center, float radius, double angle)
         {
-            Dictionary<DxfFile, int> dxfexports = new Dictionary<DxfFile, int>();
-            for (int i = 0; i < sheets.Count(); i++)
-            {
-                DxfFile sheetdxf;
-                double sheetwidth;
-                GenerateSheetOutline(sheets, i, out sheetdxf, out sheetwidth);
-
-                foreach (NFP nFP in polygons)
-                {
-                    var pivot = nFP.Points[0];
-
-                    DxfFile fl;
-                    if (nFP.fitted == false || !nFP.Name.ToLower().Contains(".dxf") || nFP.sheet.Id != sheets.ElementAt(i).Id)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        //fl = DxfFile.Load(nFP.Name);
-                    }
-                    var fle = nFP.Tag as DxfEntity[];
-                    double sheetXoffset = -sheetwidth * i;
-
-                    DxfPoint offsetdistance = new DxfPoint(nFP.x + sheetXoffset, nFP.y, 0D);
-                    List<DxfEntity> newlist = OffsetToNest(fle, new DxfPoint(pivot.x, pivot.y, 0), offsetdistance, nFP.Rotation);
-
-                    foreach (DxfEntity ent in newlist)
-                    {
-                        sheetdxf.Entities.Add(ent);
-                    }
-                }
-
-                dxfexports.Add(sheetdxf, sheets.ElementAt(i).Id);
-            }
-
-            int sheetcount = 0;
-            for (int i = 0; i < dxfexports.Count(); i++)
-            {
-                var dxf = dxfexports.ElementAt(i).Key;
-                var id = dxfexports.ElementAt(i).Value;
-
-                if (dxf.Entities.Count != 1)
-                {
-                    sheetcount += 1;
-                    if (sheets.Count() == 1)
-                    {
-                        dxf.Save(path, true);
-                    }
-                    else
-                    {
-                        FileInfo fi = new FileInfo(path);
-                        dxf.Save($"{fi.FullName.Substring(0, fi.FullName.Length - 4)}{id}.dxf", true);
-                    }
-                }
-            }
-
-            return sheetcount;
-        }
-        private static void GenerateSheetOutline(IEnumerable<NFP> sheets, int i, out DxfFile sheetdxf, out double sheetwidth)
-        {
-            // Generate Sheet Outline in Dxf
-            sheetdxf = new DxfFile();
-            sheetdxf.Views.Clear();
-
-            List<DxfVertex> sheetverts = new List<DxfVertex>();
-            double sheetheight = sheets.ElementAt(i).HeightCalculated;
-            sheetwidth = sheets.ElementAt(i).WidthCalculated;
-
-            // Bl Point
-            sheetverts.Add(new DxfVertex(new DxfPoint(0, 0, 0)));
-
-            // BR Point
-            sheetverts.Add(new DxfVertex(new DxfPoint(sheetwidth, 0, 0)));
-
-            // TR Point
-            sheetverts.Add(new DxfVertex(new DxfPoint(sheetwidth, sheetheight, 0)));
-
-            // TL Point
-            sheetverts.Add(new DxfVertex(new DxfPoint(0, sheetheight, 0)));
-
-            DxfPolyline sheetentity = new DxfPolyline(sheetverts)
-            {
-                IsClosed = true,
-                Layer = $"Plate H{sheetheight} W{sheetwidth}",
-            };
-
-            sheetdxf.Entities.Add(sheetentity);
-        }
-        private static List<DxfEntity> OffsetToNest(IList<DxfEntity> dxfEntities, DxfPoint pivot, DxfPoint offset, double rotationAngle)
-        {
-            List<DxfEntity> dxfreturn = new List<DxfEntity>();
-            List<DxfPoint> tmpPts;
-            foreach (DxfEntity entity in dxfEntities)
-            {
-                switch (entity.EntityType)
-                {
-                    case DxfEntityType.Arc:
-                        DxfArc _dxfArc = (DxfArc)entity;
-                        var dxfArc = new DxfArc(_dxfArc.Center, _dxfArc.Radius, _dxfArc.StartAngle, _dxfArc.EndAngle);
-                        dxfArc.Center = RotateLocation(rotationAngle, dxfArc.Center);
-                        dxfArc.Center += offset;
-                        dxfArc.StartAngle += rotationAngle;
-                        dxfArc.EndAngle += rotationAngle;
-                        dxfreturn.Add(dxfArc);
-                        break;
-
-                    case DxfEntityType.ArcAlignedText:
-                        DxfArcAlignedText dxfArcAligned = (DxfArcAlignedText)entity;
-                        dxfArcAligned.CenterPoint = RotateLocation(rotationAngle, dxfArcAligned.CenterPoint);
-                        dxfArcAligned.CenterPoint += offset;
-                        dxfArcAligned.StartAngle += rotationAngle;
-                        dxfArcAligned.EndAngle += rotationAngle;
-                        dxfreturn.Add(dxfArcAligned);
-                        break;
-
-                    case DxfEntityType.Attribute:
-                        DxfAttribute dxfAttribute = (DxfAttribute)entity;
-                        dxfAttribute.Location = RotateLocation(rotationAngle, dxfAttribute.Location);
-                        dxfAttribute.Location += offset;
-                        dxfreturn.Add(dxfAttribute);
-                        break;
-
-                    case DxfEntityType.AttributeDefinition:
-                        DxfAttributeDefinition dxfAttributecommon = (DxfAttributeDefinition)entity;
-                        dxfAttributecommon.Location = RotateLocation(rotationAngle, dxfAttributecommon.Location);
-                        dxfAttributecommon.Location += offset;
-                        dxfreturn.Add(dxfAttributecommon);
-                        break;
-
-                    case DxfEntityType.Circle:
-                        {
-                            DxfCircle _dxfCircle = (DxfCircle)entity;
-                            DxfCircle dxfCircle = new DxfCircle(_dxfCircle.Center, _dxfCircle.Radius);
-                            dxfCircle.Center = RotateLocation(rotationAngle, dxfCircle.Center);
-                            dxfCircle.Center += offset;
-                            dxfreturn.Add(dxfCircle);
-                        }
-                        break;
-
-                    case DxfEntityType.Ellipse:
-                        {
-                            DxfEllipse _dxfEllipse = (DxfEllipse)entity;
-                            DxfEllipse dxfEllipse = new DxfEllipse(_dxfEllipse.Center, _dxfEllipse.MajorAxis, _dxfEllipse.MinorAxisRatio);
-                            dxfEllipse.Center = RotateLocation(rotationAngle, dxfEllipse.Center);
-                            dxfEllipse.Center += offset;
-                            dxfreturn.Add(dxfEllipse);
-                        }
-                        break;
-
-                    case DxfEntityType.Image:
-                        DxfImage dxfImage = (DxfImage)entity;
-                        dxfImage.Location = RotateLocation(rotationAngle, dxfImage.Location);
-                        dxfImage.Location += offset;
-
-                        dxfreturn.Add(dxfImage);
-                        break;
-
-                    case DxfEntityType.Leader:
-                        DxfLeader dxfLeader = (DxfLeader)entity;
-                        tmpPts = new List<DxfPoint>();
-
-                        foreach (DxfPoint vrt in dxfLeader.Vertices)
-                        {
-                            var tmppnt = RotateLocation(rotationAngle, vrt);
-                            tmppnt += offset;
-                            tmpPts.Add(tmppnt);
-                        }
-
-                        dxfLeader.Vertices.Clear();
-                        dxfLeader.Vertices.Concat(tmpPts);
-                        dxfreturn.Add(dxfLeader);
-                        break;
-
-                    case DxfEntityType.Line:
-                        DxfLine _dxfLine = (DxfLine)entity;
-                        DxfLine dxfLine = new DxfLine(_dxfLine.P1, _dxfLine.P2);
-                        dxfLine.P1 = RotateLocation(rotationAngle, dxfLine.P1);
-                        dxfLine.P2 = RotateLocation(rotationAngle, dxfLine.P2);
-                        dxfLine.P1 += offset;
-                        dxfLine.P2 += offset;
-                        dxfreturn.Add(dxfLine);
-                        break;
-
-                    case DxfEntityType.LwPolyline:
-                        {
-                            DxfLwPolyline _dxfPoly = (DxfLwPolyline)entity;
-
-                            List<DxfLwPolylineVertex> verts = new List<DxfLwPolylineVertex>();
-                            foreach (var _vrt in _dxfPoly.Vertices)
-                            {
-                                var vrt = new DxfVertex();
-                                vrt.Location = new DxfPoint(_vrt.X, _vrt.Y, 0);
-
-                                vrt.Location = RotateLocation(rotationAngle, vrt.Location);
-                                vrt.Location += offset;
-                                verts.Add(new DxfLwPolylineVertex() { X = vrt.Location.X, Y = vrt.Location.Y });
-                            }
-                            DxfLwPolyline dxfPoly = new DxfLwPolyline(verts.ToArray());
-
-                            dxfreturn.Add(dxfPoly);
-                        }
-                        break;
-
-                    case DxfEntityType.MLine:
-                        DxfMLine mLine = (DxfMLine)entity;
-                        tmpPts = new List<DxfPoint>();
-                        mLine.StartPoint += offset;
-
-                        mLine.StartPoint = RotateLocation(rotationAngle, mLine.StartPoint);
-
-                        foreach (DxfPoint vrt in mLine.Vertices)
-                        {
-                            var tmppnt = RotateLocation(rotationAngle, vrt);
-                            tmppnt += offset;
-                            tmpPts.Add(tmppnt);
-                        }
-
-                        mLine.Vertices.Clear();
-                        mLine.Vertices.Concat(tmpPts);
-                        dxfreturn.Add(mLine);
-                        break;
-
-                    case DxfEntityType.Polyline:
-                        {
-                            DxfPolyline polyline = (DxfPolyline)entity;
-
-                            List<DxfVertex> verts = new List<DxfVertex>();
-                            foreach (DxfVertex vrt in polyline.Vertices)
-                            {
-                                var tmppnt = vrt;
-                                tmppnt.Location = RotateLocation(rotationAngle, tmppnt.Location);
-                                tmppnt.Location += offset;
-                                verts.Add(tmppnt);
-                            }
-
-                            DxfPolyline polyout = new DxfPolyline(verts);
-                            polyout.Location = polyline.Location + offset;
-                            polyout.IsClosed = polyline.IsClosed;
-                            polyout.Layer = polyline.Layer;
-                            dxfreturn.Add(polyout);
-                        }
-                        break;
-
-                    case DxfEntityType.Body:
-                    case DxfEntityType.DgnUnderlay:
-                    case DxfEntityType.Dimension:
-                    case DxfEntityType.DwfUnderlay:
-                    case DxfEntityType.Face:
-                    case DxfEntityType.Helix:
-                    case DxfEntityType.Insert:
-                    case DxfEntityType.Light:
-                    case DxfEntityType.ModelerGeometry:
-                    case DxfEntityType.MText:
-                    case DxfEntityType.OleFrame:
-                    case DxfEntityType.Ole2Frame:
-                    case DxfEntityType.PdfUnderlay:
-                    case DxfEntityType.Point:
-                    case DxfEntityType.ProxyEntity:
-                    case DxfEntityType.Ray:
-                    case DxfEntityType.Region:
-                    case DxfEntityType.RText:
-                    case DxfEntityType.Section:
-                    case DxfEntityType.Seqend:
-                    case DxfEntityType.Shape:
-                    case DxfEntityType.Solid:
-                    case DxfEntityType.Spline:
-                    case DxfEntityType.Text:
-                    case DxfEntityType.Tolerance:
-                    case DxfEntityType.Trace:
-                    case DxfEntityType.Underlay:
-                    case DxfEntityType.Vertex:
-                    case DxfEntityType.WipeOut:
-                    case DxfEntityType.XLine:
-                        throw new ArgumentException("unsupported entity type: " + entity.EntityType);
-                }
-            }
-
-            return dxfreturn;
+            double y = Math.Sin(angle * Math.PI / 180.0);
+            var p1 = new PointF((float)Math.Cos(angle * Math.PI / 180.0), (float)y);
+            p1 = new PointF(p1.X * radius, p1.Y * radius);
+            p1 = new PointF(p1.X + center.X, p1.Y + center.Y);
+            return p1;
         }
 
-        public static DxfPoint RotateLocation(double rotationAngle, DxfPoint pt)
-        {
-            var angle = (float)(rotationAngle * Math.PI / 180.0f);
-            var x = pt.X;
-            var y = pt.Y;
-            var x1 = (float)((x * Math.Cos(angle)) - (y * Math.Sin(angle)));
-            var y1 = (float)((x * Math.Sin(angle)) + (y * Math.Cos(angle)));
-            return new DxfPoint(x1, y1, pt.Z);
-        }
     }
 }

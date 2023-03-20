@@ -12,5 +12,8 @@ namespace DeepNestLib
 
         public abstract void Reverse();
         public abstract PointF[] GetPoints();
+
+        internal abstract void Mult(double mult);
+        
     }
 }

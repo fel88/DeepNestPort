@@ -30,5 +30,15 @@ namespace DeepNestLib
             Start = Points[0];
             End = Points[Points.Length - 1];
         }
+
+        internal override void Mult(double mult)
+        {
+            for (int i = 0; i < Points.Length; i++)
+            {
+                Points[i] = Points[i].Mult(mult);
+            }
+            Start = Points[0];
+            End = Points[Points.Length - 1];
+        }
     }
 }

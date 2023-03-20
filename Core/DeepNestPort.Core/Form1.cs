@@ -513,10 +513,10 @@ namespace DeepNestPort.Core
                     det = DxfParser.LoadDxf(item.Path, item.SplitOnLoad);
                     foreach (var ditem in det)
                     {
-                        var t1 = ditem.Outers.Where(z => z.Tag is DxfEntity[]).Select(z => z.Tag as DxfEntity[]).SelectMany(z => z).ToArray();
+                        var t1 = ditem.Outers.Where(z => z.Tag is object[]).Select(z => z.Tag as object[]).SelectMany(z => z).ToArray();
                         foreach (var outter in ditem.Outers)
                         {
-                            t1 = t1.Union(outter.Childrens.Where(z => z.Tag is DxfEntity[]).Select(z => z.Tag as DxfEntity[]).SelectMany(z => z).ToArray()).ToArray();
+                            t1 = t1.Union(outter.Childrens.Where(z => z.Tag is object[]).Select(z => z.Tag as object[]).SelectMany(z => z).ToArray()).ToArray();
                         }
                         dxfCache.Add(ditem.Name, t1);
                     }
@@ -702,7 +702,7 @@ namespace DeepNestPort.Core
             stop = true;
         }
 
-        public static Dictionary<string, DxfEntity[]> dxfCache = new Dictionary<string, DxfEntity[]>();
+        public static Dictionary<string, object[]> dxfCache = new Dictionary<string, object[]>();
 
         internal void Export()
         {
@@ -721,7 +721,7 @@ namespace DeepNestPort.Core
 
             // lastSaveFilterIndex = sfd.FilterIndex;
             if (sfd.FilterIndex == 1)
-                DxfParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
+                DxfExporter.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
 
             if (sfd.FilterIndex == 2)
                 SvgParser.Export(sfd.FileName, polygons.Where(z => z.sheet == sheets[currentSheet]).ToArray(), new[] { sheets[currentSheet] }.ToArray());
@@ -933,7 +933,7 @@ namespace DeepNestPort.Core
             }
             // lastSaveFilterIndex = sfd.FilterIndex;
             if (sfd.FilterIndex == 1)
-                DxfParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
+                DxfExporter.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());
 
             if (sfd.FilterIndex == 2)
                 SvgParser.Export(sfd.FileName, polygons.ToArray(), sheets.ToArray());

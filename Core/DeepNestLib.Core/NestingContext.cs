@@ -166,7 +166,7 @@ namespace DeepNestLib
             if (v.ToLower().EndsWith("svg"))
                 SvgParser.Export(v, Polygons, Sheets);
             else if (v.ToLower().EndsWith("dxf"))
-                DxfParser.Export(v, Polygons, Sheets);
+                DxfExporter.Export(v, Polygons, Sheets);
             else
                 throw new NotImplementedException($"unknown format: {v}");
         }
