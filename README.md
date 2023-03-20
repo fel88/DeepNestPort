@@ -17,6 +17,8 @@ Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNes
 
 ![image](https://user-images.githubusercontent.com/15663687/224830897-2009c0a2-e8b3-4aae-b673-2392d32b849f.png)
 
+![image](https://user-images.githubusercontent.com/15663687/226440959-17cbc75c-dd3c-42ca-878a-39f76a959718.png)
+
 ## Steps to build and run
 ```
 1. Open DeepNestPort.Core.sln using Visual Studio
