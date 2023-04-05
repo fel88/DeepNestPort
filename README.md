@@ -9,7 +9,8 @@ WinForm / WPF Ribbon panel
 
 
 DXF Import: https://github.com/haplokuon/netDxf <br/>
-DXF Export: https://github.com/IxMilia/Dxf
+DXF Export: https://github.com/IxMilia/Dxf <br/>
+SVG Import: https://github.com/zHaytam/SvgPathProperties
 
 Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
 
