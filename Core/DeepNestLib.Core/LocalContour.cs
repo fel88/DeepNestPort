@@ -23,5 +23,13 @@ namespace DeepNestLib
         public List<LocalContour> Childrens = new List<LocalContour>();
         public LocalContour Parent;
         public object Tag;
+
+        public void Scale(double v)
+        {
+            for (int i = 0; i < Points.Count; i++)
+            {
+                Points[i] = new PointF((float)(Points[i].X * v), (float)(Points[i].Y * v));
+            }
+        }
     }
 }

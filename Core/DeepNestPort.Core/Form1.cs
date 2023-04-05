@@ -370,10 +370,12 @@ namespace DeepNestPort.Core
         public void AddDetail()
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
+            ofd.Filter = "All supported formats (*.dxf, *.svg)|*.svg;*.dxf|Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
             ofd.FilterIndex = lastOpenFilterIndex;
             ofd.Multiselect = true;
-            if (ofd.ShowDialog() != DialogResult.OK) return;
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
             for (int i = 0; i < ofd.FileNames.Length; i++)
             {
                 lastOpenFilterIndex = ofd.FilterIndex;
@@ -385,7 +387,7 @@ namespace DeepNestPort.Core
                         d = DxfParser.LoadDxf(ofd.FileNames[i], true);
 
                     if (ofd.FileNames[i].ToLower().EndsWith("svg"))
-                        d = SvgParser.LoadSvg(ofd.FileNames[i]);
+                        d = SvgParser.LoadSvg(ofd.FileNames[i], true);
 
                     var fr = Infos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
                     if (fr != null)
@@ -511,20 +513,23 @@ namespace DeepNestPort.Core
                 if (item.Path.ToLower().EndsWith("dxf"))
                 {
                     det = DxfParser.LoadDxf(item.Path, item.SplitOnLoad);
-                    foreach (var ditem in det)
-                    {
-                        var t1 = ditem.Outers.Where(z => z.Tag is object[]).Select(z => z.Tag as object[]).SelectMany(z => z).ToArray();
-                        foreach (var outter in ditem.Outers)
-                        {
-                            t1 = t1.Union(outter.Childrens.Where(z => z.Tag is object[]).Select(z => z.Tag as object[]).SelectMany(z => z).ToArray()).ToArray();
-                        }
-                        dxfCache.Add(ditem.Name, t1);
-                    }
-
                 }
                 else if (item.Path.ToLower().EndsWith("svg"))
                 {
-                    det = SvgParser.LoadSvg(item.Path);
+                    det = SvgParser.LoadSvg(item.Path, item.SplitOnLoad);
+                }
+
+                if (det == null)
+                    continue;
+
+                foreach (var ditem in det)
+                {
+                    var t1 = ditem.Outers.Where(z => z.Tag is object[]).Select(z => z.Tag as object[]).SelectMany(z => z).ToArray();
+                    foreach (var outter in ditem.Outers)
+                    {
+                        t1 = t1.Union(outter.Childrens.Where(z => z.Tag is object[]).Select(z => z.Tag as object[]).SelectMany(z => z).ToArray()).ToArray();
+                    }
+                    dxfCache.Add(ditem.Name, t1);
                 }
 
                 foreach (var r in det)

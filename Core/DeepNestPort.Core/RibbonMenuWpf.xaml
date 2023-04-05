@@ -30,7 +30,7 @@
                 <RibbonGroup x:Name="General" Header="General">
                     <!--<RibbonButton  Label="Clear"  KeyTip="F" />-->
 
-                    <RibbonButton  Label="Load DXF" Click="RibbonButton_Click" LargeImageSource="Icons/plus.png"  />
+                    <RibbonButton  Label="Load parts" Click="RibbonButton_Click" LargeImageSource="Icons/plus.png"  />
 
                     <RibbonButton  Label="Run nesting"  Click="Run_Click" LargeImageSource="Icons/control-double.png"  />
                     <RibbonButton  Label="Settings"  Click="RibbonButton_Click_8" LargeImageSource="Icons/gear.png"  />

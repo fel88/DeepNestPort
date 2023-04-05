@@ -1,5 +1,7 @@
-﻿using System;
+﻿using SvgPathProperties;
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
@@ -12,7 +14,7 @@ namespace DeepNestLib
 {
     public class SvgParser
     {
-        public static RawDetail[] LoadSvg(string path)
+        public static RawDetail[] LoadSvg(string path, bool split = false)
         {
             XDocument doc = XDocument.Load(path);
             var fi = new FileInfo(path);
@@ -20,37 +22,63 @@ namespace DeepNestLib
             s.Name = fi.Name;
             List<GraphicsPath> paths = new List<GraphicsPath>();
             var ns = doc.Descendants().First().Name.Namespace.NamespaceName;
-
-
-            foreach (var item in doc.Descendants("path"))
+            double scale = 1;
+            double rightMax = 0;
+            if (doc.Root.Attribute("width") != null)
             {
-                var dd = (item.Attribute("d").Value);
-
-                List<string> cmnds = new List<string>();
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < dd.Length; i++)
+                var v = doc.Root.Attribute("width").Value;
+                var w = double.Parse(v.Replace("in", "").Replace(",", "."), CultureInfo.InvariantCulture);
+                if (v.Contains("in"))
                 {
-                    if (char.IsLetter(dd[i]))
-                    {
-                        if (sb.Length > 0)
-                        {
-                            cmnds.Add(sb.ToString());
-                        }
-                        sb = new StringBuilder();
-                    }
-                    sb.Append(dd[i]);
+                    w *= 25.4;
                 }
-                if (sb.Length > 0)
-                {
-                    cmnds.Add(sb.ToString());
-                }
-                //GraphicsPath p = new GraphicsPath();
-
-
-                //polygons.Add(new SvgNestPort.Polygon() { orig = item,
-                //    /*Points = p.PathPoints.Select(z => new SvgPoint(z.X, z.Y)).ToArray()*/ });
-
+                scale = w;
             }
+            List<RawDetail> ret = new List<RawDetail>();
+            foreach (var item in doc.Descendants().Where(z => z.Name.LocalName == "path"))
+            {
+                var dd = item.Attribute("d").Value;
+                SvgPath p = new SvgPath(dd);
+                var bbox = p.GetBBox();
+                rightMax = Math.Max(bbox.Right, rightMax);
+                List<SvgPoint> pp = new List<SvgPoint>();
+                List<LocalContour> cntrs2 = new List<LocalContour>();
+                foreach (var ss in p.Segments)
+                {
+                    if (ss is LineCommand lc)
+                    {
+                        if (lc.ClosePath)
+                        {
+                            cntrs2.Add(new LocalContour() { Points = pp.Select(z => new PointF((float)z.x, (float)z.y)).ToList() });
+                            pp.Clear();
+                        }
+                    }
+                    var len = ss.Length;
+                    try
+                    {
+                        for (double t = 0; t <= 1.0; t += 0.01)
+                        {
+                            var p1 = ss.GetPointAtLength(t * len);
+                            pp.Add(new SvgPoint(p1.X, p1.Y));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+
+
+
+                // var top = nfps.SingleOrDefault(z => z.Parent == null);
+                //if (top != null)
+                {
+                    // var inners = nfps.Where(z => z.Parent != null);
+                    //s.Outers.Add(new LocalContour() { Points = top.Points.ToList() });
+                    s.Outers.AddRange(cntrs2.Select(z => new LocalContour() { Points = z.Points.ToList() }));
+                }
+            }
+
             foreach (var item in doc.Descendants("rect"))
             {
                 float xx = 0;
@@ -68,7 +96,7 @@ namespace DeepNestLib
                 GraphicsPath p = new GraphicsPath();
                 p.AddRectangle(new RectangleF(xx, yy, ww, hh));
                 s.Outers.Add(new LocalContour() { Points = p.PathPoints.ToList() });
-
+                rightMax = Math.Max(rightMax, xx + ww);
             }
 
             foreach (var item in doc.Descendants(XName.Get("polygon", ns)))
@@ -81,13 +109,61 @@ namespace DeepNestLib
                     var spl2 = sitem.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                     var ar = spl2.Select(z => float.Parse(z, CultureInfo.InvariantCulture)).ToArray();
                     points.Add(new PointF(ar[0], ar[1]));
+                    rightMax = Math.Max(rightMax, ar[0]);
                 }
                 s.Outers.Add(new LocalContour() { Points = points.ToList() });
             }
 
+            if (split)
+            {
 
-            return new[] { s };
+                //split
+                var nfps = s.Outers;
+                for (int i = 0; i < nfps.Count; i++)
+                {
+                    for (int j = 0; j < nfps.Count; j++)
+                    {
+                        if (i != j)
+                        {
+                            var d2 = nfps[i];
+                            var d3 = nfps[j];
+                            var f0 = d3.Points[0];
+
+                            if (GeometryUtil.pnpoly(d2.Points.ToArray(), f0.X, f0.Y))
+                            {
+                                d3.Parent = d2;
+                                if (!d2.Childrens.Contains(d3))
+                                {
+                                    d2.Childrens.Add(d3);
+                                }
+                            }
+                        }
+                    }
+                }
+                var tops = nfps.Where(z => z.Parent == null).ToArray();
+                for (int i = 0; i < tops.Length; i++)
+                {
+                    LocalContour? item = tops[i];
+                    RawDetail rr = new RawDetail();
+                    rr.Name = fi.FullName + "_" + i;
+                    rr.Outers.Add(item);
+                    rr.Holes.AddRange(item.Childrens);
+                    ret.Add(rr);
+                }
+            }
+            else
+            {
+                ret.Add(s);
+            }
+
+            foreach (var item in ret)
+            {
+                item.Scale(scale / rightMax);
+            }
+
+            return ret.ToArray();
         }
+
         public static void Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
         {
             StringBuilder sb = new StringBuilder();

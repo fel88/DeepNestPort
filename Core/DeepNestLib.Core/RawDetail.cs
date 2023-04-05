@@ -69,5 +69,17 @@ namespace DeepNestLib
             }
             return po;
         }
+
+        internal void Scale(double v)
+        {
+            foreach (var item in Outers)
+            {
+                item.Scale(v);
+            }
+            foreach (var item in Holes)
+            {
+                item.Scale(v);
+            }
+        }
     }
 }
