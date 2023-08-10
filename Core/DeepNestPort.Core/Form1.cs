@@ -95,6 +95,9 @@ namespace DeepNestPort.Core
                         case "rotations":
                             SvgNest.Config.rotations = int.Parse(vl);
                             break;
+                        case "forcedDisableOpenGl":
+                            SkiaGLDrawingContext.GlSupport = !bool.Parse(vl);
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -487,7 +490,10 @@ namespace DeepNestPort.Core
             int src = 0;
             foreach (var item in sheetsInfos)
             {
-                item.Nfp = NewSheet(item.Width, item.Height);
+                if (!(item is DxfSheetLoadInfo))
+                {
+                    item.Nfp = NewSheet(item.Width, item.Height);
+                }
                 src = context.GetNextSheetSource();
                 for (int i = 0; i < item.Quantity; i++)
                 {
@@ -842,7 +848,9 @@ namespace DeepNestPort.Core
             ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
             ofd.FilterIndex = lastOpenFilterIndex;
             ofd.Multiselect = true;
-            if (ofd.ShowDialog() != DialogResult.OK) return;
+            if (ofd.ShowDialog() != DialogResult.OK) 
+                return;
+
             for (int i = 0; i < ofd.FileNames.Length; i++)
             {
                 lastOpenFilterIndex = ofd.FilterIndex;
@@ -855,16 +863,18 @@ namespace DeepNestPort.Core
                     if (ofd.FileNames[i].ToLower().EndsWith("svg"))
                         det = SvgParser.LoadSvg(ofd.FileNames[i]);
 
-                    var fr = sheetsInfos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
-                    if (fr != null)
+                    if (sheetsInfos.OfType<DxfSheetLoadInfo>().Any(z => z.Path == ofd.FileNames[i]))
+                    {
+                        var fr = sheetsInfos.OfType<DxfSheetLoadInfo>().First(z => z.Path == ofd.FileNames[i]);
                         fr.Quantity++;
+                    }
                     else
                     {
                         foreach (var r in det)
                         {
                             var nfp = r.ToNfp();
                             var bbox = r.BoundingBox();
-                            sheetsInfos.Add(new SheetLoadInfo()
+                            sheetsInfos.Add(new DxfSheetLoadInfo()
                             {
                                 Quantity = 1,
                                 Nfp = nfp,
@@ -955,10 +965,37 @@ namespace DeepNestPort.Core
         {
             UseColors = v;
         }
+
         public bool BorderScrollEnabled = false;
+
         internal void BorderScroll(bool v)
         {
             BorderScrollEnabled = v;
+        }
+
+        public void Report()
+        {
+            var d = AutoDialog.DialogHelpers.StartDialog();
+            d.AddOptionsField("format", "Format", new string[] { "csv", "text", "xml", "json" }, "text");
+            d.AddBoolField("all", "All sheets");
+            if (!d.ShowDialog())
+                return;
+
+            switch (d.GetOptionsField("format"))
+            {
+                case "csv":
+                    break;
+
+                case "text":
+                    break;
+
+                case "xml":
+                    break;
+
+                case "json":
+                    break;
+
+            }
         }
 
         internal void ShowNestsList()

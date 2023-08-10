@@ -58,6 +58,7 @@
 
                     <RibbonButton  Label="Export"  Click="RibbonButton_Click_2" SmallImageSource="Icons/disk.png"  KeyTip="F" />
                     <RibbonButton  Label="Export All"  Click="RibbonButton_Click_7" SmallImageSource="Icons/disks.png"  KeyTip="F" />
+                    <RibbonButton  Label="Report"  Click="RibbonButton_Click_10" SmallImageSource="Icons/report.png"  KeyTip="F" />
                     
 
 
