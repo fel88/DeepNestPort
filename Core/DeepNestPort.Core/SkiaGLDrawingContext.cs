@@ -253,13 +253,12 @@ namespace DeepNestPort.Core
             Canvas.Clear(white.ToSKColor());
         }
 
-        public static bool GlSupport = true;
+        public static bool GlSupport = !System.Windows.Forms.SystemInformation.TerminalServerSession;
         public override Control GenerateRenderControl()
         {
             Control co = null;
             if (GlSupport)
-            {
-                
+            {                
                 co = new SKGLControl();
                 ((SKGLControl)co).PaintSurface += Co_PaintSurface;
             }

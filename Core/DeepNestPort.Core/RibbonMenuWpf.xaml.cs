@@ -123,5 +123,10 @@ namespace DeepNestPort.Core
         {
             Form.ShowNestsList();
         }
+
+        private void RibbonButton_Click_10(object sender, RoutedEventArgs e)
+        {
+            Form.Report();
+        }
     }
 }

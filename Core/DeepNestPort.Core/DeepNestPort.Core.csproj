@@ -21,6 +21,7 @@
     <None Remove="Icons\magnifier--plus.png" />
     <None Remove="Icons\magnifier.png" />
     <None Remove="Icons\plus.png" />
+    <None Remove="Icons\report.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,9 +36,11 @@
     <Resource Include="Icons\magnifier--plus.png" />
     <Resource Include="Icons\magnifier.png" />
     <Resource Include="Icons\plus.png" />
+    <Resource Include="Icons\report.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoDialog" Version="1.0.0.3" />
     <PackageReference Include="ObjectListView" Version="2.7.1.5" />
     <PackageReference Include="SkiaSharp" Version="2.88.3" />
     <PackageReference Include="SkiaSharp.Views" Version="2.88.3" />
