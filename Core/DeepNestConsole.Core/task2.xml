@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<task gap="10">
+	<sheet width="3000" height="1500" count="10"/>
+	<part path="..\..\..\..\..\Framework\DeepNestPort\svgs\1.svg" count="30"/>	
+	
+</task>

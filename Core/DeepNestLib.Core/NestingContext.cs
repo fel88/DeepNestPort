@@ -160,17 +160,7 @@ namespace DeepNestLib
             }
             Iterations++;
         }
-
-        public void Export(string v)
-        {
-            if (v.ToLower().EndsWith("svg"))
-                SvgParser.Export(v, Polygons, Sheets);
-            else if (v.ToLower().EndsWith("dxf"))
-                DxfExporter.Export(v, Polygons, Sheets);
-            else
-                throw new NotImplementedException($"unknown format: {v}");
-        }
-
+       
         public void AssignPlacement(SheetPlacement plcpr)
         {
             current = plcpr;
@@ -261,8 +251,21 @@ namespace DeepNestLib
             ReorderSheets();
         }
 
-        Random r = new Random();
-
+        public void AddSheet(NFP nfp, int src)
+        {
+            Sheet sheet = new Sheet();
+            var ns = Background.clone(nfp);
+            sheet.Points = ns.Points;
+            sheet.children = ns.children;
+            
+            sheet.Width = sheet.WidthCalculated;
+            sheet.Height = sheet.HeightCalculated;
+            sheet.source = src;
+            
+            sheet.Name = "sheet" + (Sheets.Count + 1);
+            Sheets.Add(sheet);            
+            ReorderSheets();
+        }
 
         public void LoadSampleData()
         {
@@ -348,53 +351,6 @@ namespace DeepNestLib
             pl.AddPoint(new SvgPoint(xx + ww, yy + hh));
             pl.AddPoint(new SvgPoint(xx, yy + hh));
         }
-        public void LoadXml(string v)
-        {
-            var d = XDocument.Load(v);
-            var f = d.Descendants().First();
-            var gap = int.Parse(f.Attribute("gap").Value);
-            SvgNest.Config.spacing = gap;
 
-            foreach (var item in d.Descendants("sheet"))
-            {
-                int src = GetNextSheetSource();
-                var cnt = int.Parse(item.Attribute("count").Value);
-                var ww = int.Parse(item.Attribute("width").Value);
-                var hh = int.Parse(item.Attribute("height").Value);
-
-                for (int i = 0; i < cnt; i++)
-                {
-                    AddSheet(ww, hh, src);
-                }
-            }
-            foreach (var item in d.Descendants("part"))
-            {
-                var cnt = int.Parse(item.Attribute("count").Value);
-                var path = item.Attribute("path").Value;
-                RawDetail[] r = null;
-                if (path.ToLower().EndsWith("svg"))
-                {
-                    r = SvgParser.LoadSvg(path);
-                }
-                else if (path.ToLower().EndsWith("dxf"))
-                {
-                    r = DxfParser.LoadDxf(path);
-                }
-                else
-                {
-                    continue;
-                }
-
-                var src = GetNextSource();
-
-                foreach (var itemr in r)
-                {
-                    for (int i = 0; i < cnt; i++)
-                    {
-                        ImportFromRawDetail(itemr, src);
-                    }
-                }
-            }
-        }
     }
 }
