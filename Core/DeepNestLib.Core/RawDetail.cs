@@ -70,7 +70,7 @@ namespace DeepNestLib
             return po;
         }
 
-        internal void Scale(double v)
+        public void Scale(double v)
         {
             foreach (var item in Outers)
             {

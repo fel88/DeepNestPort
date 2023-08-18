@@ -1054,28 +1054,7 @@ namespace DeepNestLib
     {
         string stringify();
     }
-
-    public class NfpKey : IStringify
-    {
-
-        public NFP A;
-        public NFP B;
-        public float ARotation { get; set; }
-        public float BRotation { get; set; }
-        public bool Inside { get; set; }
-
-        public int AIndex { get; set; }
-        public int BIndex { get; set; }
-        public object Asource;
-        public object Bsource;
-
-
-        public string stringify()
-        {
-            return $"A:{AIndex} B:{BIndex} inside:{Inside} Arotation:{ARotation} Brotation:{BRotation}";
-        }
-    }
-
+    
     public class PopulationItem
     {
         public object processing = null;
@@ -1098,55 +1077,7 @@ namespace DeepNestLib
         public List<PlacementItem> sheetplacements = new List<PlacementItem>();
         public List<PlacementItem> placements = new List<PlacementItem>();
     }
-
-    public class PlacementItem
-    {
-        public double? mergedLength;
-        public object mergedSegments;
-        public List<List<ClipperLib.IntPoint>> nfp;
-        public int id;
-        public NFP hull;
-        public NFP hullsheet;
-
-        public float rotation;
-        public double x;
-        public double y;
-        public int source;
-    }
-
-    public class SheetPlacement
-    {
-        public double? fitness;
-
-        public float[] Rotation;
-        public List<SheetPlacementItem>[] placements;
-
-        public NFP[] paths;
-        public double area;
-        public double mergedLength;
-        internal int index;
-    }
-
-
-
-    public class Sheet : NFP
-    {
-        public double Width;
-        public double Height;
-    }
-
-    public class RectangleSheet : Sheet
-    {
-
-        public void Rebuild()
-        {
-            Points = new SvgPoint[] { };
-            AddPoint(new SvgPoint(x, y));
-            AddPoint(new SvgPoint(x + Width, y));
-            AddPoint(new SvgPoint(x + Width, y + Height));
-            AddPoint(new SvgPoint(x, y + Height));
-        }
-    }
+    
     public class NestItem
     {
         public NFP Polygon;
@@ -1154,4 +1085,3 @@ namespace DeepNestLib
         public bool IsSheet;
     }
 }
-

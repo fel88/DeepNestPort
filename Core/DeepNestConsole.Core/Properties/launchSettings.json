@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DeepNestConsole.Core": {
+      "commandName": "Project",
+      "commandLineArgs": "xml ../../../task1.xml"
+    }
+  }
+}

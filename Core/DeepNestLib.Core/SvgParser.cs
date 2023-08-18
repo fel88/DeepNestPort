@@ -429,4 +429,7 @@ namespace DeepNestLib
         public float toleranceSvg = 0.005f;// fudge factor for browser inaccuracy in SVG unit handling
 
     }
+
+    
+
 }
