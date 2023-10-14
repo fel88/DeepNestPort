@@ -13,8 +13,7 @@ DXF Export: https://github.com/IxMilia/Dxf <br/>
 SVG Import: https://github.com/zHaytam/SvgPathProperties
 
 Also take a look at the WPF Net.Core version: https://github.com/9swampy/DeepNestSharp 
-
-![image](https://user-images.githubusercontent.com/15663687/224829121-71dbf96a-948d-4be1-b772-5de3098d999c.png)
+![image](https://github.com/fel88/DeepNestPort/assets/15663687/1e18868b-b05b-4f33-9cb5-43690384a664)
 
 ![image](https://user-images.githubusercontent.com/15663687/224830897-2009c0a2-e8b3-4aae-b673-2392d32b849f.png)
 
