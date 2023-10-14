@@ -40,10 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoDialog" Version="1.0.0.3" />
+    <PackageReference Include="AutoDialog" Version="1.0.0.4" />
     <PackageReference Include="ObjectListView" Version="2.7.1.5" />
     <PackageReference Include="SkiaSharp" Version="2.88.6" />
-    <PackageReference Include="SkiaSharp.Views" Version="2.88.3" />
+    <PackageReference Include="SkiaSharp.Views" Version="2.88.6" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
 
