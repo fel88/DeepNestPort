@@ -12,6 +12,9 @@ using System.Windows.Media;
 using OpenTK;
 using IxMilia.Dxf.Entities;
 using System.Xml.Linq;
+using AutoDialog;
+using System.Globalization;
+using System.Security.Cryptography;
 
 namespace DeepNestPort.Core
 {
@@ -370,7 +373,40 @@ namespace DeepNestPort.Core
         }
 
         int lastOpenFilterIndex = 1;
-        public void AddDetail()
+        public DetailLoadInfo AddDetail(string path)
+        {
+
+            //try to load
+            RawDetail[] d = null;
+            if (path.ToLower().EndsWith("dxf"))
+                d = DxfParser.LoadDxf(path, true);
+
+            if (path.ToLower().EndsWith("svg"))
+                d = SvgParser.LoadSvg(path, true);
+
+            var fr = Infos.FirstOrDefault(z => z.Path == path);
+            if (fr != null)
+                fr.Quantity++;
+            else
+            {
+                bool split = d.Length > 1;
+                if (SplitMode == LoadDetailSplitMode.Ask && split && ShowQuestion($"File {path} contains {d.Length} separate parts. Do you want to split it to separate parts during nesting?") == DialogResult.No)
+                {
+                    split = false;
+                }
+                fr = new DetailLoadInfo()
+                {
+                    Quantity = 1,
+                    SplitOnLoad = split,
+                    Name = new FileInfo(path).Name,
+                    Path = path
+                };
+                Infos.Add(fr);
+            }
+            return fr;
+        }
+
+        public void AddDetailUI()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "All supported formats (*.dxf, *.svg)|*.svg;*.dxf|Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
@@ -384,39 +420,12 @@ namespace DeepNestPort.Core
                 lastOpenFilterIndex = ofd.FilterIndex;
                 try
                 {
-                    //try to load
-                    RawDetail[] d = null;
-                    if (ofd.FileNames[i].ToLower().EndsWith("dxf"))
-                        d = DxfParser.LoadDxf(ofd.FileNames[i], true);
-
-                    if (ofd.FileNames[i].ToLower().EndsWith("svg"))
-                        d = SvgParser.LoadSvg(ofd.FileNames[i], true);
-
-                    var fr = Infos.FirstOrDefault(z => z.Path == ofd.FileNames[i]);
-                    if (fr != null)
-                        fr.Quantity++;
-                    else
-                    {
-                        bool split = d.Length > 1;
-                        if (SplitMode == LoadDetailSplitMode.Ask && split && ShowQuestion($"File {ofd.FileNames[i]} contains {d.Length} separate parts. Do you want to split it to separate parts during nesting?") == DialogResult.No)
-                        {
-                            split = false;
-                        }
-                        Infos.Add(new DetailLoadInfo()
-                        {
-                            Quantity = 1,
-                            SplitOnLoad = split,
-                            Name = new FileInfo(ofd.FileNames[i]).Name,
-                            Path = ofd.FileNames[i]
-                        });
-                    }
-
+                    AddDetail(ofd.FileNames[i]);
                 }
                 catch (Exception ex)
                 {
                     System.Windows.MessageBox.Show($"{ofd.FileNames[i]}: {ex.Message}", "Info");
                 }
-
             }
             UpdateInfos();
         }
@@ -743,6 +752,11 @@ namespace DeepNestPort.Core
             return MessageBox.Show(text, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         }
 
+        public DialogResult ShowInfo(string text)
+        {
+            return MessageBox.Show(text, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         void deleteParts()
         {
             if (objectListView1.SelectedObjects.Count == 0)
@@ -796,7 +810,7 @@ namespace DeepNestPort.Core
 
         private void detailToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AddDetail();
+            AddDetailUI();
         }
 
         private void setToToolStripMenuItem_Click(object sender, EventArgs e)
@@ -848,7 +862,7 @@ namespace DeepNestPort.Core
             ofd.Filter = "Dxf files (*.dxf)|*.dxf|Svg files (*.svg)|*.svg";
             ofd.FilterIndex = lastOpenFilterIndex;
             ofd.Multiselect = true;
-            if (ofd.ShowDialog() != DialogResult.OK) 
+            if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
             for (int i = 0; i < ofd.FileNames.Length; i++)
@@ -1041,6 +1055,144 @@ namespace DeepNestPort.Core
 
             var sp = (l.SelectedItems[0].Tag as SheetPlacement);
             context.AssignPlacement(sp);
+        }
+
+
+        public void SaveXmlPojectUI(string savePath)
+        {
+            var d = DialogHelpers.StartDialog();
+            d.Text = "Settings";
+            d.AddBoolField("type", "Relative paths");
+            if (!d.ShowDialog())
+                return;
+            var r = d.GetBoolField("type");
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("<?xml version=\"1.0\"?>");
+            sb.AppendLine("<root>");
+            foreach (var item in Infos)
+            {
+                var path = item.Path;
+                if (r)
+                    path = Path.GetRelativePath(Path.GetDirectoryName(savePath), path);
+
+                sb.AppendLine($"<part path=\"{path}\" qty=\"{item.Quantity}\"/>");
+            }
+            foreach (var item in sheetsInfos)
+            {
+                if (item is DxfSheetLoadInfo ds)
+                {
+                    var path = ds.Path;
+                    if (r)
+                        path = Path.GetRelativePath(Path.GetDirectoryName(savePath), path);
+
+                    sb.AppendLine($"<dxfsheet path=\"{path}\" width=\"{item.Width.ToString(CultureInfo.InvariantCulture)}\" height=\"{item.Height.ToString(CultureInfo.InvariantCulture)}\" qty=\"{item.Quantity}\"/>");
+                }
+                else
+                    sb.AppendLine($"<sheet width=\"{item.Width.ToString(CultureInfo.InvariantCulture)}\" height=\"{item.Height.ToString(CultureInfo.InvariantCulture)}\" qty=\"{item.Quantity}\"/>");
+            }
+            sb.AppendLine("<settings>");
+            sb.AppendLine($"<param name=\"spacing\" value=\"{SvgNest.Config.spacing.ToString(CultureInfo.InvariantCulture)}\"/>");
+            sb.AppendLine($"<param name=\"sheetSpacing\" value=\"{SvgNest.Config.sheetSpacing.ToString(CultureInfo.InvariantCulture)}\"/>");
+            sb.AppendLine("</settings>");
+            sb.AppendLine("</root>");
+
+            File.WriteAllText(savePath, sb.ToString());
+        }
+
+        internal void SaveProject()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Xml project (*.xml)|*.xml|Stand-alone project (*.dnzip)|*.dnzip";
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (sfd.FileName.ToLower().EndsWith("xml"))
+            {
+                SaveXmlPojectUI(sfd.FileName);
+                ShowInfo($"Saved to {sfd.FileName}");
+            }
+            else if (sfd.FileName.ToLower().EndsWith("dnzip"))
+            {
+                SaveZipPojectUI(sfd.FileName);
+                ShowInfo($"Saved to {sfd.FileName}");
+            }
+        }
+
+        private void SaveZipPojectUI(string fileName)
+        {
+
+        }
+
+        internal void LoadProject()
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Xml project (*.xml)|*.xml|Stand-alone project (*.dnzip)|*.dnzip";
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (ofd.FileName.ToLower().EndsWith("xml"))
+            {
+                LoadXmlPojectUI(ofd.FileName);
+            }
+            else if (ofd.FileName.ToLower().EndsWith("dnzip"))
+            {
+                LoadZipPojectUI(ofd.FileName);
+            }
+        }
+
+        private void LoadZipPojectUI(string fileName)
+        {
+
+        }
+
+        private void LoadXmlPojectUI(string fileName)
+        {
+            sheetsInfos.Clear();
+            Infos.Clear();
+            var doc = XDocument.Load(fileName);
+            foreach (var item in doc.Descendants("part"))
+            {
+                var path = item.Attribute("path").Value;
+                var qty = int.Parse(item.Attribute("qty").Value);
+                if (!Path.IsPathRooted(path))
+                {
+                    path = Path.Combine(Path.GetDirectoryName(fileName), path);
+                }
+                var ret = AddDetail(path);
+                ret.Quantity = qty;
+            }
+            foreach (var item in doc.Descendants("sheet"))
+            {
+                var w = item.Attribute("width").Value.ToFloat();
+                var h = item.Attribute("height").Value.ToFloat();
+                var qty = int.Parse(item.Attribute("qty").Value);
+
+                sheetsInfos.Add(new SheetLoadInfo()
+                {
+                    Height = w,
+                    Width = h,
+                    Nfp = NewSheet(w, h),
+                    Quantity = qty
+                });
+            }
+            var stg = doc.Descendants("settings").First();
+            foreach (var item in stg.Descendants("param"))
+            {
+                var nm = item.Attribute("name").Value;
+                var vl = item.Attribute("value").Value;
+                switch (nm)
+                {
+                    case "spacing":
+                        SvgNest.Config.spacing = vl.ToFloat();
+                        break;
+                    case "sheetSpacing":
+                        SvgNest.Config.sheetSpacing = vl.ToFloat();
+                        break;
+                }
+            }
+            UpdateInfos();
+            updateSheetInfos();
         }
     }
 }

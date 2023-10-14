@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using AutoDialog;
+using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -51,7 +53,7 @@ namespace DeepNestPort.Core
 
         private void RibbonButton_Click(object sender, RoutedEventArgs e)
         {
-            Form.AddDetail();
+            Form.AddDetailUI();
         }
         private void Run_Click(object sender, RoutedEventArgs e)
         {
@@ -83,7 +85,7 @@ namespace DeepNestPort.Core
             Form.FitAll();
         }
 
-        
+
         private void RibbonButton_Click_6(object sender, RoutedEventArgs e)
         {
             Form.FitNextSheet();
@@ -127,6 +129,17 @@ namespace DeepNestPort.Core
         private void RibbonButton_Click_10(object sender, RoutedEventArgs e)
         {
             Form.Report();
+        }
+
+
+        private void Save(object sender, RoutedEventArgs e)
+        {
+            Form.SaveProject();
+        }
+
+        private void Load(object sender, RoutedEventArgs e)
+        {
+            Form.LoadProject();
         }
     }
 }

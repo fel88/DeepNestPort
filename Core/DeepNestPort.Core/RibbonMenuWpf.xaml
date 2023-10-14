@@ -27,6 +27,11 @@
             </Ribbon.QuickAccessToolBar>
             <RibbonTab x:Name="projectTab" Header="General" KeyTip="H" >
                 <!-- Home  group-->
+                <RibbonGroup x:Name="Project" Header="Project">
+                    <RibbonButton  Label="Save" Click="Save"  LargeImageSource="Icons/disk.png"  />
+                    <RibbonButton  Label="Load" Click="Load" LargeImageSource="Icons/folder-horizontal-open.png"  />
+
+                </RibbonGroup>
                 <RibbonGroup x:Name="General" Header="General">
                     <!--<RibbonButton  Label="Clear"  KeyTip="F" />-->
 

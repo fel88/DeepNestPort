@@ -8,5 +8,10 @@ namespace DeepNestPort.Core
         {
             return double.Parse(str.Replace(",", "."), CultureInfo.InvariantCulture);
         }
+
+        public static float ToFloat(this string str)
+        {
+            return float.Parse(str.Replace(",", "."), CultureInfo.InvariantCulture);
+        }
     }
 }
