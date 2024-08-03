@@ -30,6 +30,26 @@ namespace DeepNestLib
             {
                 mult = 25.4;
             }
+
+            foreach (var polyline2D in doc.Entities.Polylines2D)
+            {
+                var cc = new LocalContour();
+                var list = polyline2D.PolygonalVertexes(100);
+
+                cc.Points.AddRange(list.Select(z => new PointF((float)z.X, (float)z.Y)));
+                var p = new PolylineElement
+                {
+                    Tag = new PolylineExportInfo()
+                    {
+                        IsClosed = polyline2D.IsClosed,
+                        Points = list.Select(z => new Vector3(z.X * mult, z.Y * mult, 0)).ToArray()
+                    },
+                    Start = cc.Points.First(),
+                    End = cc.Points.Last(),
+                    Points = cc.Points.ToArray()
+                };
+                elems.Add(p);
+            }
             foreach (var cr in doc.Entities.Circles)
             {
 
