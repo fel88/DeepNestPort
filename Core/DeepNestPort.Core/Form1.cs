@@ -476,11 +476,14 @@ namespace DeepNestPort.Core
             }
             ctx.Setup();
         }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
             toolStripProgressBar1.Value = (int)Math.Round(progressVal * 100f);
 
-            RedrawPreview(ctx3, Preview);
+            if (menu.GeneralTab.IsSelected)
+                RedrawPreview(ctx3, Preview);
+
             if (!RenderControl.Visible)
                 return;
 
@@ -577,8 +580,7 @@ namespace DeepNestPort.Core
                 tableLayoutPanel2.Visible = true;
                 stgControl.Visible = false;
             }
-            else
-            if (menu.NestTab.IsSelected && !RenderControl.Visible)
+            else if (menu.NestTab.IsSelected && !RenderControl.Visible)
             {
                 RenderControl.Visible = true;
                 //tableLayoutPanel1.Controls.Remove(panel1);
