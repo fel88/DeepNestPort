@@ -1,20 +1,14 @@
 using System.Diagnostics;
-using static DeepNestPort.Core.RibbonMenuWpf;
 using System.IO;
 using DeepNestLib;
-using System.Windows.Forms;
 using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Drawing.Drawing2D;
 using SkiaSharp;
 using BrightIdeasSoftware;
-using System.Windows.Media;
 using OpenTK;
-using IxMilia.Dxf.Entities;
 using System.Xml.Linq;
 using AutoDialog;
 using System.Globalization;
-using System.Security.Cryptography;
 
 namespace DeepNestPort.Core
 {
@@ -777,10 +771,30 @@ namespace DeepNestPort.Core
             objectListView1.SetObjects(Infos);
         }
 
+        void deleteSheets()
+        {
+            if (objectListView2.SelectedObjects.Count == 0)
+                return;
+
+            if (ShowQuestion($"Are you to sure to delete {objectListView2.SelectedObjects.Count} items?") == DialogResult.No)
+                return;
+
+            foreach (var item in objectListView2.SelectedObjects)
+            {
+                if (Preview != null && ((DxfSheetLoadInfo)item).Path == Preview.Name) 
+                    Preview = null;
+
+                var di = item as DxfSheetLoadInfo;
+                sheetsInfos.Remove(di);
+            }
+            objectListView2.SetObjects(sheetsInfos);
+        }
+
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             deleteParts();
         }
+
         private void objectListView1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
@@ -788,6 +802,7 @@ namespace DeepNestPort.Core
                 deleteParts();
             }
         }
+
         public void ShowMessage(string text, MessageBoxIcon type)
         {
             MessageBox.Show(text, Text, MessageBoxButtons.OK, type);
@@ -1195,6 +1210,35 @@ namespace DeepNestPort.Core
             }
             UpdateInfos();
             updateSheetInfos();
+        }
+
+        private void objectListView2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!(objectListView2.SelectedObject is DxfSheetLoadInfo dsli))
+            {
+                Preview = null;
+                return;
+            }
+
+            string path = dsli.Path.ToLower();
+            if (path.EndsWith("dxf"))
+            {
+                Preview = DxfParser.LoadDxf(path).FirstOrDefault();
+            }
+            else if (path.EndsWith("svg"))
+            {
+                Preview = SvgParser.LoadSvg(path).FirstOrDefault();
+            }
+            if (autoFit)
+                fitAll();
+        }
+
+        private void objectListView2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteSheets();
+            }
         }
     }
 }
