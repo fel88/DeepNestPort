@@ -1,7 +1,7 @@
 # DeepNestPort
 DeepNest C# Port (https://github.com/Jack000/Deepnest)
 
-.Net 6.0 <br/>
+.Net 8.0 <br/>
 WinForm / WPF Ribbon panel
 
 :pencil2: **2D drawer:** Skia (https://github.com/mono/SkiaSharp) <br/>
