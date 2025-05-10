@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <NoWarn>$(NoWarn);NU1507</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="AutoDialog" Version="1.0.0.7" />
+    <PackageVersion Include="IxMilia.Dxf" Version="0.8.4" />
+    <PackageVersion Include="netDxf" Version="2022.11.2" />
+    <PackageVersion Include="ObjectListView" Version="2.7.1.5" />
+    <PackageVersion Include="OpenTK" Version="3.1.0" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.0" />
+    <PackageVersion Include="SkiaSharp.Views" Version="3.119.0" />
+    <PackageVersion Include="SkiaSharp.Views.Desktop.Common" Version="3.119.0" />
+    <PackageVersion Include="SkiaSharp.Views.WindowsForms" Version="3.119.0" />
+    <PackageVersion Include="SvgPathProperties" Version="1.1.2" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.4" />
+  </ItemGroup>
+</Project>

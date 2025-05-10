@@ -1,14 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFrameworks>net8.0-windows7.0</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
     <None Remove="Icons\arrow.png" />
     <None Remove="Icons\color.png" />
@@ -24,7 +22,6 @@
     <None Remove="Icons\plus.png" />
     <None Remove="Icons\report.png" />
   </ItemGroup>
-
   <ItemGroup>
     <Resource Include="Icons\arrow.png" />
     <Resource Include="Icons\color.png" />
@@ -40,19 +37,19 @@
     <Resource Include="Icons\plus.png" />
     <Resource Include="Icons\report.png" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="AutoDialog" Version="1.0.0.4" />
-    <PackageReference Include="ObjectListView" Version="2.7.1.5" />
-    <PackageReference Include="SkiaSharp" Version="2.88.8" />
-    <PackageReference Include="SkiaSharp.Views" Version="2.88.8" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.7" />
+    <PackageReference Include="AutoDialog" />
+    <PackageReference Include="ObjectListView" />
+    <PackageReference Include="OpenTK" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.Views" />
+    <PackageReference Include="SkiaSharp.Views.Desktop.Common" />
+    <PackageReference Include="SkiaSharp.Views.WindowsForms" />
+    <PackageReference Include="System.Drawing.Common" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\DeepNestLib.Core\DeepNestLib.Core.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -63,12 +60,10 @@
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 </Project>

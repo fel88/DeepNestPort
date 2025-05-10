@@ -1,7 +1,5 @@
 ﻿using SkiaSharp;
 using SkiaSharp.Views.Desktop;
-using System.Drawing;
-using System.Windows.Media;
 
 namespace DeepNestPort.Core
 {
